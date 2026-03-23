@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de KM Pessoal</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a2a3a">
+    <style>
+        :root { --blue: #1a2a3a; --green: #2ecc71; --gray: #ecf0f1; --orange: #f39c12; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--gray); margin: 0; padding: 10px; }
+        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 10px; }
+        h2 { font-size: 1rem; color: var(--blue); margin-top: 0; border-left: 4px solid var(--green); padding-left: 10px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-save { background: var(--blue); color: white; }
+        .btn-fuel { background: var(--orange); color: white; margin-top: 8px; }
+        .btn-pdf { background: var(--green); color: white; margin-top: 15px; }
+        .btn-archive { background: #95a5a6; color: white; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
+        th { text-align: left; background: #f8f9fa; padding: 10px; border-bottom: 2px solid #ddd; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .total-box { background: var(--blue); color: white; padding: 15px; border-radius: 12px; margin-top: 15px; line-height: 1.6; }
+        .archive-item { background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
+        .footer-credit { text-align: center; font-size: 10px; color: #999; margin-top: 20px; }
+        @media print { .no-print { display: none !important; } .card { box-shadow: none; border: 1px solid #000; } }
+    </style>
+</head>
+<body>
+<div class="no-print">
+    <div class="card">
+        <h2>⚙️ Configuração do Período</h2>
+        <div class="grid">
+            <div><small>Valor KM (R$)</small><input type="number" id="cfgKM" step="0.01" value="1.23" onchange="atualizar()"></div>
+            <div><small>Ajuda Custo</small><input type="number" id="cfgAjuda" value="300" onchange="atualizar()"></div>
+        </div>
+    </div>
+    <div class="card">
+        <h2>🚀 Novo Atendimento</h2>
+        <input type="text" id="protocolo" placeholder="Nº Protocolo / Chamado">
+        <input type="text" id="endereco" placeholder="Endereço / Localização">
+        <input type="number" id="kmPainel" placeholder="KM Atual no Painel">
+        <button class="btn-save" onclick="addAtendimento()">Salvar e Calcular</button>
+        <button class="btn-fuel" onclick="addGastoPosto()">⛽ Lançar Abastecimento</button>
+    </div>
+</div>
+<div class="card">
+    <h2 id="tituloRelatorio">📋 Relatório de Rodagem</h2>
+    <table id="tabelaDados">
+        <thead><tr><th>Data</th><th>Protocolo / Local</th><th>Painel</th><th>Trecho</th></tr></thead>
+        <tbody id="corpoTabela"></tbody>
+    </table>
+    <div id="resumo" class="total-box"></div>
+    <button class="btn-pdf no-print" onclick="window.print()">Gerar PDF</button>
+    <button class="btn-archive no-print" onclick="arquivarMes()">📁 Arquivar Mês</button>
+</div>
+<div class="card no-print">
+    <h2>📂 Meses Arquivados</h2>
+    <div id="listaArquivos"></div>
+    <div class="footer-credit">App v1.0 | Desenvolvido por Diego Santana</div>
+</div>
+<script>
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    let db = JSON.parse(localStorage.getItem('km_app_final_v8')) || { registros: [], gastos: [], kmVal: 1.23, ajudaVal: 300, arquivos: [] };
+    document.getElementById('cfgKM').value = db.kmVal;
+    document.getElementById('cfgAjuda').value = db.ajudaVal;
+    function addAtendimento() {
+        const km = parseFloat(document.getElementById('kmPainel').value);
+        if(!km) return alert("Informe o KM!");
+        db.registros.push({ data: new Date().toLocaleDateString('pt-BR'), protocolo: document.getElementById('protocolo').value || "S/ Protocolo", endereco: document.getElementById('endereco').value || "S/ Local", km: km });
+        document.getElementById('protocolo').value = ""; document.getElementById('endereco').value = ""; document.getElementById('kmPainel').value = "";
+        atualizar();
+    }
+    function addGastoPosto() {
+        const v = prompt("Valor gasto (R$):");
+        if(v) { db.gastos.push(parseFloat(v)); atualizar(); }
+    }
+    function arquivarMes() {
+        if(db.registros.length === 0) return;
+        const nome = prompt("Nome do período (ex: Abril/26):");
+        if(nome) {
+            db.arquivos.push({ nome: nome, registros: [...db.registros], gastos: [...db.gastos], kmVal: db.kmVal, ajudaVal: db.ajudaVal });
+            db.registros = []; db.gastos = [];
+            atualizar();
+        }
+    }
+    function carregarArquivo(i) {
+        const arq = db.arquivos[i];
+        db.registros = arq.registros; db.gastos = arq.gastos; db.kmVal = arq.kmVal; db.ajudaVal = arq.ajudaVal;
+        document.getElementById('tituloRelatorio').innerText = "📋 Relatório: " + arq.nome;
+        atualizar(true);
+    }
+    function atualizar(isView = false) {
+        if(!isView) localStorage.setItem('km_app_final_v8', JSON.stringify(db));
+        const corpo = document.getElementById('corpoTabela');
+        corpo.innerHTML = ""; let kmTotal = 0;
+        db.registros.forEach((r, i) => {
+            let trecho = (i > 0) ? r.km - db.registros[i-1].km : 0;
+            kmTotal += trecho;
+            corpo.innerHTML += `<tr><td>${r.data}</td><td><b>${r.protocolo}</b><br><small>${r.endereco}</small></td><td>${r.km}</td><td>+${trecho} km</td></tr>`;
+        });
+        const vReem = (kmTotal * db.kmVal) + db.ajudaVal;
+        const vGastos = db.gastos.reduce((a,b)=>a+b, 0);
+        document.getElementById('resumo').innerHTML = `Total: ${kmTotal}km | A Receber: R$ ${vReem.toFixed(2)} | Sobra: R$ ${(vReem-vGastos).toFixed(2)}`;
+        const lista = document.getElementById('listaArquivos');
+        lista.innerHTML = "";
+        db.arquivos.forEach((arq, i) => {
+            lista.innerHTML += `<div class="archive-item"><span>${arq.nome}</span><button onclick="carregarArquivo(${i})" style="width:auto; padding:5px; background:var(--blue); color:white;">Abrir</button></div>`;
+        });
+    }
+    atualizar();
+</script>
+</body>
+</html>
