@@ -1,0 +1,17 @@
+{
+  "name": "Cálculo de KM Pessoal",
+  "short_name": "KM Pessoal",
+  "description": "Ferramenta de auditoria de rodagem criada por Diego Santana",
+  "author": "Diego Santana",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a2a3a",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2083/2083657.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
