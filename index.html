@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de KM</title>
+    <title>Relatório de KM - Auditoria</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     <style>
@@ -14,10 +14,12 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 50px; }
         .container { padding: 15px; max-width: 500px; margin: auto; }
         
+        /* Header Editável */
         .header-edit { padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid #333; }
-        .header-edit input { background: transparent; border: none; color: var(--text); font-size: 1.2rem; font-weight: bold; width: 100%; padding: 0; margin: 0; }
-        .header-edit p { margin: 2px 0 0; font-size: 0.7rem; color: var(--accent); text-transform: uppercase; }
+        .header-edit input { background: transparent; border: none; color: var(--text); font-size: 1.2rem; font-weight: bold; width: 100%; padding: 0; margin: 0; outline: none; }
+        .header-edit p { margin: 2px 0 0; font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
 
+        /* Cards e Layout */
         .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #333; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .card h2 { font-size: 0.7rem; text-transform: uppercase; color: var(--sub); margin: 0 0 12px 0; letter-spacing: 1px; }
         
@@ -25,27 +27,32 @@
         input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: #262626; color: white; }
         input:focus { border-color: var(--accent); outline: none; }
 
+        /* Botões */
         .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; transition: 0.2s; }
         .btn-main { background: var(--accent); color: #000; }
         .btn-outline { background: transparent; color: var(--text); border: 1px solid #444; }
         .btn-pdf { background: #ffffff; color: #000; margin-top: 15px; }
         
+        /* Listagem */
         .row-item { padding: 12px 0; border-bottom: 1px solid #333; display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 12px; }
         .badge { color: var(--accent); font-weight: bold; font-size: 0.85rem; }
-        .del { color: var(--danger); font-size: 1.2rem; padding: 5px; cursor: pointer; }
+        .del { color: var(--danger); font-size: 1.2rem; padding: 5px; cursor: pointer; font-weight: bold; }
 
+        /* Resumo */
         .resumo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .resumo-card { background: #262626; padding: 12px; border-radius: 10px; border-left: 3px solid var(--accent); }
         .resumo-card span { display: block; font-size: 0.6rem; color: #888; }
         .resumo-card b { font-size: 0.9rem; }
 
-        .fuel-chip { display: inline-flex; align-items: center; background: #333; padding: 4px 10px; border-radius: 15px; margin: 3px; font-size: 0.75rem; }
+        .fuel-chip { display: inline-flex; align-items: center; background: #333; padding: 4px 10px; border-radius: 15px; margin: 3px; font-size: 0.75rem; border: 1px solid #444; }
 
+        /* Estilo de Impressão */
         @media print { 
             .no-print { display: none !important; } 
             body { background: white; color: black; } 
             .card { border: 1px solid #ddd; background: white; box-shadow: none; }
             .header-edit input { color: black; border: none; }
+            .header-edit p { color: #555; }
         }
     </style>
 </head>
@@ -53,12 +60,12 @@
 
 <div class="container">
     <div class="header-edit">
-        <input type="text" id="userName" placeholder="Seu Nome Aqui" oninput="atualizar()">
+        <input type="text" id="userName" placeholder="Toque para inserir seu nome" oninput="atualizar()">
         <p>Relatório de Auditoria de Rodagem</p>
     </div>
 
     <div class="card no-print">
-        <h2>⚙️ Configurações</h2>
+        <h2>⚙️ Configurações de Cálculo</h2>
         <div class="resumo-grid">
             <div><label>Valor KM (Empresa)</label><input type="number" id="cfgKM" step="0.001" value="1.23" oninput="atualizar()"></div>
             <div><label>Ajuda de Custo</label><input type="number" id="cfgAjuda" value="300" oninput="atualizar()"></div>
@@ -70,17 +77,17 @@
     </div>
 
     <div class="card no-print">
-        <h2>📍 Novo Lançamento</h2>
-        <input type="text" id="protocolo" placeholder="Nº Protocolo">
-        <input type="text" id="endereco" placeholder="Local/Cliente">
+        <h2>📍 Novo Atendimento</h2>
+        <input type="text" id="protocolo" placeholder="Nº Protocolo / Chamado">
+        <input type="text" id="endereco" placeholder="Local ou Cliente">
         <input type="number" id="kmPainel" placeholder="KM Atual no Painel" inputmode="numeric">
-        <button class="btn btn-main" onclick="addAtendimento()">💾 Salvar Lançamento</button>
+        <button class="btn btn-main" onclick="addAtendimento()">💾 Salvar Trajeto</button>
         <button class="btn btn-outline" onclick="addGastoPosto()">⛽ Lançar Nota do Posto</button>
         <div id="listaGastosRapida"></div>
     </div>
 
     <div class="card">
-        <h2>📊 Resumo Consolidado</h2>
+        <h2>📊 Resumo Financeiro</h2>
         <div id="resumoGrid" class="resumo-grid"></div>
         <div id="lucroReal" style="margin-top: 15px; padding: 10px; border-radius: 8px; background: #262626; font-size: 0.75rem; border: 1px dashed #444; line-height: 1.4;"></div>
         <button class="btn btn-pdf no-print" onclick="window.print()">📄 Gerar Relatório PDF</button>
@@ -91,82 +98,27 @@
         <div id="listaRegistros"></div>
     </div>
 
-    <button class="btn no-print" style="color:var(--danger); background:none; font-size:0.6rem; border:none; opacity: 0.5;" onclick="limparTudo()">RESETAR TODOS OS DADOS</button>
+    <div class="card no-print" style="background: rgba(255,255,255,0.03); border: 1px dashed #333;">
+        <h2 style="color: #666;">ℹ️ Informações do App</h2>
+        <p style="font-size: 0.75rem; color: #888; line-height: 1.4; margin: 0;">
+            Este app auxilia no controle de KM e combustível. 
+            Cálculos automáticos baseados nos seus lançamentos. 
+            <b>Privacidade:</b> Dados salvos apenas no seu celular.
+        </p>
+    </div>
+
+    <div class="no-print" style="text-align: center; margin-top: 10px; opacity: 0.3;">
+        <p style="font-size: 0.55rem; color: var(--sub); letter-spacing: 1px;">
+            DESENVOLVIDO POR DIEGO SANTANA
+        </p>
+    </div>
+
+    <button class="btn no-print" style="color:var(--danger); background:none; font-size:0.5rem; border:none; opacity: 0.1; margin-top: 5px;" onclick="limparTudo()">RESETAR TODOS OS DADOS</button>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('km_tecnico_v1')) || { 
+    let db = JSON.parse(localStorage.getItem('km_tecnico_final')) || { 
         registros: [], gastos: [], kmVal: 1.23, ajudaVal: 300, consumo: 10, precoGas: 5.80, nome: "" 
     };
     
     document.getElementById('cfgKM').value = db.kmVal;
-    document.getElementById('cfgAjuda').value = db.ajudaVal;
-    document.getElementById('carConsumo').value = db.consumo;
-    document.getElementById('carGas').value = db.precoGas;
-    document.getElementById('userName').value = db.nome || "";
-
-    function addAtendimento() {
-        const km = parseFloat(document.getElementById('kmPainel').value);
-        if(!km) return;
-        db.registros.push({ id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), protocolo: document.getElementById('protocolo').value || "S/P", endereco: document.getElementById('endereco').value || "Local", km: km });
-        document.getElementById('protocolo').value = ""; document.getElementById('endereco').value = ""; document.getElementById('kmPainel').value = "";
-        atualizar();
-    }
-
-    function addGastoPosto() {
-        const v = prompt("Valor (R$):");
-        if(v) { db.gastos.push({id: Date.now(), valor: parseFloat(v.replace(',','.'))}); atualizar(); }
-    }
-
-    function excluirRegistro(id) { if(confirm("Apagar?")) { db.registros = db.registros.filter(r => r.id !== id); atualizar(); } }
-    function excluirGasto(id) { if(confirm("Apagar?")) { db.gastos = db.gastos.filter(g => g.id !== id); atualizar(); } }
-    function limparTudo() { if(confirm("Limpar tudo?")) { db.registros = []; db.gastos = []; atualizar(); } }
-
-    function atualizar() {
-        db.kmVal = parseFloat(document.getElementById('cfgKM').value) || 0;
-        db.ajudaVal = parseFloat(document.getElementById('cfgAjuda').value) || 0;
-        db.consumo = parseFloat(document.getElementById('carConsumo').value) || 1;
-        db.precoGas = parseFloat(document.getElementById('carGas').value) || 0;
-        db.nome = document.getElementById('userName').value;
-        localStorage.setItem('km_tecnico_v1', JSON.stringify(db));
-        
-        const lista = document.getElementById('listaRegistros');
-        const listaG = document.getElementById('listaGastosRapida');
-        lista.innerHTML = ""; listaG.innerHTML = "";
-        let kmTotal = 0;
-
-        db.registros.forEach((r, i) => {
-            let trecho = (i > 0) ? r.km - db.registros[i-1].km : 0;
-            if(trecho < 0) trecho = 0;
-            kmTotal += trecho;
-            lista.innerHTML += `<div class="row-item">
-                <div><b>${r.protocolo}</b><br><small>${r.data}</small></div>
-                <div style="text-align:right"><small>KM</small><br><b>${r.km}</b></div>
-                <div class="badge">+${trecho}</div>
-                <div class="del no-print" onclick="excluirRegistro(${r.id})">×</div>
-            </div>`;
-        });
-
-        db.gastos.forEach(g => {
-            listaG.innerHTML += `<div class="fuel-chip">⛽ R$ ${g.valor.toFixed(2)} <span onclick="excluirGasto(${g.id})" style="margin-left:5px; color:var(--danger)">×</span></div>`;
-        });
-
-        const vReem = (kmTotal * db.kmVal) + db.ajudaVal;
-        const vGastos = db.gastos.reduce((a,b)=>a+b.valor, 0);
-        const custoEst = (kmTotal / db.consumo) * db.precoGas;
-
-        document.getElementById('resumoGrid').innerHTML = `
-            <div class="resumo-card"><span>KM TOTAL</span><b>${kmTotal} KM</b></div>
-            <div class="resumo-card"><span>GASTO POSTO</span><b>R$ ${vGastos.toFixed(2)}</b></div>
-            <div class="resumo-card"><span>REEMBOLSO</span><b>R$ ${vReem.toFixed(2)}</b></div>
-            <div class="resumo-card" style="border-left-color:#ffeb3b"><span>LUCRO/SOBRA</span><b>R$ ${(vReem-vGastos).toFixed(2)}</b></div>`;
-        
-        document.getElementById('lucroReal').innerHTML = `
-            <b>Análise de Custo Estimado:</b><br>
-            Custo Combustível: R$ ${custoEst.toFixed(2)}<br>
-            Sobra para Manutenção: <b>R$ ${(vReem - custoEst).toFixed(2)}</b>`;
-    }
-    atualizar();
-</script>
-</body>
-</html>
