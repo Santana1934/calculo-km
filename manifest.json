@@ -1,3 +1,4 @@
+
 {
   "name": "Cálculo de KM Pessoal",
   "short_name": "KM Pessoal",
@@ -9,7 +10,7 @@
   "theme_color": "#1a2a3a",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2083/2083657.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/1048/1048315.png",
       "sizes": "512x512",
       "type": "image/png"
     }
