@@ -8,7 +8,7 @@
     --text-sub: #9ca3af;
     --input-bg: #16191e;
     --input-border: #374151;
-    --accent-amber: #f59e0b;
+    --accent-amber: #d97706;
     --danger: #ef4444;
     --radius: 12px;
 }
@@ -210,30 +210,31 @@ td {
     color: var(--text-main);
 }
 
-.btn-action-text {
+/* DESTAQUE DE ABASTECIMENTO EM TOM ÂMBAR */
+.badge-posto-amber {
+    display: inline-block;
+    background: var(--accent-amber);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+/* BOTÃO DE EXCLUIR 'X' DISCRETO SEM BRANCO DE FUNDO */
+.btn-icon-subtle {
     background: transparent;
     border: none;
     color: var(--text-sub);
     cursor: pointer;
-    font-size: 0.75rem;
-    padding: 2px 4px;
-    border-radius: 4px;
+    font-size: 1.1rem;
+    padding: 2px 6px;
+    line-height: 1;
+    transition: color 0.2s ease;
 }
 
-.btn-action-text:hover {
-    color: var(--text-main);
-}
-
-.btn-action-delete {
-    background: transparent;
-    border: none;
-    color: var(--text-sub);
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 2px 4px;
-}
-
-.btn-action-delete:hover {
+.btn-icon-subtle.delete:hover {
     color: var(--danger);
 }
 
@@ -265,7 +266,7 @@ footer {
 
 .print-only { display: none; }
 
-/* REGRAS DE IMPRESSÃO - DIRETO AO PONTO (APENAS RELATÓRIO) */
+/* REGRAS DE IMPRESSÃO EXCLUSIVAS PARA O PDF */
 @media print {
     body {
         background-color: #fff !important;
@@ -273,23 +274,14 @@ footer {
         padding: 0 !important;
     }
     
-    .container {
-        max-width: 100% !important;
-    }
-
-    .no-print, .col-acoes, footer {
-        display: none !important;
-    }
-
-    .print-only {
-        display: block !important;
-    }
+    .container { max-width: 100% !important; }
+    .no-print, .col-acoes, footer { display: none !important; }
+    .print-only { display: block !important; }
 
     .print-header {
-        text-align: left;
         border-bottom: 2px solid #000;
         padding-bottom: 8px;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
 
     .print-header h2 {
@@ -301,7 +293,16 @@ footer {
 
     .print-meta {
         font-size: 0.85rem;
-        color: #222;
+        color: #111;
+        margin-bottom: 4px;
+    }
+
+    .print-params-summary {
+        font-size: 0.8rem;
+        color: #333;
+        border-top: 1px dashed #ccc;
+        padding-top: 4px;
+        margin-top: 4px;
     }
 
     .card {
@@ -316,16 +317,16 @@ footer {
         background: transparent !important;
         border: none !important;
         padding: 0 !important;
-        margin-bottom: 16px !important;
+        margin-bottom: 12px !important;
     }
 
     .dia-header-print {
         font-weight: bold !important;
         color: #000 !important;
-        font-size: 0.85rem !important;
-        border-bottom: 1px solid #666 !important;
-        padding-bottom: 4px !important;
-        margin-bottom: 6px !important;
+        font-size: 0.82rem !important;
+        border-bottom: 1px solid #444 !important;
+        padding-bottom: 2px !important;
+        margin-bottom: 4px !important;
     }
 
     table {
@@ -343,14 +344,22 @@ footer {
     td {
         border-bottom: 1px solid #ddd !important;
         color: #000 !important;
-        padding: 6px 2px !important;
+        padding: 5px 2px !important;
     }
 
-    .total-dia-print {
-        text-align: right !important;
-        font-size: 0.8rem !important;
+    .badge-posto-amber {
+        background: transparent !important;
         color: #000 !important;
-        margin-top: 6px !important;
         font-weight: bold !important;
+        padding: 0 !important;
+    }
+
+    .print-final-calc {
+        margin-top: 16px;
+        border-top: 2px solid #000;
+        padding-top: 8px;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: #000;
     }
 }
