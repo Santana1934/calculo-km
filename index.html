@@ -11,41 +11,10 @@
 <body>
     <div class="container">
         <header>
-            <h1>🚗 Controle de Deslocamento</h1>
-            <p class="subtitle">Relatório Operacional</p>
+            <h1>🚗 Controle Operacional</h1>
         </header>
 
-        <!-- CARDS DE METRICAS E RESUMO -->
-        <section class="card">
-            <h3>📊 Resumo Geral do Mês</h3>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <span class="stat-label">TOTAL RODADO</span>
-                    <span class="stat-value" id="totalKm">0 KM</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-label">CLIENTES ATENDIDOS</span>
-                    <span class="stat-value" id="totalClientes">0</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-label">REEMBOLSO KM</span>
-                    <span class="stat-value" id="totalKmValor">R$ 0,00</span>
-                </div>
-                <div class="stat-box highlight">
-                    <span class="stat-label">SOBRA LÍQUIDA REAL</span>
-                    <span class="stat-value" id="sobraLiquida">R$ 0,00</span>
-                </div>
-            </div>
-
-            <div class="comparativo">
-                <div>💰 A Pagar Empresa (Fixo + KM): <span id="totalEmpresa">R$ 0,00</span></div>
-                <div>⛽ Total Gasto no Posto: <span id="totalGastosPosto">R$ 0,00</span></div>
-                <div>💳 Saldo Caju Restante: <span id="saldoCaju">R$ 0,00</span></div>
-                <div>📏 Seu Custo por KM Rodado: <span id="custoPorKm">R$ 0,00/KM</span></div>
-            </div>
-        </section>
-
-        <!-- FORMULÁRIO DE LANÇAMENTO DIÁRIO -->
+        <!-- FORMULÁRIO DE LANÇAMENTO DIÁRIO (AGORA NO TOPO) -->
         <section class="card">
             <h3>📝 Novo Registro</h3>
             <form id="kmForm">
@@ -79,6 +48,36 @@
             </form>
         </section>
 
+        <!-- CARDS DE METRICAS E RESUMO (LOGO ABAIXO DO REGISTRO) -->
+        <section class="card">
+            <h3>📊 Resumo Geral do Mês</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">TOTAL RODADO</span>
+                    <span class="stat-value" id="totalKm">0 KM</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">CLIENTES ATENDIDOS</span>
+                    <span class="stat-value" id="totalClientes">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">REEMBOLSO KM</span>
+                    <span class="stat-value" id="totalKmValor">R$ 0,00</span>
+                </div>
+                <div class="stat-box highlight">
+                    <span class="stat-label">SOBRA LÍQUIDA REAL</span>
+                    <span class="stat-value" id="sobraLiquida">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="comparativo">
+                <div>💰 Ajuda de Custo Fixa + KM: <span id="totalEmpresa">R$ 0,00</span></div>
+                <div>⛽ Total Gasto no Posto: <span id="totalGastosPosto">R$ 0,00</span></div>
+                <div>💳 Saldo Caju Restante: <span id="saldoCaju">R$ 0,00</span></div>
+                <div>📏 Seu Custo por KM Rodado: <span id="custoPorKm">R$ 0,00/KM</span></div>
+            </div>
+        </section>
+
         <!-- LISTAGEM COM RESUMO DIÁRIO -->
         <section class="card">
             <h3>📅 Histórico por Dia</h3>
@@ -88,29 +87,32 @@
             <button id="btnLimpar" class="btn-danger-subtle">Apagar Registros do Mês</button>
         </section>
 
-        <!-- CONFIGURAÇÕES DE CÁLCULO -->
+        <!-- CONFIGURAÇÕES DE CÁLCULO (TÉCNICO E MÊS/ANO MOVIDOS PARA CIMA) -->
         <section class="card config-card">
-            <h3>⚙️ Parâmetros Financeiros</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">⚙️ Parâmetros Financeiros</h3>
+                <button type="button" id="btnToggleConfig" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">🔒 Editar Parâmetros</button>
+            </div>
             <div class="grid-2">
                 <div class="form-group">
                     <label for="nomeTecnico">Técnico</label>
-                    <input type="text" id="nomeTecnico">
+                    <input type="text" id="nomeTecnico" disabled>
                 </div>
                 <div class="form-group">
                     <label for="periodoRelatorio">Mês/Ano</label>
-                    <input type="text" id="periodoRelatorio" placeholder="Ex: Julho/2026">
+                    <input type="text" id="periodoRelatorio" placeholder="Ex: Julho/2026" disabled>
                 </div>
                 <div class="form-group">
                     <label for="ajudaCusto">Ajuda de Custo Fixa (R$)</label>
-                    <input type="number" id="ajudaCusto" step="0.01">
+                    <input type="number" id="ajudaCusto" step="0.01" disabled>
                 </div>
                 <div class="form-group">
                     <label for="taxaKm">R$ / KM (Empresa)</label>
-                    <input type="number" id="taxaKm" step="0.01">
+                    <input type="number" id="taxaKm" step="0.01" disabled>
                 </div>
                 <div class="form-group">
                     <label for="cartaoCaju">Valor Caju do Mês (R$)</label>
-                    <input type="number" id="cartaoCaju" step="0.01">
+                    <input type="number" id="cartaoCaju" step="0.01" disabled>
                 </div>
             </div>
         </section>
