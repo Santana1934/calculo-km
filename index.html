@@ -4,9 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Operacional</title>
-    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
+    <!-- TELA DE BLOQUEIO -->
+    <div id="tela-bloqueio" class="bloqueio-container">
+        <div class="bloqueio-caixa card">
+            <h2>🔒 Acesso Restrito</h2>
+            <p>App de uso exclusivo.<br>Insira a chave para liberar o aplicativo.</p>
+            <input type="password" id="chave-input" placeholder="Digite a chave..." style="margin-bottom: 12px; text-align: center;">
+            <button class="btn-action-green" onclick="verificarChave()">Liberar Acesso</button>
+            <p id="erro-chave" style="color: var(--danger); font-size: 0.8rem; display: none; margin-top: 15px; font-weight: 600;">
+                ❌ Chave incorreta. Entre em contato com Diego Santana.
+            </p>
+        </div>
+    </div>
+
     <div class="container">
         
         <header class="no-print">
@@ -216,6 +229,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=13"></script>
+    <script src="script.js?v=14"></script>
 </body>
 </html>
