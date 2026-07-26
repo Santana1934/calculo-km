@@ -11,7 +11,7 @@ let params = JSON.parse(localStorage.getItem('km_params')) || {
     caju: 250
 };
 
-// Carrega parâmetros na tela e no cabeçalho do PDF
+// Inicializa os Parâmetros
 function initParamsUI() {
     document.getElementById('param-tech').value = params.tech;
     document.getElementById('param-period').value = params.period;
@@ -27,7 +27,7 @@ function initParamsUI() {
     document.getElementById('pdf-summary-base').innerText = parseFloat(params.basePay).toFixed(2);
 }
 
-// Bloqueia e desbloqueia os campos de parâmetros
+// Edição de Parâmetros
 function toggleEditParams() {
     paramsUnlocked = !paramsUnlocked;
     const inputIds = ['param-tech', 'param-period', 'param-base-pay', 'param-km-rate', 'param-caju'];
@@ -60,7 +60,7 @@ function toggleEditParams() {
     }
 }
 
-// Alterna entre Parada/Cliente e Abastecimento
+// Modos
 function setMode(newMode) {
     mode = newMode;
     document.getElementById('btn-mode-parada').classList.toggle('active', mode === 'parada');
@@ -70,12 +70,11 @@ function setMode(newMode) {
     document.getElementById('fields-abastecimento').style.display = mode === 'abastecimento' ? 'block' : 'none';
 }
 
-// Preenche o atalho no campo
 function setShortcut(location) {
     document.getElementById('input-client').value = location;
 }
 
-// Adiciona Parada ou Abastecimento
+// Lançamento
 function addEntry() {
     if (mode === 'parada') {
         const client = document.getElementById('input-client').value.trim();
@@ -122,12 +121,13 @@ function addEntry() {
     clearInputs();
 }
 
+// Exclusão Única
 function deleteEntry(id) {
     entries = entries.filter(e => e.id !== id);
     saveAndRender();
 }
 
-// Funções do Modal Customizado para Limpar Registros
+// Modal Limpar Tudo
 function openConfirmModal() {
     document.getElementById('modal-confirm').style.display = 'flex';
 }
@@ -140,8 +140,41 @@ function confirmClearAll() {
     entries = [];
     lastKmInput = 0;
     localStorage.removeItem('last_km_input');
+    localStorage.removeItem('km_entries_v2');
+    
     saveAndRender();
     closeConfirmModal();
+}
+
+// Modal de Edição de Registro
+function openEditModal(id) {
+    const item = entries.find(e => e.id == id);
+    if (!item || item.type === 'abastecimento') return;
+
+    document.getElementById('edit-id').value = item.id;
+    document.getElementById('edit-client').value = item.client;
+    document.getElementById('edit-os').value = item.os;
+    document.getElementById('edit-km').value = item.km;
+
+    document.getElementById('modal-edit').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('modal-edit').style.display = 'none';
+}
+
+function saveEditEntry() {
+    const id = parseInt(document.getElementById('edit-id').value);
+    const item = entries.find(e => e.id === id);
+
+    if (item) {
+        item.client = document.getElementById('edit-client').value.trim() || item.client;
+        item.os = document.getElementById('edit-os').value.trim() || '-';
+        item.km = parseFloat(document.getElementById('edit-km').value) || 0;
+
+        saveAndRender();
+    }
+    closeEditModal();
 }
 
 function saveAndRender() {
@@ -157,6 +190,7 @@ function clearInputs() {
     document.getElementById('input-fuel').value = '';
 }
 
+// Render da Tabela
 function renderHistory() {
     const tbody = document.getElementById('history-body');
     tbody.innerHTML = '';
@@ -179,7 +213,7 @@ function renderHistory() {
             `;
         } else {
             tr.innerHTML = `
-                <td>${item.client}</td>
+                <td style="cursor: pointer; color: #60a5fa;" onclick="openEditModal(${item.id})" title="Clique para editar">${item.client} ✏️</td>
                 <td>${item.os}</td>
                 <td>+${item.km} KM</td>
                 <td class="no-print"><button class="btn-icon-subtle" onclick="deleteEntry(${item.id})">×</button></td>
@@ -189,7 +223,7 @@ function renderHistory() {
     });
 }
 
-// Lógica Financeira e Regras de Negócio
+// Cálculos
 function calculateTotals() {
     let totalKm = 0;
     let totalFuel = 0;
@@ -197,11 +231,14 @@ function calculateTotals() {
 
     const shortcuts = ['casa', 'empresa', 'trabalho'];
 
+    const kmRateInput = parseFloat(document.getElementById('param-km-rate').value) || 0;
+    const basePayInput = parseFloat(document.getElementById('param-base-pay').value) || 0;
+    const cajuInput = parseFloat(document.getElementById('param-caju').value) || 0;
+
     entries.forEach(item => {
         if (item.type === 'parada') {
             totalKm += item.km;
 
-            // Filtra atalhos para não pontuar como atendimento de cliente
             const nameLower = item.client.trim().toLowerCase();
             if (!shortcuts.includes(nameLower)) {
                 clientCount++;
@@ -212,27 +249,24 @@ function calculateTotals() {
         }
     });
 
-    const kmReimbursement = totalKm * params.kmRate;
-    const netProfit = params.basePay + kmReimbursement;
+    const kmReimbursement = totalKm * kmRateInput;
+    const netProfit = basePayInput + kmReimbursement;
 
-    // Garante que o saldo Caju não fique negativo (trava em 0.00)
-    const cajuRemaining = Math.max(0, params.caju - totalFuel);
+    const cajuRemaining = Math.max(0, cajuInput - totalFuel);
     const costPerKm = totalKm > 0 ? (totalFuel / totalKm) : 0;
 
-    // Atualização do Dashboard
     document.getElementById('dash-total-km').innerText = `${totalKm} KM`;
     document.getElementById('dash-total-clients').innerText = clientCount;
     document.getElementById('dash-reimbursement-km').innerText = `R$ ${kmReimbursement.toFixed(2)}`;
     document.getElementById('dash-net-profit').innerText = `R$ ${netProfit.toFixed(2)}`;
 
-    document.getElementById('detail-base-pay').innerText = `R$ ${parseFloat(params.basePay).toFixed(2)}`;
+    document.getElementById('detail-base-pay').innerText = `R$ ${basePayInput.toFixed(2)}`;
     document.getElementById('detail-total-fuel').innerText = `R$ ${totalFuel.toFixed(2)}`;
     document.getElementById('detail-caju-remaining').innerText = `R$ ${cajuRemaining.toFixed(2)}`;
     document.getElementById('detail-cost-per-km').innerText = `R$ ${costPerKm.toFixed(2)}/KM`;
 
-    // Atualização do PDF
     document.getElementById('pdf-total-km').innerText = totalKm;
-    document.getElementById('pdf-calc-km').innerText = `${totalKm} KM × R$ ${parseFloat(params.kmRate).toFixed(2)} = R$ ${kmReimbursement.toFixed(2)}`;
+    document.getElementById('pdf-calc-km').innerText = `${totalKm} KM × R$ ${kmRateInput.toFixed(2)} = R$ ${kmReimbursement.toFixed(2)}`;
     document.getElementById('pdf-final-reimbursement').innerText = `R$ ${netProfit.toFixed(2)}`;
 }
 
@@ -244,4 +278,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initParamsUI();
     renderHistory();
     calculateTotals();
+
+    const paramInputs = ['param-km-rate', 'param-base-pay', 'param-caju', 'param-tech', 'param-period'];
+    paramInputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', calculateTotals);
+        }
+    });
 });
