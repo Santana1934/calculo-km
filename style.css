@@ -248,7 +248,6 @@ td {
     color: var(--text-main);
 }
 
-/* ESTILO DO ABASTECIMENTO: MINIMALISTA, SUTIL E SEM CAIXA LARANJA */
 .badge-posto-amber {
     display: inline-flex;
     align-items: center;
@@ -305,7 +304,71 @@ td {
     display: none;
 }
 
-/* OMITIR ABASTECIMENTO E UI NA IMPRESSÃO */
+/* MODAL DE CONFIRMAÇÃO CUSTOMIZADO */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.modal-box {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.modal-box h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.modal-box p {
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-modal-cancel {
+    flex: 1;
+    padding: 10px;
+    background: #2a3447;
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.btn-modal-danger {
+    flex: 1;
+    padding: 10px;
+    background: var(--danger);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
 @media print {
     body {
         background: white !important;
@@ -316,7 +379,8 @@ td {
     .no-print, 
     .btn-icon-subtle,
     tr.row-abastecimento,
-    .badge-posto-amber {
+    .badge-posto-amber,
+    .modal-overlay {
         display: none !important;
     }
 
