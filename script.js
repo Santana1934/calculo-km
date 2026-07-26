@@ -107,15 +107,16 @@ kmForm.addEventListener('submit', (e) => {
     adicionarRegistro(tipoAtual, clienteInput.value, parseFloat(kmAtualInput.value), protocoloOsInput.value);
 });
 
-// AÇÃO DO BOTÃO ABASTECIMENTO (DIRETO DA TELA)
-btnPosto.addEventListener('click', () => {
+// AÇÃO INDEPENDENTE DE ABASTECIMENTO
+btnPosto.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     const valorNota = parseFloat(valorPostoInput.value);
     if (!isNaN(valorNota) && valorNota > 0) {
         const kmMomento = kmAtualInput.value ? parseFloat(kmAtualInput.value) : (registros.length > 0 ? registros[registros.length - 1].km : 0);
         adicionarRegistro('posto', `⛽ Abastecimento (R$ ${valorNota.toFixed(2)})`, kmMomento, '', valorNota);
         valorPostoInput.value = '';
-    } else {
-        alert('Informe um valor válido em R$ para o abastecimento.');
     }
 });
 
