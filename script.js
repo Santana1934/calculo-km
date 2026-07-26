@@ -190,7 +190,7 @@ function clearInputs() {
     document.getElementById('input-fuel').value = '';
 }
 
-// Render da Tabela
+// Render da Tabela Clean (Clique no nome do cliente abre a edição sem usar ícones)
 function renderHistory() {
     const tbody = document.getElementById('history-body');
     tbody.innerHTML = '';
@@ -213,7 +213,7 @@ function renderHistory() {
             `;
         } else {
             tr.innerHTML = `
-                <td style="cursor: pointer; color: #60a5fa;" onclick="openEditModal(${item.id})" title="Clique para editar">${item.client} ✏️</td>
+                <td class="clickable-cell" onclick="openEditModal(${item.id})" title="Clique para editar">${item.client}</td>
                 <td>${item.os}</td>
                 <td>+${item.km} KM</td>
                 <td class="no-print"><button class="btn-icon-subtle" onclick="deleteEntry(${item.id})">×</button></td>
@@ -223,7 +223,7 @@ function renderHistory() {
     });
 }
 
-// Cálculos
+// Cálculos em Tempo Real
 function calculateTotals() {
     let totalKm = 0;
     let totalFuel = 0;
