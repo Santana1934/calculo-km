@@ -2,7 +2,6 @@ let registros = JSON.parse(localStorage.getItem('registros_km')) || [];
 
 // Elementos DOM
 const kmForm = document.getElementById('kmForm');
-const tipoRegistroInput = document.getElementById('tipoRegistro');
 const clienteInput = document.getElementById('cliente');
 const protocoloOsInput = document.getElementById('protocoloOs');
 const kmAtualInput = document.getElementById('kmAtual');
@@ -20,6 +19,8 @@ const totalGastosPostoEl = document.getElementById('totalGastosPosto');
 const saldoCajuEl = document.getElementById('saldoCaju');
 const custoPorKmEl = document.getElementById('custoPorKm');
 const sobraLiquidaEl = document.getElementById('sobraLiquida');
+
+let tipoAtual = 'cliente'; // Padrão: cliente
 
 // Carregar Configurações
 nomeTecnicoInput.value = localStorage.getItem('cfg_nome') || 'Diego Santana';
@@ -42,14 +43,22 @@ cartaoCajuInput.value = localStorage.getItem('cfg_caju') || '250.00';
 
 function preencherAtalho(nomeLocal, tipo) {
     clienteInput.value = nomeLocal;
-    tipoRegistroInput.value = tipo;
+    tipoAtual = tipo;
     protocoloOsInput.value = '';
 }
+
+// Reseta o tipo para 'cliente' se o usuário começar a digitar um nome manualmente
+clienteInput.addEventListener('input', () => {
+    const val = clienteInput.value.toLowerCase().trim();
+    if (val !== 'casa' && val !== 'empresa') {
+        tipoAtual = 'cliente';
+    }
+});
 
 // Ações do Formulário
 kmForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    adicionarRegistro(tipoRegistroInput.value, clienteInput.value, parseFloat(kmAtualInput.value), protocoloOsInput.value);
+    adicionarRegistro(tipoAtual, clienteInput.value, parseFloat(kmAtualInput.value), protocoloOsInput.value);
 });
 
 document.getElementById('btnPosto').addEventListener('click', () => {
@@ -80,6 +89,7 @@ function adicionarRegistro(tipo, descricao, km, protocoloOs = '', valorGasto = 0
     clienteInput.value = '';
     protocoloOsInput.value = '';
     kmAtualInput.value = '';
+    tipoAtual = 'cliente'; // Volta ao padrão para o próximo lançamento
 }
 
 function deletarRegistro(id) {
@@ -119,7 +129,7 @@ function renderizarHistoricoAgrupado() {
             <thead>
                 <tr>
                     <th>Hora</th>
-                    <th>Local / Tipo / OS</th>
+                    <th>Local / Protocolo</th>
                     <th>KM Painel</th>
                     <th>Trecho</th>
                     <th></th>
@@ -143,7 +153,7 @@ function renderizarHistoricoAgrupado() {
             }
 
             const badgeTipo = reg.tipo === 'cliente' ? '👤' : (reg.tipo === 'base' ? '🏢' : '⛽');
-            const osTexto = reg.protocoloOs ? ` <span style="font-size:0.75rem; color:var(--sub);">[OS: ${reg.protocoloOs}]</span>` : '';
+            const osTexto = reg.protocoloOs ? ` <span style="font-size:0.75rem; color:var(--sub);">[Prot: ${reg.protocoloOs}]</span>` : '';
             const classeLinha = reg.tipo === 'posto' ? 'class="row-posto"' : '';
 
             diaHtml += `
@@ -198,13 +208,10 @@ function atualizarCalculos() {
     const cajuInicial = parseFloat(cartaoCajuInput.value) || 0;
 
     const kmValorTotal = kmTotalRodado * taxa;
-    const totalEmpresaPaga = ajudaCusto + kmValorTotal; // Fixo R$ 300 + KM
-    const sobraLiquida = totalEmpresaPaga - totalGastosPosto; // Lucro real no bolso
+    const totalEmpresaPaga = ajudaCusto + kmValorTotal;
+    const sobraLiquida = totalEmpresaPaga - totalGastosPosto;
 
-    // Saldo Caju abatendo conforme abastece
     const saldoCajuRestante = Math.max(0, cajuInicial - totalGastosPosto);
-    
-    // Custo por KM
     const custoPorKm = kmTotalRodado > 0 ? (totalGastosPosto / kmTotalRodado) : 0;
 
     totalKmEl.textContent = `${kmTotalRodado} KM`;
