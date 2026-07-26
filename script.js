@@ -4,9 +4,11 @@ let registros = JSON.parse(localStorage.getItem('registros_km')) || [];
 const kmForm = document.getElementById('kmForm');
 const tipoRegistroInput = document.getElementById('tipoRegistro');
 const clienteInput = document.getElementById('cliente');
+const protocoloOsInput = document.getElementById('protocoloOs');
 const kmAtualInput = document.getElementById('kmAtual');
 const nomeTecnicoInput = document.getElementById('nomeTecnico');
 const periodoInput = document.getElementById('periodoRelatorio');
+const ajudaCustoInput = document.getElementById('ajudaCusto');
 const taxaKmInput = document.getElementById('taxaKm');
 const cartaoCajuInput = document.getElementById('cartaoCaju');
 
@@ -15,41 +17,50 @@ const totalClientesEl = document.getElementById('totalClientes');
 const totalKmValorEl = document.getElementById('totalKmValor');
 const totalEmpresaEl = document.getElementById('totalEmpresa');
 const totalGastosPostoEl = document.getElementById('totalGastosPosto');
-const exibeCajuEl = document.getElementById('exibeCaju');
+const saldoCajuEl = document.getElementById('saldoCaju');
+const custoPorKmEl = document.getElementById('custoPorKm');
 const sobraLiquidaEl = document.getElementById('sobraLiquida');
 
 // Carregar Configurações
-nomeTecnicoInput.value = localStorage.getItem('cfg_nome') || '';
+nomeTecnicoInput.value = localStorage.getItem('cfg_nome') || 'Diego Santana';
 periodoInput.value = localStorage.getItem('cfg_periodo') || '';
+ajudaCustoInput.value = localStorage.getItem('cfg_ajuda') || '300.00';
 taxaKmInput.value = localStorage.getItem('cfg_taxa') || '1.30';
 cartaoCajuInput.value = localStorage.getItem('cfg_caju') || '250.00';
 
 // Salvar Configurações
-[nomeTecnicoInput, periodoInput, taxaKmInput, cartaoCajuInput].forEach(elem => {
+[nomeTecnicoInput, periodoInput, ajudaCustoInput, taxaKmInput, cartaoCajuInput].forEach(elem => {
     elem.addEventListener('input', () => {
         localStorage.setItem('cfg_nome', nomeTecnicoInput.value);
         localStorage.setItem('cfg_periodo', periodoInput.value);
+        localStorage.setItem('cfg_ajuda', ajudaCustoInput.value);
         localStorage.setItem('cfg_taxa', taxaKmInput.value);
         localStorage.setItem('cfg_caju', cartaoCajuInput.value);
         atualizarCalculos();
     });
 });
 
+function preencherAtalho(nomeLocal, tipo) {
+    clienteInput.value = nomeLocal;
+    tipoRegistroInput.value = tipo;
+    protocoloOsInput.value = '';
+}
+
 // Ações do Formulário
 kmForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    adicionarRegistro(tipoRegistroInput.value, clienteInput.value, parseFloat(kmAtualInput.value));
+    adicionarRegistro(tipoRegistroInput.value, clienteInput.value, parseFloat(kmAtualInput.value), protocoloOsInput.value);
 });
 
 document.getElementById('btnPosto').addEventListener('click', () => {
     const valorNota = prompt('Informe o valor R$ gasto no Posto:');
     if (valorNota && !isNaN(valorNota)) {
         const kmMomento = kmAtualInput.value ? parseFloat(kmAtualInput.value) : (registros.length > 0 ? registros[registros.length - 1].km : 0);
-        adicionarRegistro('posto', `⛽ Abastecimento (R$ ${parseFloat(valorNota).toFixed(2)})`, kmMomento, parseFloat(valorNota));
+        adicionarRegistro('posto', `⛽ Abastecimento (R$ ${parseFloat(valorNota).toFixed(2)})`, kmMomento, '', parseFloat(valorNota));
     }
 });
 
-function adicionarRegistro(tipo, descricao, km, valorGasto = 0) {
+function adicionarRegistro(tipo, descricao, km, protocoloOs = '', valorGasto = 0) {
     const hoje = new Date();
     const dataStr = hoje.toLocaleDateString('pt-BR');
     const horaStr = hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -60,12 +71,14 @@ function adicionarRegistro(tipo, descricao, km, valorGasto = 0) {
         hora: horaStr,
         tipo: tipo, // 'cliente', 'base', 'posto'
         descricao: descricao,
+        protocoloOs: protocoloOs,
         km: km,
         valorGasto: valorGasto
     };
     registros.push(novoRegistro);
     salvarERenderizar();
     clienteInput.value = '';
+    protocoloOsInput.value = '';
     kmAtualInput.value = '';
 }
 
@@ -89,7 +102,6 @@ function renderizarHistoricoAgrupado() {
         return;
     }
 
-    // Agrupar registros por Data
     const agrupadoPorData = {};
     registros.forEach(reg => {
         if (!agrupadoPorData[reg.data]) agrupadoPorData[reg.data] = [];
@@ -107,7 +119,7 @@ function renderizarHistoricoAgrupado() {
             <thead>
                 <tr>
                     <th>Hora</th>
-                    <th>Local / Tipo</th>
+                    <th>Local / Tipo / OS</th>
                     <th>KM Painel</th>
                     <th>Trecho</th>
                     <th></th>
@@ -131,12 +143,13 @@ function renderizarHistoricoAgrupado() {
             }
 
             const badgeTipo = reg.tipo === 'cliente' ? '👤' : (reg.tipo === 'base' ? '🏢' : '⛽');
+            const osTexto = reg.protocoloOs ? ` <span style="font-size:0.75rem; color:var(--sub);">[OS: ${reg.protocoloOs}]</span>` : '';
             const classeLinha = reg.tipo === 'posto' ? 'class="row-posto"' : '';
 
             diaHtml += `
                 <tr ${classeLinha}>
                     <td>${reg.hora || ''}</td>
-                    <td>${badgeTipo} ${reg.descricao}</td>
+                    <td>${badgeTipo} ${reg.descricao}${osTexto}</td>
                     <td>${reg.km ? reg.km + ' KM' : '-'}</td>
                     <td>${reg.tipo !== 'posto' ? '+' + trechoKm + ' KM' : '-'}</td>
                     <td><button class="btn-del" onclick="deletarRegistro(${reg.id})">❌</button></td>
@@ -180,20 +193,27 @@ function atualizarCalculos() {
         kmTotalRodado = ultimoKm - primeiroKm;
     }
 
+    const ajudaCusto = parseFloat(ajudaCustoInput.value) || 0;
     const taxa = parseFloat(taxaKmInput.value) || 0;
-    const caju = parseFloat(cartaoCajuInput.value) || 0;
-    const ajudaCustoFixa = 300.00;
+    const cajuInicial = parseFloat(cartaoCajuInput.value) || 0;
 
     const kmValorTotal = kmTotalRodado * taxa;
-    const totalEmpresaPaga = ajudaCustoFixa + kmValorTotal + caju;
-    const sobraLiquida = (ajudaCustoFixa + kmValorTotal) - (totalGastosPosto - caju);
+    const totalEmpresaPaga = ajudaCusto + kmValorTotal; // Fixo R$ 300 + KM
+    const sobraLiquida = totalEmpresaPaga - totalGastosPosto; // Lucro real no bolso
+
+    // Saldo Caju abatendo conforme abastece
+    const saldoCajuRestante = Math.max(0, cajuInicial - totalGastosPosto);
+    
+    // Custo por KM
+    const custoPorKm = kmTotalRodado > 0 ? (totalGastosPosto / kmTotalRodado) : 0;
 
     totalKmEl.textContent = `${kmTotalRodado} KM`;
     totalClientesEl.textContent = `${contadorClientes}`;
     totalKmValorEl.textContent = `R$ ${kmValorTotal.toFixed(2)}`;
     totalEmpresaEl.textContent = `R$ ${totalEmpresaPaga.toFixed(2)}`;
     totalGastosPostoEl.textContent = `R$ ${totalGastosPosto.toFixed(2)}`;
-    exibeCajuEl.textContent = `R$ ${caju.toFixed(2)}`;
+    saldoCajuEl.textContent = `R$ ${saldoCajuRestante.toFixed(2)}`;
+    custoPorKmEl.textContent = `R$ ${custoPorKm.toFixed(2)}/KM`;
     sobraLiquidaEl.textContent = `R$ ${sobraLiquida.toFixed(2)}`;
 }
 
