@@ -32,15 +32,16 @@
                     <span class="stat-value" id="totalKmValor">R$ 0,00</span>
                 </div>
                 <div class="stat-box highlight">
-                    <span class="stat-label">SOBRA LÍQUIDA</span>
+                    <span class="stat-label">SOBRA LÍQUIDA REAL</span>
                     <span class="stat-value" id="sobraLiquida">R$ 0,00</span>
                 </div>
             </div>
 
             <div class="comparativo">
-                <div>💰 A Pagar Empresa (Fixo + KM + Caju): <span id="totalEmpresa">R$ 0,00</span></div>
-                <div>⛽ Total Gasto Posto: <span id="totalGastosPosto">R$ 0,00</span></div>
-                <div>💳 Adiantamento Caju: <span id="exibeCaju">R$ 0,00</span></div>
+                <div>💰 A Pagar Empresa (Fixo + KM): <span id="totalEmpresa">R$ 0,00</span></div>
+                <div>⛽ Total Gasto no Posto: <span id="totalGastosPosto">R$ 0,00</span></div>
+                <div>💳 Saldo Caju Restante: <span id="saldoCaju">R$ 0,00</span></div>
+                <div>📏 Seu Custo por KM Rodado: <span id="custoPorKm">R$ 0,00/KM</span></div>
             </div>
         </section>
 
@@ -49,20 +50,36 @@
             <h3>📝 Novo Registro</h3>
             <form id="kmForm">
                 <div class="form-group">
+                    <label>Atalhos Rápidos de Local</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                        <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Casa', 'base')" style="flex:1;">🏠 Casa</button>
+                        <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Empresa / Base', 'base')" style="flex:1;">🏢 Empresa</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label for="tipoRegistro">Tipo de Deslocamento</label>
-                    <select id="tipoRegistro" style="background:#2a2a2a; color:#fff; padding:10px; border-radius:6px; border:1px solid var(--border); margin-bottom:8px;">
+                    <select id="tipoRegistro" style="background:#2a2a2a; color:#fff; padding:10px; border-radius:6px; border:1px solid var(--border); margin-bottom:8px; width:100%;">
                         <option value="cliente">👤 Atendimento a Cliente</option>
                         <option value="base">🏢 Empresa / Base / Casa</option>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="cliente">Descrição / Local</label>
-                    <input type="text" id="cliente" placeholder="Ex: Cliente XYZ ou Saída da Empresa" required>
+                    <label for="cliente">Descrição / Nome do Local</label>
+                    <input type="text" id="cliente" placeholder="Ex: Cliente XYZ ou Saída de Casa" required>
                 </div>
+
+                <div class="form-group">
+                    <label for="protocoloOs">Nº do Protocolo / OS (Opcional)</label>
+                    <input type="text" id="protocoloOs" placeholder="Ex: OS-98452">
+                </div>
+
                 <div class="form-group">
                     <label for="kmAtual">KM Atual do Painel</label>
                     <input type="number" id="kmAtual" step="0.1" placeholder="Ex: 45230" required>
                 </div>
+
                 <div class="btn-group">
                     <button type="submit" class="btn btn-primary">➕ Salvar Parada</button>
                     <button type="button" id="btnPosto" class="btn btn-secondary">⛽ Lançar Abastecimento</button>
@@ -73,9 +90,7 @@
         <!-- LISTAGEM COM RESUMO DIÁRIO -->
         <section class="card">
             <h3>📅 Histórico por Dia</h3>
-            <div id="historicoAgrupado">
-                <!-- Os dias e registros serão gerados via JavaScript aqui -->
-            </div>
+            <div id="historicoAgrupado"></div>
             
             <button id="btnPdf" class="btn btn-pdf">🖨️ Gerar PDF / Imprimir</button>
             <button id="btnLimpar" class="btn-danger-subtle">Apagar Registros do Mês</button>
@@ -94,17 +109,22 @@
                     <input type="text" id="periodoRelatorio" placeholder="Ex: Julho/2026">
                 </div>
                 <div class="form-group">
-                    <label for="taxaKm">R$ / KM</label>
+                    <label for="ajudaCusto">Ajuda de Custo Fixa (R$)</label>
+                    <input type="number" id="ajudaCusto" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="taxaKm">R$ / KM (Empresa)</label>
                     <input type="number" id="taxaKm" step="0.01">
                 </div>
                 <div class="form-group">
-                    <label for="cartaoCaju">Cartão Caju (R$)</label>
+                    <label for="cartaoCaju">Valor Caju do Mês (R$)</label>
                     <input type="number" id="cartaoCaju" step="0.01">
                 </div>
             </div>
         </section>
 
         <footer>
+            <div class="privacy-note">🔒 Seus dados ficam armazenados exclusivamente no seu dispositivo.</div>
             <div class="dev-tag">DESENVOLVIDO POR DIEGO SANTANA</div>
         </footer>
     </div>
