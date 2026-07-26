@@ -5,6 +5,7 @@ const kmForm = document.getElementById('kmForm');
 const clienteInput = document.getElementById('cliente');
 const protocoloOsInput = document.getElementById('protocoloOs');
 const kmAtualInput = document.getElementById('kmAtual');
+
 const nomeTecnicoInput = document.getElementById('nomeTecnico');
 const periodoInput = document.getElementById('periodoRelatorio');
 const ajudaCustoInput = document.getElementById('ajudaCusto');
@@ -24,48 +25,68 @@ const sobraLiquidaEl = document.getElementById('sobraLiquida');
 let tipoAtual = 'cliente';
 let configEditavel = false;
 
-// Carregar Configurações
-nomeTecnicoInput.value = localStorage.getItem('cfg_nome') || 'Diego Santana';
-periodoInput.value = localStorage.getItem('cfg_periodo') || '';
-ajudaCustoInput.value = localStorage.getItem('cfg_ajuda') || '300.00';
-taxaKmInput.value = localStorage.getItem('cfg_taxa') || '1.30';
-cartaoCajuInput.value = localStorage.getItem('cfg_caju') || '250.00';
+// Carregar Configurações Iniciais
+function carregarConfiguracoes() {
+    nomeTecnicoInput.value = localStorage.getItem('cfg_nome') || 'Diego Santana';
+    periodoInput.value = localStorage.getItem('cfg_periodo') || '';
+    ajudaCustoInput.value = localStorage.getItem('cfg_ajuda') || '300.00';
+    taxaKmInput.value = localStorage.getItem('cfg_taxa') || '1.30';
+    cartaoCajuInput.value = localStorage.getItem('cfg_caju') || '250.00';
+}
 
-// Alternar Trava/Destrava das Configurações
-btnToggleConfig.addEventListener('click', () => {
+// Botão para liberar/bloquear edição
+btnToggleConfig.addEventListener('click', (e) => {
+    e.preventDefault();
     configEditavel = !configEditavel;
-    const inputs = [nomeTecnicoInput, periodoInput, ajudaCustoInput, taxaKmInput, cartaoCajuInput];
     
-    inputs.forEach(input => {
+    const campos = document.querySelectorAll('.campo-parametro');
+    
+    campos.forEach(campo => {
         if (configEditavel) {
-            input.removeAttribute('readonly');
-            input.style.border = '1px solid var(--accent)';
+            campo.removeAttribute('readonly');
+            campo.style.backgroundColor = '#2a2a2a';
+            campo.style.borderColor = '#00e676';
+            campo.style.color = '#ffffff';
         } else {
-            input.setAttribute('readonly', 'true');
-            input.style.border = '';
+            campo.setAttribute('readonly', 'readonly');
+            campo.style.backgroundColor = '';
+            campo.style.borderColor = '';
+            campo.style.color = '';
         }
     });
 
     if (configEditavel) {
-        btnToggleConfig.textContent = '🔓 Salvar / Bloquear';
-        btnToggleConfig.style.background = 'var(--accent)';
-        btnToggleConfig.style.color = '#000';
+        btnToggleConfig.innerHTML = '🔓 Salvar Dados';
+        btnToggleConfig.style.background = '#00e676';
+        btnToggleConfig.style.color = '#000000';
+        nomeTecnicoInput.focus();
     } else {
-        btnToggleConfig.textContent = '🔒 Editar Parâmetros';
-        btnToggleConfig.style.background = '';
-        btnToggleConfig.style.color = '';
-    }
-});
-
-// Salvar Configurações
-[nomeTecnicoInput, periodoInput, ajudaCustoInput, taxaKmInput, cartaoCajuInput].forEach(elem => {
-    elem.addEventListener('input', () => {
+        // Salvar ao fechar
         localStorage.setItem('cfg_nome', nomeTecnicoInput.value);
         localStorage.setItem('cfg_periodo', periodoInput.value);
         localStorage.setItem('cfg_ajuda', ajudaCustoInput.value);
         localStorage.setItem('cfg_taxa', taxaKmInput.value);
         localStorage.setItem('cfg_caju', cartaoCajuInput.value);
+
+        btnToggleConfig.innerHTML = '🔒 Editar Parâmetros';
+        btnToggleConfig.style.background = '';
+        btnToggleConfig.style.color = '';
+        
         atualizarCalculos();
+    }
+});
+
+// Atualizar em tempo real caso digite enquanto liberado
+[nomeTecnicoInput, periodoInput, ajudaCustoInput, taxaKmInput, cartaoCajuInput].forEach(elem => {
+    elem.addEventListener('input', () => {
+        if (configEditavel) {
+            localStorage.setItem('cfg_nome', nomeTecnicoInput.value);
+            localStorage.setItem('cfg_periodo', periodoInput.value);
+            localStorage.setItem('cfg_ajuda', ajudaCustoInput.value);
+            localStorage.setItem('cfg_taxa', taxaKmInput.value);
+            localStorage.setItem('cfg_caju', cartaoCajuInput.value);
+            atualizarCalculos();
+        }
     });
 });
 
@@ -82,7 +103,6 @@ clienteInput.addEventListener('input', () => {
     }
 });
 
-// Ações do Formulário
 kmForm.addEventListener('submit', (e) => {
     e.preventDefault();
     adicionarRegistro(tipoAtual, clienteInput.value, parseFloat(kmAtualInput.value), protocoloOsInput.value);
@@ -259,4 +279,6 @@ document.getElementById('btnLimpar').addEventListener('click', () => {
     }
 });
 
+// Inicialização
+carregarConfiguracoes();
 salvarERenderizar();
