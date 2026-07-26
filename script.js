@@ -10,16 +10,8 @@ function setMode(newMode) {
     document.getElementById('btn-mode-parada').classList.toggle('active', mode === 'parada');
     document.getElementById('btn-mode-abastecimento').classList.toggle('active', mode === 'abastecimento');
     
-    const fieldsParada = document.getElementById('fields-parada');
-    const fieldsAbastecimento = document.getElementById('fields-abastecimento');
-
-    if (mode === 'parada') {
-        fieldsParada.style.display = 'block';
-        fieldsAbastecimento.style.display = 'none';
-    } else {
-        fieldsParada.style.display = 'none';
-        fieldsAbastecimento.style.display = 'block';
-    }
+    document.getElementById('fields-parada').style.display = mode === 'parada' ? 'block' : 'none';
+    document.getElementById('fields-abastecimento').style.display = mode === 'abastecimento' ? 'block' : 'none';
 }
 
 function addEntry() {
@@ -67,7 +59,7 @@ function addEntry() {
 }
 
 function deleteEntry(id) {
-    if (confirm('Deseja realmente apagar este registro?')) {
+    if (confirm('Deseja apagar este registro?')) {
         entries = entries.filter(e => e.id !== id);
         saveAndRender();
     }
@@ -111,14 +103,14 @@ function renderHistory() {
                 <td><span class="badge-posto-amber">⛽ Abastecimento (R$ ${item.valor.toFixed(2)})</span></td>
                 <td>-</td>
                 <td>-</td>
-                <td><button class="btn-icon-subtle delete no-print" onclick="deleteEntry(${item.id})">×</button></td>
+                <td class="no-print"><button class="btn-icon-subtle" onclick="deleteEntry(${item.id})">×</button></td>
             `;
         } else {
             tr.innerHTML = `
                 <td>${item.client}</td>
                 <td>${item.os}</td>
                 <td>+${item.km} KM</td>
-                <td><button class="btn-icon-subtle delete no-print" onclick="deleteEntry(${item.id})">×</button></td>
+                <td class="no-print"><button class="btn-icon-subtle" onclick="deleteEntry(${item.id})">×</button></td>
             `;
         }
         tbody.appendChild(tr);
@@ -138,9 +130,16 @@ function calculateTotals() {
     const totalReimbursement = BASE_PAY + kmReimbursement;
     const cajuRemaining = CAJU_BUDGET - totalFuel;
 
-    document.getElementById('total-km').innerText = totalKm;
-    document.getElementById('total-reimbursement').innerText = `R$ ${totalReimbursement.toFixed(2)}`;
+    // Atualiza App
     document.getElementById('caju-remaining').innerText = `R$ ${cajuRemaining.toFixed(2)}`;
+    
+    let costPerKm = totalKm > 0 ? (totalFuel / totalKm) : 0;
+    document.getElementById('cost-per-km').innerText = `R$ ${costPerKm.toFixed(2)}/KM`;
+
+    // Atualiza PDF Totais
+    document.getElementById('pdf-total-km').innerText = totalKm;
+    document.getElementById('pdf-calc-km').innerText = `${totalKm} KM × R$ ${KM_RATE.toFixed(2)} = R$ ${kmReimbursement.toFixed(2)}`;
+    document.getElementById('pdf-final-reimbursement').innerText = `R$ ${totalReimbursement.toFixed(2)}`;
 }
 
 function printPDF() {
