@@ -144,14 +144,14 @@ td {
     color: var(--text-main);
 }
 
-/* ABASTECIMENTO CLEAN E DISCRETO NO APP */
+/* ABASTECIMENTO CLEAN (SEM RETÂNGULO/FUNDO) */
 .badge-posto-amber {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: transparent;
-    color: #f59e0b;
-    border: none;
+    background: transparent !important;
+    color: #f59e0b !important;
+    border: none !important;
     font-weight: 500;
     padding: 0;
     font-size: 0.85rem;
@@ -170,7 +170,7 @@ td {
     display: none;
 }
 
-/* REGRA DE IMPRESSÃO / GERAR PDF */
+/* REGRAS DE IMPRESSÃO / PDF */
 @media print {
     body {
         background: white !important;
