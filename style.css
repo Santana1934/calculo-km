@@ -7,7 +7,6 @@
     --accent-blue: #2563eb;
     --accent-blue-hover: #1d4ed8;
     --danger: #ef4444;
-    --success: #10b981;
 }
 
 * {
@@ -30,14 +29,13 @@ body {
     max-width: 480px;
 }
 
-header {
-    margin-bottom: 20px;
-    text-align: center;
-}
-
 header h1 {
     font-size: 1.25rem;
     font-weight: 600;
+}
+
+.pdf-header {
+    display: none;
 }
 
 .card {
@@ -59,7 +57,7 @@ label {
     margin-bottom: 4px;
 }
 
-input, select {
+input {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
@@ -109,10 +107,6 @@ input, select {
     cursor: pointer;
 }
 
-.btn-primary:active {
-    background: var(--accent-blue-hover);
-}
-
 .summary-card {
     display: flex;
     flex-direction: column;
@@ -150,7 +144,7 @@ td {
     color: var(--text-main);
 }
 
-/* ABASTECIMENTO CLEAN E DESTAQUE SUTIL NO APP */
+/* ABASTECIMENTO CLEAN E DISCRETO NO APP */
 .badge-posto-amber {
     display: inline-flex;
     align-items: center;
@@ -161,7 +155,6 @@ td {
     font-weight: 500;
     padding: 0;
     font-size: 0.85rem;
-    cursor: pointer;
 }
 
 .btn-icon-subtle {
@@ -171,42 +164,64 @@ td {
     cursor: pointer;
     font-size: 1.1rem;
     padding: 2px 6px;
-    line-height: 1;
 }
 
-.btn-icon-subtle.delete:hover {
-    color: var(--danger);
+.pdf-totals {
+    display: none;
 }
 
-/* OCULTAR ELEMENTOS NO IMPRESSO/PDF */
+/* REGRA DE IMPRESSÃO / GERAR PDF */
 @media print {
     body {
-        background: white;
-        color: black;
+        background: white !important;
+        color: black !important;
         padding: 0;
     }
     
     .no-print, 
-    .btn-icon-subtle, 
-    .mode-switch,
+    .btn-icon-subtle,
     tr.row-abastecimento,
     .badge-posto-amber {
         display: none !important;
     }
 
+    .pdf-header {
+        display: block !important;
+        margin-bottom: 15px;
+    }
+
+    .pdf-header h2 {
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+
+    .pdf-meta, .pdf-submeta {
+        font-size: 0.75rem;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .pdf-totals {
+        display: block !important;
+        margin-top: 15px;
+        font-size: 0.85rem;
+    }
+
     .container, .card {
-        max-width: 100%;
-        border: none;
-        background: transparent;
-        padding: 0;
+        max-width: 100% !important;
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
     }
 
     table {
-        color: black;
+        color: black !important;
+        width: 100%;
     }
 
     th, td {
-        border-bottom: 1px solid #ccc;
-        color: black;
+        border-bottom: 1px solid #ddd !important;
+        color: black !important;
     }
 }
