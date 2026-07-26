@@ -8,7 +8,7 @@
     --text-sub: #9ca3af;
     --input-bg: #16191e;
     --input-border: #374151;
-    --accent-amber: #d97706;
+    --accent-amber: #b45309; /* Âmbar sofisticado e suave */
     --danger: #ef4444;
     --radius: 12px;
 }
@@ -210,19 +210,19 @@ td {
     color: var(--text-main);
 }
 
-/* DESTAQUE DE ABASTECIMENTO EM TOM ÂMBAR */
+/* DESTAQUE DE ABASTECIMENTO EM ÂMBAR SUAVE E ELEGANTE */
 .badge-posto-amber {
     display: inline-block;
     background: var(--accent-amber);
-    color: #ffffff;
-    font-weight: 700;
+    color: #fef3c7;
+    font-weight: 600;
     padding: 3px 8px;
     border-radius: 6px;
     font-size: 0.78rem;
     cursor: pointer;
 }
 
-/* BOTÃO DE EXCLUIR 'X' DISCRETO SEM BRANCO DE FUNDO */
+/* BOTÃO 'X' DISCRETO SEM FUNDO BRANCO */
 .btn-icon-subtle {
     background: transparent;
     border: none;
