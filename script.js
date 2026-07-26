@@ -1,10 +1,21 @@
 let registros = JSON.parse(localStorage.getItem('registros_km')) || [];
+let modoAtual = 'parada'; // 'parada' ou 'posto'
+let tipoAtalho = 'cliente';
+let configEditavel = false;
 
 // Elementos DOM
 const kmForm = document.getElementById('kmForm');
 const clienteInput = document.getElementById('cliente');
 const protocoloOsInput = document.getElementById('protocoloOs');
 const kmAtualInput = document.getElementById('kmAtual');
+const valorPostoInput = document.getElementById('valorPostoInput');
+
+const secaoParada = document.getElementById('secaoParada');
+const secaoPosto = document.getElementById('secaoPosto');
+const tabParada = document.getElementById('tabParada');
+const tabPosto = document.getElementById('tabPosto');
+const btnSalvar = document.getElementById('btnSalvar');
+const labelKm = document.getElementById('labelKm');
 
 const nomeTecnicoInput = document.getElementById('nomeTecnico');
 const periodoInput = document.getElementById('periodoRelatorio');
@@ -22,12 +33,6 @@ const saldoCajuEl = document.getElementById('saldoCaju');
 const custoPorKmEl = document.getElementById('custoPorKm');
 const sobraLiquidaEl = document.getElementById('sobraLiquida');
 
-const valorPostoInput = document.getElementById('valorPostoInput');
-const btnPosto = document.getElementById('btnPosto');
-
-let tipoAtual = 'cliente';
-let configEditavel = false;
-
 function carregarConfiguracoes() {
     nomeTecnicoInput.value = localStorage.getItem('cfg_nome') || 'Diego Santana';
     periodoInput.value = localStorage.getItem('cfg_periodo') || '';
@@ -36,30 +41,22 @@ function carregarConfiguracoes() {
     cartaoCajuInput.value = localStorage.getItem('cfg_caju') || '250.00';
 }
 
-btnToggleConfig.addEventListener('click', (e) => {
-    e.preventDefault();
+btnToggleConfig.addEventListener('click', () => {
     configEditavel = !configEditavel;
-    
     const campos = document.querySelectorAll('.campo-parametro');
     
     campos.forEach(campo => {
         if (configEditavel) {
             campo.removeAttribute('readonly');
-            campo.style.backgroundColor = '#2a2a2a';
-            campo.style.borderColor = '#00e676';
-            campo.style.color = '#ffffff';
+            campo.style.borderColor = 'var(--primary)';
         } else {
             campo.setAttribute('readonly', 'readonly');
-            campo.style.backgroundColor = '';
             campo.style.borderColor = '';
-            campo.style.color = '';
         }
     });
 
     if (configEditavel) {
-        btnToggleConfig.innerHTML = '🔓 Salvar Dados';
-        btnToggleConfig.style.background = '#00e676';
-        btnToggleConfig.style.color = '#000000';
+        btnToggleConfig.textContent = 'Salvar';
         nomeTecnicoInput.focus();
     } else {
         localStorage.setItem('cfg_nome', nomeTecnicoInput.value);
@@ -67,11 +64,7 @@ btnToggleConfig.addEventListener('click', (e) => {
         localStorage.setItem('cfg_ajuda', ajudaCustoInput.value);
         localStorage.setItem('cfg_taxa', taxaKmInput.value);
         localStorage.setItem('cfg_caju', cartaoCajuInput.value);
-
-        btnToggleConfig.innerHTML = '🔒 Editar Parâmetros';
-        btnToggleConfig.style.background = '';
-        btnToggleConfig.style.color = '';
-        
+        btnToggleConfig.textContent = 'Editar Parâmetros';
         atualizarCalculos();
     }
 });
@@ -89,35 +82,63 @@ btnToggleConfig.addEventListener('click', (e) => {
     });
 });
 
+function alternarModo(modo) {
+    modoAtual = modo;
+    if (modo === 'parada') {
+        tabParada.classList.add('active');
+        tabPosto.classList.remove('active');
+        secaoParada.style.display = 'block';
+        secaoPosto.style.display = 'none';
+        labelKm.textContent = 'KM Atual do Painel';
+        btnSalvar.textContent = 'Salvar Parada';
+    } else {
+        tabPosto.classList.add('active');
+        tabParada.classList.remove('active');
+        secaoParada.style.display = 'none';
+        secaoPosto.style.display = 'block';
+        labelKm.textContent = 'KM Atual do Painel (Opcional)';
+        btnSalvar.textContent = 'Confirmar Abastecimento';
+    }
+}
+
 function preencherAtalho(nomeLocal, tipo) {
     clienteInput.value = nomeLocal;
-    tipoAtual = tipo;
+    tipoAtalho = tipo;
     protocoloOsInput.value = '';
 }
 
-clienteInput.addEventListener('input', () => {
-    const val = clienteInput.value.toLowerCase().trim();
-    if (val !== 'casa' && val !== 'empresa') {
-        tipoAtual = 'cliente';
-    }
-});
-
 kmForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    adicionarRegistro(tipoAtual, clienteInput.value, parseFloat(kmAtualInput.value), protocoloOsInput.value);
-});
 
-// AÇÃO INDEPENDENTE DE ABASTECIMENTO
-btnPosto.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const valorNota = parseFloat(valorPostoInput.value);
-    if (!isNaN(valorNota) && valorNota > 0) {
-        const kmMomento = kmAtualInput.value ? parseFloat(kmAtualInput.value) : (registros.length > 0 ? registros[registros.length - 1].km : 0);
-        adicionarRegistro('posto', `⛽ Abastecimento (R$ ${valorNota.toFixed(2)})`, kmMomento, '', valorNota);
+    if (modoAtual === 'parada') {
+        const kmVal = parseFloat(kmAtualInput.value);
+        if (isNaN(kmVal)) return;
+
+        let tipoFinal = tipoAtalho;
+        const localTexto = clienteInput.value.trim();
+        if (localTexto.toLowerCase() !== 'casa' && localTexto.toLowerCase() !== 'empresa') {
+            tipoFinal = 'cliente';
+        }
+
+        adicionarRegistro(tipoFinal, localTexto || 'Parada', kmVal, protocoloOsInput.value, 0);
+    } else {
+        const valorGasto = parseFloat(valorPostoInput.value);
+        if (isNaN(valorGasto) || valorGasto <= 0) return;
+
+        let kmVal = parseFloat(kmAtualInput.value);
+        if (isNaN(kmVal)) {
+            kmVal = registros.length > 0 ? registros[registros.length - 1].km : 0;
+        }
+
+        adicionarRegistro('posto', 'Abastecimento', kmVal, '', valorGasto);
         valorPostoInput.value = '';
     }
+
+    clienteInput.value = '';
+    protocoloOsInput.value = '';
+    kmAtualInput.value = '';
+    tipoAtalho = 'cliente';
+    alternarModo('parada');
 });
 
 function adicionarRegistro(tipo, descricao, km, protocoloOs = '', valorGasto = 0) {
@@ -125,7 +146,7 @@ function adicionarRegistro(tipo, descricao, km, protocoloOs = '', valorGasto = 0
     const dataStr = hoje.toLocaleDateString('pt-BR');
     const horaStr = hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-    const novoRegistro = {
+    registros.push({
         id: Date.now(),
         data: dataStr,
         hora: horaStr,
@@ -134,13 +155,9 @@ function adicionarRegistro(tipo, descricao, km, protocoloOs = '', valorGasto = 0
         protocoloOs: protocoloOs,
         km: km,
         valorGasto: valorGasto
-    };
-    registros.push(novoRegistro);
+    });
+
     salvarERenderizar();
-    clienteInput.value = '';
-    protocoloOsInput.value = '';
-    kmAtualInput.value = '';
-    tipoAtual = 'cliente';
 }
 
 function deletarRegistro(id) {
@@ -150,16 +167,16 @@ function deletarRegistro(id) {
 
 function salvarERenderizar() {
     localStorage.setItem('registros_km', JSON.stringify(registros));
-    renderizarHistoricoAgrupado();
+    renderizarHistorico();
     atualizarCalculos();
 }
 
-function renderizarHistoricoAgrupado() {
+function renderizarHistorico() {
     const conteiner = document.getElementById('historicoAgrupado');
     conteiner.innerHTML = '';
 
     if (registros.length === 0) {
-        conteiner.innerHTML = '<p style="text-align:center; color:var(--sub); font-size:0.85rem; padding:15px;">Nenhum registro efetuado este mês.</p>';
+        conteiner.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:0.85rem; padding:15px;">Nenhum registro este mês.</p>';
         return;
     }
 
@@ -173,15 +190,15 @@ function renderizarHistoricoAgrupado() {
 
     Object.keys(agrupadoPorData).forEach(data => {
         const diaBloco = document.createElement('div');
-        diaBloco.style.cssText = 'margin-bottom: 20px; background:#181818; border-radius:8px; padding:10px; border:1px solid var(--border);';
+        diaBloco.style.cssText = 'margin-bottom: 16px; background:var(--input-bg); border-radius:8px; padding:10px; border:1px solid var(--card-border);';
 
-        let diaHtml = `<div style="font-weight:bold; color:var(--accent); margin-bottom:8px; font-size:0.85rem; border-bottom:1px solid var(--border); padding-bottom:4px;">📅 ${data}</div>`;
+        let diaHtml = `<div style="font-weight:600; color:var(--text-main); margin-bottom:8px; font-size:0.8rem;">📅 ${data}</div>`;
         diaHtml += `<div class="table-responsive"><table>
             <thead>
                 <tr>
                     <th>Hora</th>
-                    <th>Local / Protocolo</th>
-                    <th>KM Painel</th>
+                    <th>Local / Detalhe</th>
+                    <th>KM</th>
                     <th>Trecho</th>
                     <th></th>
                 </tr>
@@ -195,34 +212,37 @@ function renderizarHistoricoAgrupado() {
             let trechoKm = 0;
             if (reg.tipo !== 'posto') {
                 if (kmAnteriorGeral !== null) {
-                    trechoKm = reg.km - kmAnteriorGeral;
-                    if (trechoKm < 0) trechoKm = 0;
+                    trechoKm = Math.max(0, reg.km - kmAnteriorGeral);
                 }
                 kmAnteriorGeral = reg.km;
                 if (primeiroKmDia === null) primeiroKmDia = reg.km;
                 ultimoKmDia = reg.km;
             }
 
-            const badgeTipo = reg.tipo === 'cliente' ? '👤' : (reg.tipo === 'base' ? '🏢' : '⛽');
-            const osTexto = reg.protocoloOs ? ` <span style="font-size:0.75rem; color:var(--sub);">[Prot: ${reg.protocoloOs}]</span>` : '';
-            const classeLinha = reg.tipo === 'posto' ? 'class="row-posto"' : '';
+            let detalheHtml = '';
+            if (reg.tipo === 'posto') {
+                detalheHtml = `<span class="badge-posto">⛽ Posto R$ ${reg.valorGasto.toFixed(2)}</span>`;
+            } else {
+                const osTexto = reg.protocoloOs ? `<br><span style="font-size:0.7rem; color:var(--text-sub);">OS: ${reg.protocoloOs}</span>` : '';
+                detalheHtml = `${reg.descricao}${osTexto}`;
+            }
 
             diaHtml += `
-                <tr ${classeLinha}>
+                <tr>
                     <td>${reg.hora || ''}</td>
-                    <td>${badgeTipo} ${reg.descricao}${osTexto}</td>
+                    <td>${detalheHtml}</td>
                     <td>${reg.km ? reg.km + ' KM' : '-'}</td>
                     <td>${reg.tipo !== 'posto' ? '+' + trechoKm + ' KM' : '-'}</td>
-                    <td><button class="btn-del" onclick="deletarRegistro(${reg.id})">❌</button></td>
+                    <td><button class="btn-del" onclick="deletarRegistro(${reg.id})">✕</button></td>
                 </tr>
             `;
         });
 
-        let totalDiaKm = (primeiroKmDia !== null && ultimoKmDia !== null) ? (ultimoKmDia - primeiroKmDia) : 0;
+        const totalDiaKm = (primeiroKmDia !== null && ultimoKmDia !== null) ? (ultimoKmDia - primeiroKmDia) : 0;
 
         diaHtml += `</tbody></table></div>`;
-        diaHtml += `<div style="text-align:right; font-size:0.8rem; font-weight:bold; color:#fff; margin-top:6px; background:#262626; padding:6px 10px; border-radius:4px;">
-            Total Rodado no Dia: <span style="color:var(--accent);">${totalDiaKm} KM</span>
+        diaHtml += `<div style="text-align:right; font-size:0.75rem; color:var(--text-sub); margin-top:6px;">
+            Total Rodado: <strong style="color:var(--primary);">${totalDiaKm} KM</strong>
         </div>`;
 
         diaBloco.innerHTML = diaHtml;
@@ -238,9 +258,7 @@ function atualizarCalculos() {
     let contadorClientes = 0;
 
     registros.forEach((reg) => {
-        if (reg.tipo === 'cliente') {
-            contadorClientes++;
-        }
+        if (reg.tipo === 'cliente') contadorClientes++;
         
         if (reg.tipo !== 'posto') {
             if (primeiroKm === null) primeiroKm = reg.km;
@@ -261,7 +279,6 @@ function atualizarCalculos() {
     const kmValorTotal = kmTotalRodado * taxa;
     const totalEmpresaPaga = ajudaCusto + kmValorTotal;
     const sobraLiquida = totalEmpresaPaga - totalGastosPosto;
-
     const saldoCajuRestante = Math.max(0, cajuInicial - totalGastosPosto);
     const custoPorKm = kmTotalRodado > 0 ? (totalGastosPosto / kmTotalRodado) : 0;
 
@@ -273,6 +290,13 @@ function atualizarCalculos() {
     saldoCajuEl.textContent = `R$ ${saldoCajuRestante.toFixed(2)}`;
     custoPorKmEl.textContent = `R$ ${custoPorKm.toFixed(2)}/KM`;
     sobraLiquidaEl.textContent = `R$ ${sobraLiquida.toFixed(2)}`;
+
+    // Ajusta cor da Sobra Líquida
+    if (sobraLiquida < 0) {
+        sobraLiquidaEl.style.color = 'var(--danger)';
+    } else {
+        sobraLiquidaEl.style.color = 'var(--primary)';
+    }
 }
 
 document.getElementById('btnPdf').addEventListener('click', () => window.print());
