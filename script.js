@@ -11,6 +11,7 @@ let params = JSON.parse(localStorage.getItem('km_params')) || {
     caju: 250
 };
 
+// Carrega parâmetros na tela e no cabeçalho do PDF
 function initParamsUI() {
     document.getElementById('param-tech').value = params.tech;
     document.getElementById('param-period').value = params.period;
@@ -26,13 +27,15 @@ function initParamsUI() {
     document.getElementById('pdf-summary-base').innerText = parseFloat(params.basePay).toFixed(2);
 }
 
+// Bloqueia e desbloqueia os campos de parâmetros
 function toggleEditParams() {
     paramsUnlocked = !paramsUnlocked;
-    const inputs = ['param-tech', 'param-period', 'param-base-pay', 'param-km-rate', 'param-caju'];
+    const inputIds = ['param-tech', 'param-period', 'param-base-pay', 'param-km-rate', 'param-caju'];
     const btn = document.getElementById('btn-edit-params');
 
-    inputs.forEach(id => {
-        document.getElementById(id).disabled = !paramsUnlocked;
+    inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = !paramsUnlocked;
     });
 
     if (paramsUnlocked) {
@@ -47,7 +50,7 @@ function toggleEditParams() {
         params.caju = parseFloat(document.getElementById('param-caju').value) || 0;
 
         localStorage.setItem('km_params', JSON.stringify(params));
-        
+
         btn.innerText = '🔒 Editar Parâmetros';
         btn.style.background = '#2a3447';
         btn.style.color = 'var(--text-main)';
@@ -57,33 +60,35 @@ function toggleEditParams() {
     }
 }
 
+// Alterna entre Parada/Cliente e Abastecimento
 function setMode(newMode) {
     mode = newMode;
     document.getElementById('btn-mode-parada').classList.toggle('active', mode === 'parada');
     document.getElementById('btn-mode-abastecimento').classList.toggle('active', mode === 'abastecimento');
-    
+
     document.getElementById('fields-parada').style.display = mode === 'parada' ? 'block' : 'none';
     document.getElementById('fields-abastecimento').style.display = mode === 'abastecimento' ? 'block' : 'none';
 }
 
+// Preenche o atalho no campo
 function setShortcut(location) {
     document.getElementById('input-client').value = location;
 }
 
+// Adiciona Parada ou Abastecimento
 function addEntry() {
     if (mode === 'parada') {
-        const client = document.getElementById('input-client').value;
-        const os = document.getElementById('input-os').value;
+        const client = document.getElementById('input-client').value.trim();
+        const os = document.getElementById('input-os').value.trim();
         const inputKmVal = parseFloat(document.getElementById('input-km').value) || 0;
 
         if (!client) {
-            alert('Informe o cliente/local.');
+            alert('Informe o cliente ou local.');
             return;
         }
 
         let kmCalculado = inputKmVal;
 
-        // Lógica de cálculo acumulativo de KM do painel
         if (inputKmVal > 0) {
             if (lastKmInput > 0 && inputKmVal > lastKmInput) {
                 kmCalculado = inputKmVal - lastKmInput;
@@ -157,7 +162,7 @@ function renderHistory() {
 
     entries.forEach(item => {
         const tr = document.createElement('tr');
-        
+
         if (item.type === 'abastecimento') {
             tr.classList.add('row-abastecimento');
             tr.innerHTML = `
@@ -178,15 +183,23 @@ function renderHistory() {
     });
 }
 
+// Lógica Financeira e Regras de Negócio
 function calculateTotals() {
     let totalKm = 0;
     let totalFuel = 0;
     let clientCount = 0;
 
+    const shortcuts = ['casa', 'empresa', 'trabalho'];
+
     entries.forEach(item => {
         if (item.type === 'parada') {
             totalKm += item.km;
-            clientCount++;
+
+            // Filtra atalhos para não pontuar como atendimento de cliente
+            const nameLower = item.client.trim().toLowerCase();
+            if (!shortcuts.includes(nameLower)) {
+                clientCount++;
+            }
         }
         if (item.type === 'abastecimento') {
             totalFuel += item.valor;
@@ -195,9 +208,12 @@ function calculateTotals() {
 
     const kmReimbursement = totalKm * params.kmRate;
     const netProfit = params.basePay + kmReimbursement;
-    const cajuRemaining = params.caju - totalFuel;
-    let costPerKm = totalKm > 0 ? (totalFuel / totalKm) : 0;
 
+    // Garante que o saldo Caju não fique negativo (trava em 0.00)
+    const cajuRemaining = Math.max(0, params.caju - totalFuel);
+    const costPerKm = totalKm > 0 ? (totalFuel / totalKm) : 0;
+
+    // Atualização do Dashboard
     document.getElementById('dash-total-km').innerText = `${totalKm} KM`;
     document.getElementById('dash-total-clients').innerText = clientCount;
     document.getElementById('dash-reimbursement-km').innerText = `R$ ${kmReimbursement.toFixed(2)}`;
@@ -208,6 +224,7 @@ function calculateTotals() {
     document.getElementById('detail-caju-remaining').innerText = `R$ ${cajuRemaining.toFixed(2)}`;
     document.getElementById('detail-cost-per-km').innerText = `R$ ${costPerKm.toFixed(2)}/KM`;
 
+    // Atualização do PDF
     document.getElementById('pdf-total-km').innerText = totalKm;
     document.getElementById('pdf-calc-km').innerText = `${totalKm} KM × R$ ${parseFloat(params.kmRate).toFixed(2)} = R$ ${kmReimbursement.toFixed(2)}`;
     document.getElementById('pdf-final-reimbursement').innerText = `R$ ${netProfit.toFixed(2)}`;
