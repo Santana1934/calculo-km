@@ -3,129 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cálculo KM - Gestão de Frota</title>
+    <title>Controle Operacional</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#121212">
+    <meta name="theme-color" content="#121417">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🚗 Controle Operacional</h1>
+            <h1>Controle Operacional</h1>
         </header>
 
-        <!-- SEÇÃO SUPERIOR: IDENTIFICAÇÃO DO RELATÓRIO E PARÂMETROS -->
-        <section class="card config-card" style="margin-bottom: 16px;">
+        <!-- IDENTIFICAÇÃO DO RELATÓRIO -->
+        <section class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="margin: 0; font-size: 1rem;">👤 Identificação do Relatório</h3>
-                <button type="button" id="btnToggleConfig" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">🔒 Editar Parâmetros</button>
+                <h3 style="margin: 0;">Identificação</h3>
+                <button type="button" id="btnToggleConfig" class="btn btn-secondary" style="width: auto; padding: 4px 10px; font-size: 0.75rem;">Editar Parâmetros</button>
             </div>
             
             <div class="grid-2">
                 <div class="form-group">
-                    <label for="nomeTecnico">Técnico</label>
+                    <label>Técnico</label>
                     <input type="text" id="nomeTecnico" readonly class="campo-parametro">
                 </div>
                 <div class="form-group">
-                    <label for="periodoRelatorio">Mês/Ano</label>
+                    <label>Mês/Ano</label>
                     <input type="text" id="periodoRelatorio" placeholder="Ex: Julho/2026" readonly class="campo-parametro">
                 </div>
             </div>
 
-            <div class="grid-2" style="margin-top: 10px;">
+            <div class="grid-2" style="margin-top: 6px;">
                 <div class="form-group">
-                    <label for="ajudaCusto">Ajuda de Custo (R$)</label>
+                    <label>Ajuda Custo (R$)</label>
                     <input type="number" id="ajudaCusto" step="0.01" readonly class="campo-parametro">
                 </div>
                 <div class="form-group">
-                    <label for="taxaKm">R$ / KM (Empresa)</label>
+                    <label>R$ / KM</label>
                     <input type="number" id="taxaKm" step="0.01" readonly class="campo-parametro">
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
-                    <label for="cartaoCaju">Valor Caju do Mês (R$)</label>
+                    <label>Valor Caju do Mês (R$)</label>
                     <input type="number" id="cartaoCaju" step="0.01" readonly class="campo-parametro">
                 </div>
             </div>
         </section>
 
-        <!-- FORMULÁRIO DE LANÇAMENTO DIÁRIO -->
+        <!-- NOVO REGISTRO COM PILL SWITCH -->
         <section class="card">
-            <h3>📝 Novo Registro</h3>
+            <div class="mode-switch">
+                <button type="button" id="tabParada" class="switch-btn active" onclick="alternarModo('parada')">🚗 Parada / Cliente</button>
+                <button type="button" id="tabPosto" class="switch-btn" onclick="alternarModo('posto')">⛽ Abastecimento</button>
+            </div>
+
             <form id="kmForm">
-                <div class="form-group">
-                    <label>Atalhos Rápidos de Local</label>
-                    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                        <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Casa', 'base')" style="flex:1;">🏠 Casa</button>
-                        <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Empresa', 'base')" style="flex:1;">🏢 Empresa</button>
+                <!-- CAMPOS MODO PARADA -->
+                <div id="secaoParada">
+                    <div class="form-group">
+                        <label>Atalhos Rápidos</label>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Casa', 'base')">🏠 Casa</button>
+                            <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Empresa', 'base')">🏢 Empresa</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cliente / Local</label>
+                        <input type="text" id="cliente" placeholder="Ex: Cliente XYZ ou Av. Paulista">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nº Protocolo (Opcional)</label>
+                        <input type="text" id="protocoloOs" placeholder="Ex: 98452">
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="cliente">Cliente / Endereço</label>
-                    <input type="text" id="cliente" placeholder="Ex: Cliente XYZ, Av. Paulista 1000 ou Casa" required>
+                <!-- CAMPO MODO POSTO -->
+                <div id="secaoPosto" style="display: none;">
+                    <div class="form-group">
+                        <label>Valor Gasto no Posto (R$)</label>
+                        <input type="number" id="valorPostoInput" step="0.01" placeholder="Ex: 150.00">
+                    </div>
                 </div>
 
+                <!-- CAMPO COMUM -->
                 <div class="form-group">
-                    <label for="protocoloOs">Nº do Protocolo (Opcional)</label>
-                    <input type="text" id="protocoloOs" placeholder="Ex: 98452">
+                    <label id="labelKm">KM Atual do Painel</label>
+                    <input type="number" id="kmAtual" step="0.1" placeholder="Ex: 45230">
                 </div>
 
-                <div class="form-group">
-                    <label for="kmAtual">KM Atual do Painel</label>
-                    <input type="number" id="kmAtual" step="0.1" placeholder="Ex: 45230" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width: 100%;">➕ Salvar Parada</button>
+                <button type="submit" id="btnSalvar" class="btn btn-primary">Salvar Parada</button>
             </form>
-
-            <!-- ABASTECIMENTO DISCRETO E ISOLADO DO FORM -->
-            <div style="margin-top: 15px; pt-3; border-top: 1px solid #2a2a2a; display: flex; gap: 8px; align-items: center;">
-                <input type="number" id="valorPostoInput" step="0.01" placeholder="R$ Abastecimento" style="flex: 1; padding: 10px; font-size: 0.85rem;">
-                <button type="button" id="btnPosto" class="btn btn-secondary" style="padding: 10px 14px; font-size: 0.85rem; white-space: nowrap;">⛽ Lançar Posto</button>
-            </div>
         </section>
 
-        <!-- CARDS DE METRICAS E RESUMO -->
+        <!-- RESUMO MENSAL -->
         <section class="card">
-            <h3>📊 Resumo Geral do Mês</h3>
+            <h3>Resumo Geral do Mês</h3>
             <div class="stats-grid">
                 <div class="stat-box">
-                    <span class="stat-label">TOTAL RODADO</span>
+                    <span class="stat-label">Total Rodado</span>
                     <span class="stat-value" id="totalKm">0 KM</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">CLIENTES ATENDIDOS</span>
+                    <span class="stat-label">Atendimentos</span>
                     <span class="stat-value" id="totalClientes">0</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">REEMBOLSO KM</span>
+                    <span class="stat-label">Reembolso KM</span>
                     <span class="stat-value" id="totalKmValor">R$ 0,00</span>
                 </div>
                 <div class="stat-box highlight">
-                    <span class="stat-label">SOBRA LÍQUIDA REAL</span>
+                    <span class="stat-label">Sobra Líquida</span>
                     <span class="stat-value" id="sobraLiquida">R$ 0,00</span>
                 </div>
             </div>
 
             <div class="comparativo">
-                <div>💰 Ajuda de Custo Fixa: <span id="totalEmpresa">R$ 0,00</span></div>
-                <div>⛽ Total Gasto no Posto: <span id="totalGastosPosto">R$ 0,00</span></div>
-                <div>💳 Saldo Caju Restante: <span id="saldoCaju">R$ 0,00</span></div>
-                <div>📏 Seu Custo por KM Rodado: <span id="custoPorKm">R$ 0,00/KM</span></div>
+                <div>Ajuda de Custo Fixa: <span id="totalEmpresa">R$ 0,00</span></div>
+                <div>Total Gasto no Posto: <span id="totalGastosPosto">R$ 0,00</span></div>
+                <div>Saldo Caju Restante: <span id="saldoCaju">R$ 0,00</span></div>
+                <div>Custo Médio / KM: <span id="custoPorKm">R$ 0,00/KM</span></div>
             </div>
         </section>
 
-        <!-- LISTAGEM COM RESUMO DIÁRIO -->
+        <!-- HISTÓRICO -->
         <section class="card">
-            <h3>📅 Histórico por Dia</h3>
+            <h3>Histórico de Lançamentos</h3>
             <div id="historicoAgrupado"></div>
             
-            <button id="btnPdf" class="btn btn-pdf">🖨️ Gerar PDF / Imprimir</button>
-            <button id="btnLimpar" class="btn-danger-subtle">Apagar Registros do Mês</button>
+            <button id="btnPdf" class="btn btn-pdf">Gerar Relatório PDF</button>
+            <button id="btnLimpar" class="btn-danger-subtle">Limpar Dados do Mês</button>
         </section>
 
         <footer>
-            <div class="privacy-note">🔒 Seus dados ficam armazenados exclusivamente no seu dispositivo.</div>
+            <div>Dados salvos localmente no seu dispositivo.</div>
             <div class="dev-tag">DESENVOLVIDO POR DIEGO SANTANA</div>
         </footer>
     </div>
