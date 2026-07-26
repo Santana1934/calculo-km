@@ -81,7 +81,7 @@ window.deletarRegistro = function(id) {
     salvarERenderizar();
 };
 
-/* --- LOGICA DE EDICAO --- */
+/* --- EDIÇÃO DE REGISTROS --- */
 window.abrirModalEdicao = function(id) {
     const reg = registros.find(item => item.id === id);
     if (!reg) return;
@@ -126,6 +126,21 @@ window.salvarEdicao = function() {
         salvarERenderizar();
     }
     window.fecharModal();
+};
+
+/* --- CONFIRMAÇÃO DE LIMPEZA GERAL --- */
+window.abrirModalConfirm = function() {
+    document.getElementById('modalConfirm').style.display = 'flex';
+};
+
+window.fecharModalConfirm = function() {
+    document.getElementById('modalConfirm').style.display = 'none';
+};
+
+window.confirmarLimpezaGeral = function() {
+    registros = [];
+    salvarERenderizar();
+    window.fecharModalConfirm();
 };
 
 btnToggleConfig.addEventListener('click', () => {
@@ -234,17 +249,18 @@ function renderizarHistorico() {
 
     Object.keys(agrupadoPorData).forEach(data => {
         const diaBloco = document.createElement('div');
+        diaBloco.className = 'dia-bloco-print';
         diaBloco.style.cssText = 'margin-bottom: 12px; background:var(--input-bg); border-radius:8px; padding:10px; border:1px solid var(--card-border);';
 
-        let diaHtml = `<div style="font-weight:600; color:var(--primary); margin-bottom:6px; font-size:0.8rem; border-bottom:1px solid var(--card-border); padding-bottom:4px;">📅 ${data}</div>`;
+        let diaHtml = `<div class="dia-header-print" style="font-weight:600; color:var(--primary); margin-bottom:6px; font-size:0.8rem; border-bottom:1px solid var(--card-border); padding-bottom:4px;">Data: ${data}</div>`;
         diaHtml += `<div class="table-responsive"><table>
             <thead>
                 <tr>
                     <th>Hora</th>
-                    <th>Local / Detalhe</th>
+                    <th>Cliente / Local</th>
                     <th>KM Painel</th>
                     <th>Trecho</th>
-                    <th class="no-print">Ações</th>
+                    <th class="col-acoes no-print" style="text-align:right;">Ações</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -265,10 +281,10 @@ function renderizarHistorico() {
 
             let detalheHtml = '';
             if (reg.tipo === 'posto') {
-                detalheHtml = `<span class="badge-posto">⛽ Abastecimento (R$ ${reg.valorGasto.toFixed(2)})</span>`;
+                detalheHtml = `<span style="color:var(--accent-amber); font-weight:600;">Abastecimento (R$ ${reg.valorGasto.toFixed(2)})</span>`;
             } else {
-                const osTexto = reg.protocoloOs ? `<br><span style="font-size:0.7rem; color:var(--text-sub);">[Prot: ${reg.protocoloOs}]</span>` : '';
-                detalheHtml = `${reg.descricao}${osTexto}`;
+                const osTexto = reg.protocoloOs ? `<br><span style="font-size:0.72rem; color:var(--text-sub);">[Prot: ${reg.protocoloOs}]</span>` : '';
+                detalheHtml = `<span onclick="abrirModalEdicao(${reg.id})" style="cursor:pointer;" title="Clique para editar">${reg.descricao}</span>${osTexto}`;
             }
 
             diaHtml += `
@@ -277,9 +293,9 @@ function renderizarHistorico() {
                     <td>${detalheHtml}</td>
                     <td>${reg.km ? reg.km + ' KM' : '-'}</td>
                     <td>${reg.tipo !== 'posto' ? '+' + trechoKm + ' KM' : '-'}</td>
-                    <td class="no-print">
-                        <button class="btn-action" onclick="abrirModalEdicao(${reg.id})">✏️</button>
-                        <button class="btn-action" onclick="deletarRegistro(${reg.id})">❌</button>
+                    <td class="col-acoes no-print" style="text-align:right;">
+                        <button class="btn-action-text" onclick="abrirModalEdicao(${reg.id})">Editar</button>
+                        <button class="btn-action-delete" onclick="deletarRegistro(${reg.id})">×</button>
                     </td>
                 </tr>
             `;
@@ -288,7 +304,7 @@ function renderizarHistorico() {
         const totalDiaKm = (primeiroKmDia !== null && ultimoKmDia !== null) ? (ultimoKmDia - primeiroKmDia) : 0;
 
         diaHtml += `</tbody></table></div>`;
-        diaHtml += `<div style="text-align:right; font-size:0.75rem; color:var(--text-sub); margin-top:6px;">
+        diaHtml += `<div class="total-dia-print" style="text-align:right; font-size:0.75rem; color:var(--text-sub); margin-top:6px;">
             Total Rodado no Dia: <strong style="color:var(--primary);">${totalDiaKm} KM</strong>
         </div>`;
 
@@ -339,18 +355,13 @@ function atualizarCalculos() {
     sobraLiquidaEl.textContent = `R$ ${sobraLiquida.toFixed(2)}`;
 
     // Atualiza metadados do PDF
-    const tecNome = nomeTecnicoInput.value || 'Técnico';
-    const mesAno = periodoInput.value || 'Mês Atual';
-    document.getElementById('printMetaInfo').innerHTML = `Técnico: <strong>${tecNome}</strong> | Período: <strong>${mesAno}</strong>`;
+    const tecNome = nomeTecnicoInput.value || 'Não informado';
+    const mesAno = periodoInput.value || 'Não informado';
+    document.getElementById('printMetaInfo').innerHTML = `<strong>TÉCNICO:</strong> ${tecNome} | <strong>PERÍODO:</strong> ${mesAno}`;
 }
 
 document.getElementById('btnPdf').addEventListener('click', () => window.print());
-document.getElementById('btnLimpar').addEventListener('click', () => {
-    if (confirm('Deseja apagar todos os registros do mês atual?')) {
-        registros = [];
-        salvarERenderizar();
-    }
-});
+document.getElementById('btnLimpar').addEventListener('click', abrirModalConfirm);
 
 carregarConfiguracoes();
 salvarERenderizar();
