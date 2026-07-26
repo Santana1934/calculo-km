@@ -304,14 +304,14 @@ td {
     display: none;
 }
 
-/* MODAL DE CONFIRMAÇÃO CUSTOMIZADO */
+/* MODAIS */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.75);
     display: flex;
     justify-content: center;
     align-items: center;
