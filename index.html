@@ -53,26 +53,18 @@
                     <label>Atalhos Rápidos de Local</label>
                     <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                         <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Casa', 'base')" style="flex:1;">🏠 Casa</button>
-                        <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Empresa / Base', 'base')" style="flex:1;">🏢 Empresa</button>
+                        <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Empresa', 'base')" style="flex:1;">🏢 Empresa</button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="tipoRegistro">Tipo de Deslocamento</label>
-                    <select id="tipoRegistro" style="background:#2a2a2a; color:#fff; padding:10px; border-radius:6px; border:1px solid var(--border); margin-bottom:8px; width:100%;">
-                        <option value="cliente">👤 Atendimento a Cliente</option>
-                        <option value="base">🏢 Empresa / Base / Casa</option>
-                    </select>
+                    <label for="cliente">Cliente / Endereço</label>
+                    <input type="text" id="cliente" placeholder="Ex: Cliente XYZ, Av. Paulista 1000 ou Casa" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="cliente">Descrição / Nome do Local</label>
-                    <input type="text" id="cliente" placeholder="Ex: Cliente XYZ ou Saída de Casa" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="protocoloOs">Nº do Protocolo / OS (Opcional)</label>
-                    <input type="text" id="protocoloOs" placeholder="Ex: OS-98452">
+                    <label for="protocoloOs">Nº do Protocolo (Opcional)</label>
+                    <input type="text" id="protocoloOs" placeholder="Ex: 98452">
                 </div>
 
                 <div class="form-group">
