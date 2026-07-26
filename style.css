@@ -57,7 +57,6 @@ header h1 {
     margin-bottom: 12px;
 }
 
-/* SELETOR PILL SWITCH */
 .mode-switch {
     display: flex;
     background: var(--input-bg);
@@ -111,14 +110,8 @@ input {
     outline: none;
 }
 
-input:focus {
-    border-color: var(--primary);
-}
-
-input[readonly] {
-    opacity: 0.75;
-    background: transparent;
-}
+input:focus { border-color: var(--primary); }
+input[readonly] { opacity: 0.75; background: transparent; }
 
 .grid-2 {
     display: grid;
@@ -138,6 +131,7 @@ input[readonly] {
 
 .btn-primary { background: var(--primary); color: #052e16; }
 .btn-secondary { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--card-border); }
+.btn-danger { background: var(--danger); color: #fff; }
 .btn-pdf { background: #2563eb; color: #fff; margin-top: 10px; }
 
 .btn-danger-subtle {
@@ -216,23 +210,31 @@ td {
     color: var(--text-main);
 }
 
-.badge-posto {
-    display: inline-block;
-    background: rgba(245, 158, 11, 0.15);
-    color: var(--accent-amber);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.btn-action {
+.btn-action-text {
     background: transparent;
     border: none;
     color: var(--text-sub);
     cursor: pointer;
-    font-size: 0.85rem;
-    margin-left: 4px;
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.btn-action-text:hover {
+    color: var(--text-main);
+}
+
+.btn-action-delete {
+    background: transparent;
+    border: none;
+    color: var(--text-sub);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 2px 4px;
+}
+
+.btn-action-delete:hover {
+    color: var(--danger);
 }
 
 footer {
@@ -243,7 +245,7 @@ footer {
     margin-bottom: 24px;
 }
 
-/* MODAL DE EDIÇÃO */
+/* MODAL */
 .modal-backdrop {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -263,7 +265,7 @@ footer {
 
 .print-only { display: none; }
 
-/* REGRAS DE IMPRESSÃO - ENXUTO TIPO TABELA/PLANILHA */
+/* REGRAS DE IMPRESSÃO - DIRETO AO PONTO (APENAS RELATÓRIO) */
 @media print {
     body {
         background-color: #fff !important;
@@ -275,7 +277,7 @@ footer {
         max-width: 100% !important;
     }
 
-    .no-print, .btn-action, footer {
+    .no-print, .col-acoes, footer {
         display: none !important;
     }
 
@@ -284,20 +286,22 @@ footer {
     }
 
     .print-header {
-        text-align: center;
+        text-align: left;
         border-bottom: 2px solid #000;
         padding-bottom: 8px;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
     }
 
     .print-header h2 {
         font-size: 1.1rem;
-        margin-bottom: 4px;
+        font-weight: bold;
+        color: #000;
+        margin-bottom: 6px;
     }
 
     .print-meta {
-        font-size: 0.8rem;
-        color: #333;
+        font-size: 0.85rem;
+        color: #222;
     }
 
     .card {
@@ -305,48 +309,48 @@ footer {
         border: none !important;
         box-shadow: none !important;
         padding: 0 !important;
-        margin-bottom: 12px !important;
+        margin: 0 !important;
     }
 
-    .card h3 {
+    .dia-bloco-print {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin-bottom: 16px !important;
+    }
+
+    .dia-header-print {
+        font-weight: bold !important;
         color: #000 !important;
-        border-bottom: 1px solid #000;
-        font-size: 0.85rem;
-        padding-bottom: 2px;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 4px !important;
-    }
-
-    .stat-box {
-        border: 1px solid #ccc !important;
-        background: #f9f9f9 !important;
-        padding: 6px !important;
-    }
-
-    .stat-label { color: #555 !important; font-size: 0.6rem !important; }
-    .stat-value { color: #000 !important; font-size: 0.85rem !important; }
-
-    .comparativo {
-        font-size: 0.75rem !important;
-        color: #000 !important;
+        font-size: 0.85rem !important;
+        border-bottom: 1px solid #666 !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 6px !important;
     }
 
     table {
-        font-size: 0.75rem !important;
+        font-size: 0.8rem !important;
+        width: 100% !important;
     }
 
-    th, td {
-        border-bottom: 1px solid #ddd !important;
+    th {
         color: #000 !important;
+        font-weight: bold !important;
+        border-bottom: 1px solid #000 !important;
         padding: 4px 2px !important;
     }
 
-    .badge-posto {
-        background: transparent !important;
+    td {
+        border-bottom: 1px solid #ddd !important;
         color: #000 !important;
-        padding: 0 !important;
+        padding: 6px 2px !important;
+    }
+
+    .total-dia-print {
+        text-align: right !important;
+        font-size: 0.8rem !important;
+        color: #000 !important;
+        margin-top: 6px !important;
+        font-weight: bold !important;
     }
 }
