@@ -75,17 +75,14 @@
                     <input type="number" id="kmAtual" step="0.1" placeholder="Ex: 45230" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="margin-bottom: 15px;">➕ Salvar Parada</button>
-
-                <!-- CAMPO DIRETO PARA ABASTECIMENTO -->
-                <div style="background: #1e1e1e; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-top: 10px;">
-                    <label for="valorPostoInput" style="font-size: 0.85rem; color: #ccc; margin-bottom: 6px; display: block;">⛽ Lançar Abastecimento (Posto)</label>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="number" id="valorPostoInput" step="0.01" placeholder="Valor R$" style="flex: 1;">
-                        <button type="button" id="btnPosto" class="btn btn-secondary" style="white-space: nowrap;">Lançar</button>
-                    </div>
-                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">➕ Salvar Parada</button>
             </form>
+
+            <!-- ABASTECIMENTO DISCRETO E ISOLADO DO FORM -->
+            <div style="margin-top: 15px; pt-3; border-top: 1px solid #2a2a2a; display: flex; gap: 8px; align-items: center;">
+                <input type="number" id="valorPostoInput" step="0.01" placeholder="R$ Abastecimento" style="flex: 1; padding: 10px; font-size: 0.85rem;">
+                <button type="button" id="btnPosto" class="btn btn-secondary" style="padding: 10px 14px; font-size: 0.85rem; white-space: nowrap;">⛽ Lançar Posto</button>
+            </div>
         </section>
 
         <!-- CARDS DE METRICAS E RESUMO -->
