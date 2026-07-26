@@ -23,7 +23,7 @@
             </div>
         </header>
 
-        <!-- CONTROLES DO APP (OCULTOS NO PDF) -->
+        <!-- FORMULÁRIO DO APP -->
         <div class="card no-print">
             <header>
                 <h1>Lançamento de Registro</h1>
@@ -64,7 +64,7 @@
             <button class="btn-primary" onclick="addEntry()">Adicionar Registro</button>
         </div>
 
-        <!-- CARDS DE RESUMO (NO APP) -->
+        <!-- DASHBOARD FINANCEIRO NO APP -->
         <div class="card no-print">
             <div class="summary-card">
                 <div class="summary-row">
@@ -78,7 +78,7 @@
             </div>
         </div>
 
-        <!-- HISTÓRICO E TABELA (IMPRESSO E NO APP) -->
+        <!-- TABELA DE HISTÓRICO -->
         <div class="card">
             <h3 class="no-print" style="margin-bottom: 12px;">📅 Histórico por Dia</h3>
             
@@ -93,12 +93,12 @@
                         </tr>
                     </thead>
                     <tbody id="history-body">
-                        <!-- Registros entram via JS -->
+                        <!-- JS insere os dados aqui -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- TOTALIZADORES PARA O PDF -->
+            <!-- RESUMO EXCLUSIVO DO PDF -->
             <div class="pdf-totals">
                 <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
                 <p><strong>TOTAL DE KM RODADOS:</strong> <span id="pdf-total-km">0</span> KM</p>
