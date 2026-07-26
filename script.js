@@ -33,7 +33,6 @@ const saldoCajuEl = document.getElementById('saldoCaju');
 const custoPorKmEl = document.getElementById('custoPorKm');
 const sobraLiquidaEl = document.getElementById('sobraLiquida');
 
-// GARANTE VALORES PADRÃO ROBUSTOS (FORÇA 300 SE ESTIVER VAZIO OU INVÁLIDO)
 function carregarConfiguracoes() {
     const nomeSalvo = localStorage.getItem('cfg_nome');
     const periodoSalvo = localStorage.getItem('cfg_periodo');
@@ -47,13 +46,11 @@ function carregarConfiguracoes() {
     taxaKmInput.value = (taxaSalva && !isNaN(taxaSalva) && parseFloat(taxaSalva) > 0) ? taxaSalva : '1.30';
     cartaoCajuInput.value = (cajuSalvo && !isNaN(cajuSalvo) && parseFloat(cajuSalvo) >= 0) ? cajuSalvo : '250.00';
 
-    // Salva os padrões validados caso estivessem em branco no storage
     localStorage.setItem('cfg_ajuda', ajudaCustoInput.value);
     localStorage.setItem('cfg_taxa', taxaKmInput.value);
     localStorage.setItem('cfg_caju', cartaoCajuInput.value);
 }
 
-// ALTERNÂNCIA DE MODO EXPOSTA GLOBALMENTE
 window.alternarModo = function(modo) {
     modoAtual = modo;
     if (modo === 'parada') {
@@ -84,6 +81,53 @@ window.deletarRegistro = function(id) {
     salvarERenderizar();
 };
 
+/* --- LOGICA DE EDICAO --- */
+window.abrirModalEdicao = function(id) {
+    const reg = registros.find(item => item.id === id);
+    if (!reg) return;
+
+    document.getElementById('editId').value = reg.id;
+    document.getElementById('editDescricao').value = reg.descricao;
+
+    if (reg.tipo === 'posto') {
+        document.getElementById('groupEditKm').style.display = 'none';
+        document.getElementById('groupEditOs').style.display = 'none';
+        document.getElementById('groupEditValor').style.display = 'block';
+        document.getElementById('editValor').value = reg.valorGasto;
+    } else {
+        document.getElementById('groupEditKm').style.display = 'block';
+        document.getElementById('groupEditOs').style.display = 'block';
+        document.getElementById('groupEditValor').style.display = 'none';
+        document.getElementById('editKm').value = reg.km;
+        document.getElementById('editOs').value = reg.protocoloOs || '';
+    }
+
+    document.getElementById('modalEdit').style.display = 'flex';
+};
+
+window.fecharModal = function() {
+    document.getElementById('modalEdit').style.display = 'none';
+};
+
+window.salvarEdicao = function() {
+    const id = parseInt(document.getElementById('editId').value);
+    const index = registros.findIndex(item => item.id === id);
+
+    if (index !== -1) {
+        registros[index].descricao = document.getElementById('editDescricao').value.trim();
+        
+        if (registros[index].tipo === 'posto') {
+            registros[index].valorGasto = parseFloat(document.getElementById('editValor').value) || 0;
+        } else {
+            registros[index].km = parseFloat(document.getElementById('editKm').value) || 0;
+            registros[index].protocoloOs = document.getElementById('editOs').value.trim();
+        }
+
+        salvarERenderizar();
+    }
+    window.fecharModal();
+};
+
 btnToggleConfig.addEventListener('click', () => {
     configEditavel = !configEditavel;
     const campos = document.querySelectorAll('.campo-parametro');
@@ -112,19 +156,6 @@ btnToggleConfig.addEventListener('click', () => {
     }
 });
 
-[nomeTecnicoInput, periodoInput, ajudaCustoInput, taxaKmInput, cartaoCajuInput].forEach(elem => {
-    elem.addEventListener('input', () => {
-        if (configEditavel) {
-            localStorage.setItem('cfg_nome', nomeTecnicoInput.value);
-            localStorage.setItem('cfg_periodo', periodoInput.value);
-            localStorage.setItem('cfg_ajuda', ajudaCustoInput.value);
-            localStorage.setItem('cfg_taxa', taxaKmInput.value);
-            localStorage.setItem('cfg_caju', cartaoCajuInput.value);
-            atualizarCalculos();
-        }
-    });
-});
-
 kmForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -141,14 +172,10 @@ kmForm.addEventListener('submit', (e) => {
         adicionarRegistro(tipoFinal, localTexto || 'Parada', kmVal, protocoloOsInput.value, 0);
     } else {
         const valorGasto = parseFloat(valorPostoInput.value);
-        if (isNaN(valorGasto) || valorGasto <= 0) {
-            alert('Por favor, informe um valor válido para o abastecimento.');
-            return;
-        }
+        if (isNaN(valorGasto) || valorGasto <= 0) return;
 
         let kmVal = parseFloat(kmAtualInput.value);
         if (isNaN(kmVal)) {
-            // Se não preencheu o KM no posto, pega o último KM registrado ou 0
             kmVal = registros.length > 0 ? registros[registros.length - 1].km : 0;
         }
 
@@ -207,9 +234,9 @@ function renderizarHistorico() {
 
     Object.keys(agrupadoPorData).forEach(data => {
         const diaBloco = document.createElement('div');
-        diaBloco.style.cssText = 'margin-bottom: 16px; background:var(--input-bg); border-radius:8px; padding:10px; border:1px solid var(--card-border);';
+        diaBloco.style.cssText = 'margin-bottom: 12px; background:var(--input-bg); border-radius:8px; padding:10px; border:1px solid var(--card-border);';
 
-        let diaHtml = `<div style="font-weight:600; color:var(--primary); margin-bottom:8px; font-size:0.8rem; border-bottom:1px solid var(--card-border); padding-bottom:4px;">📅 ${data}</div>`;
+        let diaHtml = `<div style="font-weight:600; color:var(--primary); margin-bottom:6px; font-size:0.8rem; border-bottom:1px solid var(--card-border); padding-bottom:4px;">📅 ${data}</div>`;
         diaHtml += `<div class="table-responsive"><table>
             <thead>
                 <tr>
@@ -217,7 +244,7 @@ function renderizarHistorico() {
                     <th>Local / Detalhe</th>
                     <th>KM Painel</th>
                     <th>Trecho</th>
-                    <th></th>
+                    <th class="no-print">Ações</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -250,7 +277,10 @@ function renderizarHistorico() {
                     <td>${detalheHtml}</td>
                     <td>${reg.km ? reg.km + ' KM' : '-'}</td>
                     <td>${reg.tipo !== 'posto' ? '+' + trechoKm + ' KM' : '-'}</td>
-                    <td><button class="btn-del" onclick="deletarRegistro(${reg.id})">❌</button></td>
+                    <td class="no-print">
+                        <button class="btn-action" onclick="abrirModalEdicao(${reg.id})">✏️</button>
+                        <button class="btn-action" onclick="deletarRegistro(${reg.id})">❌</button>
+                    </td>
                 </tr>
             `;
         });
@@ -308,11 +338,10 @@ function atualizarCalculos() {
     custoPorKmEl.textContent = `R$ ${custoPorKm.toFixed(2)}/KM`;
     sobraLiquidaEl.textContent = `R$ ${sobraLiquida.toFixed(2)}`;
 
-    if (sobraLiquida < 0) {
-        sobraLiquidaEl.style.color = 'var(--danger)';
-    } else {
-        sobraLiquidaEl.style.color = 'var(--primary)';
-    }
+    // Atualiza metadados do PDF
+    const tecNome = nomeTecnicoInput.value || 'Técnico';
+    const mesAno = periodoInput.value || 'Mês Atual';
+    document.getElementById('printMetaInfo').innerHTML = `Técnico: <strong>${tecNome}</strong> | Período: <strong>${mesAno}</strong>`;
 }
 
 document.getElementById('btnPdf').addEventListener('click', () => window.print());
