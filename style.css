@@ -248,6 +248,16 @@ td {
     color: var(--text-main);
 }
 
+.clickable-cell {
+    cursor: pointer;
+    color: var(--text-main);
+    transition: color 0.2s ease;
+}
+
+.clickable-cell:hover {
+    color: #60a5fa;
+}
+
 .badge-posto-amber {
     display: inline-flex;
     align-items: center;
