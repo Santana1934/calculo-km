@@ -3,82 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Operacional e KM</title>
-    <link rel="stylesheet" href="style.css?v=3">
+    <title>Controle Operacional</title>
+    <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
     <div class="container">
         
-        <!-- CABEÇALHO PARA IMPRESSÃO/PDF -->
+        <header class="no-print">
+            <h1>Controle Operacional</h1>
+        </header>
+
+        <!-- CABEÇALHO PARA IMPRESSÃO / PDF -->
         <header class="pdf-header">
             <h2>RELATÓRIO OPERACIONAL DE ATENDIMENTOS</h2>
             <div class="pdf-meta">
-                <span><strong>TÉCNICO:</strong> DIEGO SANTANA</span>
-                <span><strong>PERÍODO:</strong> JULHO/2026</span>
+                <span><strong>TÉCNICO:</strong> <span id="pdf-tech-name">DIEGO SANTANA</span></span>
+                <span><strong>PERÍODO:</strong> <span id="pdf-period">JULHO/2026</span></span>
             </div>
             <div class="pdf-submeta">
-                <span>Ajuda de Custo Fixa: R$ 300.00</span> | 
-                <span>Valor por KM (Empresa): R$ 1.30</span> | 
-                <span>Cartão Caju (Combustível Solicitado): R$ 250.00</span>
+                <span>Ajuda de Custo Fixa: R$ <span id="pdf-base-pay">300.00</span></span> | 
+                <span>Valor por KM (Empresa): R$ <span id="pdf-km-rate">1.30</span></span> | 
+                <span>Cartão Caju (Combustível Solicitado): R$ <span id="pdf-caju-budget">250.00</span></span>
             </div>
         </header>
 
-        <!-- FORMULÁRIO DO APP -->
+        <!-- CARD 1: PARÂMETROS FINANCEIROS -->
         <div class="card no-print">
-            <header>
-                <h1>Lançamento de Registro</h1>
-            </header>
+            <div class="card-header-flex">
+                <h3>⚙️ Parâmetros Financeiros</h3>
+                <button id="btn-edit-params" class="btn-subtle" onclick="toggleEditParams()">🔒 Editar Parâmetros</button>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>TÉCNICO</label>
+                    <input type="text" id="param-tech" value="DIEGO SANTANA" disabled>
+                </div>
+                <div class="form-group">
+                    <label>MÊS/ANO</label>
+                    <input type="text" id="param-period" value="JULHO/2026" disabled>
+                </div>
+                <div class="form-group">
+                    <label>AJUDA DE CUSTO FIXA (R$)</label>
+                    <input type="number" id="param-base-pay" value="300" step="0.01" disabled>
+                </div>
+                <div class="form-group">
+                    <label>R$ / KM (EMPRESA)</label>
+                    <input type="number" id="param-km-rate" value="1.30" step="0.01" disabled>
+                </div>
+                <div class="form-group full-width">
+                    <label>VALOR CAJU DO MÊS (R$)</label>
+                    <input type="number" id="param-caju" value="250" step="0.01" disabled>
+                </div>
+            </div>
+        </div>
 
+        <!-- CARD 2: LANÇAMENTO DE REGISTRO -->
+        <div class="card no-print">
             <div class="mode-switch">
-                <button id="btn-mode-parada" class="mode-btn active" onclick="setMode('parada')">📍 Parada / Atendimento</button>
+                <button id="btn-mode-parada" class="mode-btn active" onclick="setMode('parada')">🚗 Parada / Cliente</button>
                 <button id="btn-mode-abastecimento" class="mode-btn" onclick="setMode('abastecimento')">⛽ Abastecimento</button>
             </div>
 
-            <div class="form-group">
-                <label for="input-date">Data</label>
-                <input type="date" id="input-date">
-            </div>
-
             <div id="fields-parada">
+                <label class="label-section">ATALHOS RÁPIDOS</label>
+                <div class="shortcut-buttons">
+                    <button type="button" class="btn-shortcut" onclick="setShortcut('Casa')">🏠 Casa</button>
+                    <button type="button" class="btn-shortcut" onclick="setShortcut('Empresa')">🏢 Empresa</button>
+                </div>
+
                 <div class="form-group">
-                    <label for="input-client">Cliente / Local</label>
-                    <input type="text" id="input-client" placeholder="Ex: Climapress">
+                    <label>CLIENTE / LOCAL</label>
+                    <input type="text" id="input-client" placeholder="Ex: Cliente XYZ ou Av. Paulista">
                 </div>
                 <div class="form-group">
-                    <label for="input-os">Protocolo / OS</label>
-                    <input type="text" id="input-os" placeholder="Ex: 198459">
+                    <label>Nº PROTOCOLO (OPCIONAL)</label>
+                    <input type="text" id="input-os" placeholder="Ex: 98452">
                 </div>
                 <div class="form-group">
-                    <label for="input-km">KM Rodado na Etapa</label>
-                    <input type="number" id="input-km" placeholder="Ex: 80">
+                    <label>KM ATUAL DO PAINEL</label>
+                    <input type="number" id="input-km" placeholder="Ex: 45230">
                 </div>
+                <button class="btn-action-green" onclick="addEntry()">Salvar Parada</button>
             </div>
 
             <div id="fields-abastecimento" style="display: none;">
                 <div class="form-group">
-                    <label for="input-fuel">Valor do Abastecimento (R$)</label>
+                    <label>VALOR DO ABASTECIMENTO (R$)</label>
                     <input type="number" id="input-fuel" placeholder="Ex: 100.00" step="0.01">
                 </div>
+                <button class="btn-action-green" onclick="addEntry()">Salvar Abastecimento</button>
             </div>
-
-            <button class="btn-primary" onclick="addEntry()">Adicionar Registro</button>
         </div>
 
-        <!-- DASHBOARD FINANCEIRO NO APP -->
+        <!-- CARD 3: RESUMO GERAL DO MÊS -->
         <div class="card no-print">
-            <div class="summary-card">
-                <div class="summary-row">
-                    <span>💳 Saldo Caju Restante:</span>
-                    <strong id="caju-remaining">R$ 250.00</strong>
+            <h3>📊 Resumo Geral do Mês</h3>
+            <div class="dashboard-grid">
+                <div class="dash-box">
+                    <span>TOTAL RODADO</span>
+                    <strong id="dash-total-km">0 KM</strong>
                 </div>
-                <div class="summary-row">
-                    <span>💸 Seu Custo por KM Rodado:</span>
-                    <strong id="cost-per-km">R$ 0.00/KM</strong>
+                <div class="dash-box">
+                    <span>CLIENTES ATENDIDOS</span>
+                    <strong id="dash-total-clients">0</strong>
+                </div>
+                <div class="dash-box">
+                    <span>REEMBOLSO KM</span>
+                    <strong id="dash-reimbursement-km">R$ 0.00</strong>
+                </div>
+                <div class="dash-box highlight-green">
+                    <span>SOBRA LÍQUIDA REAL</span>
+                    <strong id="dash-net-profit">R$ 300.00</strong>
+                </div>
+            </div>
+
+            <div class="summary-details">
+                <div class="summary-line">
+                    <span>💰 Ajuda de Custo Fixa:</span>
+                    <strong id="detail-base-pay">R$ 300.00</strong>
+                </div>
+                <div class="summary-line">
+                    <span>⛽ Total Gasto no Posto:</span>
+                    <strong id="detail-total-fuel">R$ 0.00</strong>
+                </div>
+                <div class="summary-line">
+                    <span>💳 Saldo Caju Restante:</span>
+                    <strong id="detail-caju-remaining">R$ 250.00</strong>
+                </div>
+                <div class="summary-line">
+                    <span>✏️ Seu Custo por KM Rodado:</span>
+                    <strong id="detail-cost-per-km">R$ 0.00/KM</strong>
                 </div>
             </div>
         </div>
 
-        <!-- TABELA DE HISTÓRICO -->
+        <!-- CARD 4: HISTÓRICO E TABELA -->
         <div class="card">
             <h3 class="no-print" style="margin-bottom: 12px;">📅 Histórico por Dia</h3>
             
@@ -93,28 +152,33 @@
                         </tr>
                     </thead>
                     <tbody id="history-body">
-                        <!-- JS insere os dados aqui -->
+                        <!-- Lançamentos via JS -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- RESUMO EXCLUSIVO DO PDF -->
+            <!-- RESUMO FINAL EXCLUSIVO DO PDF -->
             <div class="pdf-totals">
                 <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
                 <p><strong>TOTAL DE KM RODADOS:</strong> <span id="pdf-total-km">0</span> KM</p>
                 <p><strong>CÁLCULO KM:</strong> <span id="pdf-calc-km">0 KM × R$ 1.30 = R$ 0.00</span></p>
-                <p><strong>AJUDA DE CUSTO FIXA:</strong> R$ 300.00</p>
+                <p><strong>AJUDA DE CUSTO FIXA:</strong> R$ <span id="pdf-summary-base">300.00</span></p>
                 <hr style="margin: 10px 0; border: 0; border-top: 1px solid #000;">
                 <p style="font-size: 1.1rem;"><strong>VALOR TOTAL DE REEMBOLSO:</strong> <span id="pdf-final-reimbursement">R$ 300.00</span></p>
             </div>
 
             <div class="no-print" style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px;">
                 <button class="btn-primary" onclick="printPDF()">🖨️ Gerar PDF / Imprimir</button>
-                <button style="background: transparent; color: var(--text-sub); border: none; cursor: pointer; font-size: 0.85rem;" onclick="clearAll()">Apagar Registros do Mês</button>
+                <button class="btn-clear-all" onclick="clearAll()">Apagar Registros do Mês</button>
             </div>
         </div>
 
+        <footer class="footer-credits no-print">
+            <p>🔒 Seus dados ficam armazenados exclusivamente no seu dispositivo.</p>
+            <p><strong>DESENVOLVIDO POR DIEGO SANTANA</strong></p>
+        </footer>
+
     </div>
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=4"></script>
 </body>
 </html>
