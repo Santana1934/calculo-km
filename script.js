@@ -1,3 +1,24 @@
+// ==== SISTEMA DE BLOQUEIO ====
+const CHAVE_MESTRA = "ACESSO@KM";
+
+function verificarBloqueio() {
+    if (localStorage.getItem("app_liberado") === "sim") {
+        document.getElementById("tela-bloqueio").style.display = "none";
+    }
+}
+
+function verificarChave() {
+    let chaveDigitada = document.getElementById("chave-input").value.trim();
+    
+    if (chaveDigitada === CHAVE_MESTRA) {
+        localStorage.setItem("app_liberado", "sim");
+        document.getElementById("tela-bloqueio").style.display = "none";
+    } else {
+        document.getElementById("erro-chave").style.display = "block";
+    }
+}
+// =============================
+
 let mode = 'parada';
 let paramsUnlocked = false;
 let entries = JSON.parse(localStorage.getItem('km_entries_v2')) || [];
@@ -190,7 +211,7 @@ function clearInputs() {
     document.getElementById('input-fuel').value = '';
 }
 
-// Render da Tabela Clean (Clique no nome do cliente abre a edição sem usar ícones)
+// Render da Tabela Clean
 function renderHistory() {
     const tbody = document.getElementById('history-body');
     tbody.innerHTML = '';
@@ -275,6 +296,7 @@ function printPDF() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    verificarBloqueio(); // Chama a verificação da chave logo ao carregar
     initParamsUI();
     renderHistory();
     calculateTotals();
