@@ -14,41 +14,41 @@
             <h1>Controle Operacional</h1>
         </header>
 
-        <!-- IDENTIFICAÇÃO DO RELATÓRIO -->
+        <!-- IDENTIFICAÇÃO DO RELATÓRIO E PARÂMETROS -->
         <section class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="margin: 0;">Identificação</h3>
-                <button type="button" id="btnToggleConfig" class="btn btn-secondary" style="width: auto; padding: 4px 10px; font-size: 0.75rem;">Editar Parâmetros</button>
+                <h3 style="margin: 0;">⚙️ Parâmetros Financeiros</h3>
+                <button type="button" id="btnToggleConfig" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.75rem;">🔒 Editar Parâmetros</button>
             </div>
             
             <div class="grid-2">
                 <div class="form-group">
-                    <label>Técnico</label>
+                    <label>TÉCNICO</label>
                     <input type="text" id="nomeTecnico" readonly class="campo-parametro">
                 </div>
                 <div class="form-group">
-                    <label>Mês/Ano</label>
+                    <label>MÊS/ANO</label>
                     <input type="text" id="periodoRelatorio" placeholder="Ex: Julho/2026" readonly class="campo-parametro">
                 </div>
             </div>
 
             <div class="grid-2" style="margin-top: 6px;">
                 <div class="form-group">
-                    <label>Ajuda Custo (R$)</label>
+                    <label>AJUDA DE CUSTO FIXA (R$)</label>
                     <input type="number" id="ajudaCusto" step="0.01" readonly class="campo-parametro">
                 </div>
                 <div class="form-group">
-                    <label>R$ / KM</label>
+                    <label>R$ / KM (EMPRESA)</label>
                     <input type="number" id="taxaKm" step="0.01" readonly class="campo-parametro">
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
-                    <label>Valor Caju do Mês (R$)</label>
+                    <label>VALOR CAJU DO MÊS (R$)</label>
                     <input type="number" id="cartaoCaju" step="0.01" readonly class="campo-parametro">
                 </div>
             </div>
         </section>
 
-        <!-- NOVO REGISTRO COM PILL SWITCH -->
+        <!-- REGISTRO COM PILL SWITCH -->
         <section class="card">
             <div class="mode-switch">
                 <button type="button" id="tabParada" class="switch-btn active" onclick="alternarModo('parada')">🚗 Parada / Cliente</button>
@@ -56,10 +56,10 @@
             </div>
 
             <form id="kmForm">
-                <!-- CAMPOS MODO PARADA -->
+                <!-- MODO PARADA -->
                 <div id="secaoParada">
                     <div class="form-group">
-                        <label>Atalhos Rápidos</label>
+                        <label>ATALHOS RÁPIDOS</label>
                         <div style="display: flex; gap: 8px;">
                             <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Casa', 'base')">🏠 Casa</button>
                             <button type="button" class="btn btn-secondary" onclick="preencherAtalho('Empresa', 'base')">🏢 Empresa</button>
@@ -67,27 +67,27 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Cliente / Local</label>
+                        <label>CLIENTE / LOCAL</label>
                         <input type="text" id="cliente" placeholder="Ex: Cliente XYZ ou Av. Paulista">
                     </div>
 
                     <div class="form-group">
-                        <label>Nº Protocolo (Opcional)</label>
+                        <label>Nº PROTOCOLO (OPCIONAL)</label>
                         <input type="text" id="protocoloOs" placeholder="Ex: 98452">
                     </div>
                 </div>
 
-                <!-- CAMPO MODO POSTO -->
+                <!-- MODO POSTO -->
                 <div id="secaoPosto" style="display: none;">
                     <div class="form-group">
-                        <label>Valor Gasto no Posto (R$)</label>
+                        <label>VALOR GASTO NO POSTO (R$)</label>
                         <input type="number" id="valorPostoInput" step="0.01" placeholder="Ex: 150.00">
                     </div>
                 </div>
 
-                <!-- CAMPO COMUM -->
+                <!-- CAMPO COMUM DE KM -->
                 <div class="form-group">
-                    <label id="labelKm">KM Atual do Painel</label>
+                    <label id="labelKm">KM ATUAL DO PAINEL</label>
                     <input type="number" id="kmAtual" step="0.1" placeholder="Ex: 45230">
                 </div>
 
@@ -97,46 +97,47 @@
 
         <!-- RESUMO MENSAL -->
         <section class="card">
-            <h3>Resumo Geral do Mês</h3>
+            <h3>📊 Resumo Geral do Mês</h3>
             <div class="stats-grid">
                 <div class="stat-box">
-                    <span class="stat-label">Total Rodado</span>
+                    <span class="stat-label">TOTAL RODADO</span>
                     <span class="stat-value" id="totalKm">0 KM</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Atendimentos</span>
+                    <span class="stat-label">CLIENTES ATENDIDOS</span>
                     <span class="stat-value" id="totalClientes">0</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">Reembolso KM</span>
+                    <span class="stat-label">REEMBOLSO KM</span>
                     <span class="stat-value" id="totalKmValor">R$ 0,00</span>
                 </div>
                 <div class="stat-box highlight">
-                    <span class="stat-label">Sobra Líquida</span>
+                    <span class="stat-label">SOBRA LÍQUIDA REAL</span>
                     <span class="stat-value" id="sobraLiquida">R$ 0,00</span>
                 </div>
             </div>
 
             <div class="comparativo">
-                <div>Ajuda de Custo Fixa: <span id="totalEmpresa">R$ 0,00</span></div>
-                <div>Total Gasto no Posto: <span id="totalGastosPosto">R$ 0,00</span></div>
-                <div>Saldo Caju Restante: <span id="saldoCaju">R$ 0,00</span></div>
-                <div>Custo Médio / KM: <span id="custoPorKm">R$ 0,00/KM</span></div>
+                <div>💰 Ajuda de Custo Fixa: <span id="totalEmpresa">R$ 0,00</span></div>
+                <div>⛽ Total Gasto no Posto: <span id="totalGastosPosto">R$ 0,00</span></div>
+                <div>💳 Saldo Caju Restante: <span id="saldoCaju">R$ 0,00</span></div>
+                <div>📏 Seu Custo por KM Rodado: <span id="custoPorKm">R$ 0,00/KM</span></div>
             </div>
         </section>
 
         <!-- HISTÓRICO -->
         <section class="card">
-            <h3>Histórico de Lançamentos</h3>
+            <h3>📅 Histórico por Dia</h3>
             <div id="historicoAgrupado"></div>
             
-            <button id="btnPdf" class="btn btn-pdf">Gerar Relatório PDF</button>
-            <button id="btnLimpar" class="btn-danger-subtle">Limpar Dados do Mês</button>
+            <button id="btnPdf" class="btn btn-pdf">🖨️ Gerar PDF / Imprimir</button>
+            <button id="btnLimpar" class="btn-danger-subtle">Apagar Registros do Mês</button>
         </section>
 
+        <!-- RODAPÉ MANTIDO EXATAMENTE COM SUA MENSAGEM -->
         <footer>
-            <div>Dados salvos localmente no seu dispositivo.</div>
-            <div class="dev-tag">DESENVOLVIDO POR DIEGO SANTANA</div>
+            <div style="margin-bottom: 4px;">🔒 Seus dados ficam armazenados exclusivamente no seu dispositivo.</div>
+            <div style="letter-spacing: 0.08em; opacity: 0.6; font-size: 0.75rem;">DESENVOLVIDO POR DIEGO SANTANA</div>
         </footer>
     </div>
 
