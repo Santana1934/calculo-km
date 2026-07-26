@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de KM</title>
+    <title>Cálculo KM - Gestão de Frota</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
@@ -11,107 +11,101 @@
 <body>
     <div class="container">
         <header>
-            <h1>🚗 Controle de KM & Reembolso</h1>
-            <p class="subtitle">Relatório Operacional de Campo</p>
+            <h1>🚗 Controle de Deslocamento</h1>
+            <p class="subtitle">Relatório Operacional & Reembolso</p>
         </header>
 
-        <!-- PARÂMETROS DO MÊS -->
-        <section class="card config-card">
-            <h3>⚙️ Parâmetros do Mês</h3>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Técnico</label>
-                    <input type="text" id="nomeTecnico" placeholder="Seu nome">
-                </div>
-                <div class="form-group">
-                    <label>Período</label>
-                    <input type="text" id="periodoRelatorio" placeholder="Ex: 01/03 a 31/03">
-                </div>
-                <div class="form-group">
-                    <label>Valor por KM (R$)</label>
-                    <input type="number" id="taxaKm" step="0.01" value="1.30">
-                </div>
-                <div class="form-group">
-                    <label>Cartão Caju (R$)</label>
-                    <input type="number" id="cartaoCaju" step="0.01" value="250.00">
-                </div>
-            </div>
-        </section>
-
-        <!-- REGISTRO DIÁRIO -->
+        <!-- CARDS DE METRICAS E RESUMO -->
         <section class="card">
-            <h3>📍 Novo Lançamento</h3>
-            <form id="kmForm">
-                <div class="form-group">
-                    <label>Local / Cliente</label>
-                    <input type="text" id="cliente" placeholder="Ex: Cliente X" required>
-                </div>
-                <div class="form-group">
-                    <label>KM Atual no Painel</label>
-                    <input type="number" id="kmAtual" placeholder="Ex: 45200" required>
-                </div>
-                <div class="btn-group">
-                    <button type="submit" class="btn btn-primary">💾 Salvar Trajeto</button>
-                    <button type="button" id="btnPosto" class="btn btn-secondary">⛽ Lançar Nota do Posto</button>
-                </div>
-            </form>
-        </section>
-
-        <!-- RESUMO FINANCEIRO ESPELHADO -->
-        <section class="card">
-            <h3>📊 Resumo Financeiro do Mês</h3>
+            <h3>📊 Resumo Geral do Mês</h3>
             <div class="stats-grid">
                 <div class="stat-box">
-                    <span class="stat-label">KM TOTAL RODADO</span>
+                    <span class="stat-label">TOTAL RODADO</span>
                     <span class="stat-value" id="totalKm">0 KM</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">AJUDA DE CUSTO</span>
-                    <span class="stat-value">R$ 300,00</span>
+                    <span class="stat-label">CLIENTES ATENDIDOS</span>
+                    <span class="stat-value" id="totalClientes">0</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-label">VALOR KM REEMBOLSO</span>
-                    <span class="stat-value" id="totalKmValor">R$ 0.00</span>
+                    <span class="stat-label">REEMBOLSO KM</span>
+                    <span class="stat-value" id="totalKmValor">R$ 0,00</span>
                 </div>
                 <div class="stat-box highlight">
-                    <span class="stat-label">TOTAL EMPRESA (PREVISTO)</span>
-                    <span class="stat-value" id="totalEmpresa">R$ 550.00</span>
+                    <span class="stat-label">SOBRA LÍQUIDA</span>
+                    <span class="stat-value" id="sobraLiquida">R$ 0,00</span>
                 </div>
             </div>
 
             <div class="comparativo">
-                <p>⛽ <strong>Gastos Reais no Posto (Notas):</strong> <span id="totalGastosPosto">R$ 0.00</span></p>
-                <p>💳 <strong>Adiantamento Caju:</strong> <span id="exibeCaju">R$ 250.00</span></p>
-                <hr class="divider">
-                <p>💰 <strong>Sobra Real de Manutenção:</strong> <span id="sobraLiquida">R$ 300.00</span></p>
+                <div>💰 A Pagar Empresa (Fixo + KM + Caju): <span id="totalEmpresa">R$ 0,00</span></div>
+                <div>⛽ Total Gasto Posto: <span id="totalGastosPosto">R$ 0,00</span></div>
+                <div>💳 Adiantamento Caju: <span id="exibeCaju">R$ 0,00</span></div>
             </div>
-
-            <button id="btnPdf" class="btn btn-pdf">📄 Gerar Relatório PDF</button>
         </section>
 
-        <!-- HISTÓRICO -->
+        <!-- FORMULÁRIO DE LANÇAMENTO DIÁRIO -->
         <section class="card">
-            <h3>📝 Histórico de Viagens e Abastecimentos</h3>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data/Hora</th>
-                            <th>Local/Descrição</th>
-                            <th>KM Painel</th>
-                            <th>Trecho</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="listaRegistros"></tbody>
-                </table>
+            <h3>📝 Novo Registro</h3>
+            <form id="kmForm">
+                <div class="form-group">
+                    <label for="tipoRegistro">Tipo de Deslocamento</label>
+                    <select id="tipoRegistro" style="background:#2a2a2a; color:#fff; padding:10px; border-radius:6px; border:1px solid var(--border); margin-bottom:8px;">
+                        <option value="cliente">👤 Atendimento a Cliente</option>
+                        <option value="base">🏢 Empresa / Base / Casa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cliente">Descrição / Local</label>
+                    <input type="text" id="cliente" placeholder="Ex: Cliente XYZ ou Saída da Empresa" required>
+                </div>
+                <div class="form-group">
+                    <label for="kmAtual">KM Atual do Painel</label>
+                    <input type="number" id="kmAtual" step="0.1" placeholder="Ex: 45230" required>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">➕ Salvar Parada</button>
+                    <button type="button" id="btnPosto" class="btn btn-secondary">⛽ Lançar Abastecimento</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- LISTAGEM COM RESUMO DIÁRIO -->
+        <section class="card">
+            <h3>📅 Histórico por Dia</h3>
+            <div id="historicoAgrupado">
+                <!-- Os dias e registros serão gerados via JavaScript aqui -->
             </div>
-            <button id="btnLimpar" class="btn-danger-subtle">🗑️ Zerar Mês Atual</button>
+            
+            <button id="btnPdf" class="btn btn-pdf">🖨️ Gerar PDF / Imprimir</button>
+            <button id="btnLimpar" class="btn-danger-subtle">Apagar Registros do Mês</button>
+        </section>
+
+        <!-- CONFIGURAÇÕES DE CÁLCULO -->
+        <section class="card config-card">
+            <h3>⚙️ Parâmetros Financeiros</h3>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="nomeTecnico">Técnico</label>
+                    <input type="text" id="nomeTecnico">
+                </div>
+                <div class="form-group">
+                    <label for="periodoRelatorio">Mês/Ano</label>
+                    <input type="text" id="periodoRelatorio" placeholder="Ex: Julho/2026">
+                </div>
+                <div class="form-group">
+                    <label for="taxaKm">R$ / KM</label>
+                    <input type="number" id="taxaKm" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="cartaoCaju">Cartão Caju (R$)</label>
+                    <input type="number" id="cartaoCaju" step="0.01">
+                </div>
+            </div>
         </section>
 
         <footer>
-            <p><strong>Privacidade:</strong> Os dados são salvos apenas no seu celular.</p>
-            <p class="dev-tag">DESENVOLVIDO POR DIEGO SANTANA</p>
+            <div class="dev-tag">DESENVOLVIDO POR DIEGO SANTANA</div>
         </footer>
     </div>
 
