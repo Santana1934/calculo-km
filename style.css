@@ -1,11 +1,13 @@
 :root {
-    --bg-dark: #0f172a;
-    --card-bg: #1e293b;
-    --card-border: #334155;
-    --text-main: #f8fafc;
+    --bg-dark: #121824;
+    --card-bg: #1e2638;
+    --card-border: #2e394e;
+    --input-bg: #161d2b;
+    --text-main: #f1f5f9;
     --text-sub: #94a3b8;
     --accent-blue: #2563eb;
-    --accent-blue-hover: #1d4ed8;
+    --accent-green: #10b981;
+    --accent-green-hover: #059669;
     --danger: #ef4444;
 }
 
@@ -30,8 +32,10 @@ body {
 }
 
 header h1 {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: 600;
+    text-align: center;
+    margin-bottom: 16px;
 }
 
 .pdf-header {
@@ -46,15 +50,53 @@ header h1 {
     margin-bottom: 16px;
 }
 
-.form-group {
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 12px;
+}
+
+.card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.btn-subtle {
+    background: #2a3447;
+    color: var(--text-main);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-group {
+    margin-bottom: 8px;
 }
 
 label {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     color: var(--text-sub);
     margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.label-section {
+    margin-top: 8px;
+    margin-bottom: 6px;
 }
 
 input {
@@ -62,18 +104,40 @@ input {
     padding: 10px;
     border-radius: 8px;
     border: 1px solid var(--card-border);
-    background: #0f172a;
+    background: var(--input-bg);
     color: var(--text-main);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
-/* PILL SWITCH */
+input:disabled {
+    opacity: 0.6;
+}
+
+/* ATALHOS RÁPIDOS */
+.shortcut-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.btn-shortcut {
+    flex: 1;
+    padding: 8px;
+    background: #2a3447;
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+/* BOTÃO DE TIPO DE LANÇAMENTO */
 .mode-switch {
     display: flex;
-    background: #0f172a;
+    background: var(--input-bg);
     border-radius: 8px;
     padding: 3px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     border: 1px solid var(--card-border);
 }
 
@@ -87,34 +151,74 @@ input {
     font-weight: 500;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .mode-btn.active {
-    background: var(--accent-blue);
+    background: #2a3447;
     color: #fff;
+    border: 1px solid var(--card-border);
 }
 
-.btn-primary {
+/* BOTÃO SALVAR VERDE */
+.btn-action-green {
     width: 100%;
     padding: 12px;
-    background: var(--accent-blue);
+    background: var(--accent-green);
     color: white;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     font-size: 0.95rem;
     cursor: pointer;
+    margin-top: 8px;
 }
 
-.summary-card {
+.btn-action-green:active {
+    background: var(--accent-green-hover);
+}
+
+/* DASHBOARD GRID */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+    margin-bottom: 12px;
+}
+
+.dash-box {
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    font-size: 0.9rem;
+    gap: 4px;
 }
 
-.summary-row {
+.dash-box span {
+    font-size: 0.68rem;
+    color: var(--text-sub);
+    font-weight: 600;
+}
+
+.dash-box strong {
+    font-size: 0.95rem;
+}
+
+.dash-box.highlight-green strong {
+    color: var(--accent-green);
+}
+
+.summary-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.82rem;
+    padding-top: 6px;
+}
+
+.summary-line {
     display: flex;
     justify-content: space-between;
 }
@@ -166,11 +270,42 @@ td {
     padding: 2px 6px;
 }
 
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.btn-clear-all {
+    background: transparent;
+    color: var(--text-sub);
+    border: none;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+
+.footer-credits {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-sub);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .pdf-totals {
     display: none;
 }
 
-/* REGRAS DE IMPRESSÃO / PDF */
+/* OCULTAR ELEMENTOS NO PDF */
 @media print {
     body {
         background: white !important;
