@@ -18,7 +18,6 @@ function initParamsUI() {
     document.getElementById('param-km-rate').value = params.kmRate;
     document.getElementById('param-caju').value = params.caju;
 
-    // Header do PDF
     document.getElementById('pdf-tech-name').innerText = params.tech;
     document.getElementById('pdf-period').innerText = params.period;
     document.getElementById('pdf-base-pay').innerText = parseFloat(params.basePay).toFixed(2);
@@ -41,7 +40,6 @@ function toggleEditParams() {
         btn.style.background = '#10b981';
         btn.style.color = '#fff';
     } else {
-        // Salva as alterações
         params.tech = document.getElementById('param-tech').value || 'DIEGO SANTANA';
         params.period = document.getElementById('param-period').value || 'JULHO/2026';
         params.basePay = parseFloat(document.getElementById('param-base-pay').value) || 0;
@@ -76,19 +74,21 @@ function addEntry() {
     if (mode === 'parada') {
         const client = document.getElementById('input-client').value;
         const os = document.getElementById('input-os').value;
-        const currentKm = parseFloat(document.getElementById('input-km').value);
+        const inputKmVal = parseFloat(document.getElementById('input-km').value) || 0;
 
         if (!client) {
             alert('Informe o cliente/local.');
             return;
         }
 
-        let calculatedKm = 0;
-        if (!isNaN(currentKm) && currentKm > 0) {
-            if (lastKmInput > 0 && currentKm > lastKmInput) {
-                calculatedKm = currentKm - lastKmInput;
+        let kmCalculado = inputKmVal;
+
+        // Lógica de cálculo acumulativo de KM do painel
+        if (inputKmVal > 0) {
+            if (lastKmInput > 0 && inputKmVal > lastKmInput) {
+                kmCalculado = inputKmVal - lastKmInput;
             }
-            lastKmInput = currentKm;
+            lastKmInput = inputKmVal;
             localStorage.setItem('last_km_input', lastKmInput);
         }
 
@@ -97,7 +97,7 @@ function addEntry() {
             type: 'parada',
             client,
             os: os || '-',
-            km: calculatedKm
+            km: kmCalculado
         });
     } else {
         const fuel = parseFloat(document.getElementById('input-fuel').value) || 0;
@@ -198,7 +198,6 @@ function calculateTotals() {
     const cajuRemaining = params.caju - totalFuel;
     let costPerKm = totalKm > 0 ? (totalFuel / totalKm) : 0;
 
-    // Atualiza Dashboard do App
     document.getElementById('dash-total-km').innerText = `${totalKm} KM`;
     document.getElementById('dash-total-clients').innerText = clientCount;
     document.getElementById('dash-reimbursement-km').innerText = `R$ ${kmReimbursement.toFixed(2)}`;
@@ -209,7 +208,6 @@ function calculateTotals() {
     document.getElementById('detail-caju-remaining').innerText = `R$ ${cajuRemaining.toFixed(2)}`;
     document.getElementById('detail-cost-per-km').innerText = `R$ ${costPerKm.toFixed(2)}/KM`;
 
-    // Atualiza Totais do PDF
     document.getElementById('pdf-total-km').innerText = totalKm;
     document.getElementById('pdf-calc-km').innerText = `${totalKm} KM × R$ ${parseFloat(params.kmRate).toFixed(2)} = R$ ${kmReimbursement.toFixed(2)}`;
     document.getElementById('pdf-final-reimbursement').innerText = `R$ ${netProfit.toFixed(2)}`;
