@@ -4,7 +4,7 @@ let entries = JSON.parse(localStorage.getItem('km_entries_v2')) || [];
 let lastKmInput = parseFloat(localStorage.getItem('last_km_input')) || 0;
 
 let params = JSON.parse(localStorage.getItem('km_params')) || {
-    tech: 'DIEGO SANTANA',
+    tech: '',
     period: 'JULHO/2026',
     basePay: 300,
     kmRate: 1.30,
@@ -19,7 +19,7 @@ function initParamsUI() {
     document.getElementById('param-km-rate').value = params.kmRate;
     document.getElementById('param-caju').value = params.caju;
 
-    document.getElementById('pdf-tech-name').innerText = params.tech;
+    document.getElementById('pdf-tech-name').innerText = params.tech || '___________________';
     document.getElementById('pdf-period').innerText = params.period;
     document.getElementById('pdf-base-pay').innerText = parseFloat(params.basePay).toFixed(2);
     document.getElementById('pdf-km-rate').innerText = parseFloat(params.kmRate).toFixed(2);
@@ -43,7 +43,7 @@ function toggleEditParams() {
         btn.style.background = '#10b981';
         btn.style.color = '#fff';
     } else {
-        params.tech = document.getElementById('param-tech').value || 'DIEGO SANTANA';
+        params.tech = document.getElementById('param-tech').value.trim();
         params.period = document.getElementById('param-period').value || 'JULHO/2026';
         params.basePay = parseFloat(document.getElementById('param-base-pay').value) || 0;
         params.kmRate = parseFloat(document.getElementById('param-km-rate').value) || 0;
@@ -123,19 +123,25 @@ function addEntry() {
 }
 
 function deleteEntry(id) {
-    if (confirm('Deseja apagar este registro?')) {
-        entries = entries.filter(e => e.id !== id);
-        saveAndRender();
-    }
+    entries = entries.filter(e => e.id !== id);
+    saveAndRender();
 }
 
-function clearAll() {
-    if (confirm('Tem certeza que deseja apagar todos os registros do mês?')) {
-        entries = [];
-        lastKmInput = 0;
-        localStorage.removeItem('last_km_input');
-        saveAndRender();
-    }
+// Funções do Modal Customizado para Limpar Registros
+function openConfirmModal() {
+    document.getElementById('modal-confirm').style.display = 'flex';
+}
+
+function closeConfirmModal() {
+    document.getElementById('modal-confirm').style.display = 'none';
+}
+
+function confirmClearAll() {
+    entries = [];
+    lastKmInput = 0;
+    localStorage.removeItem('last_km_input');
+    saveAndRender();
+    closeConfirmModal();
 }
 
 function saveAndRender() {
