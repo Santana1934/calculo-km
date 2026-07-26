@@ -128,7 +128,7 @@ window.salvarEdicao = function() {
     window.fecharModal();
 };
 
-/* --- CONFIRMAÇÃO DE LIMPEZA GERAL --- */
+/* --- MODAL CONFIRMAR LIMPEZA --- */
 window.abrirModalConfirm = function() {
     document.getElementById('modalConfirm').style.display = 'flex';
 };
@@ -208,12 +208,10 @@ kmForm.addEventListener('submit', (e) => {
 function adicionarRegistro(tipo, descricao, km, protocoloOs = '', valorGasto = 0) {
     const hoje = new Date();
     const dataStr = hoje.toLocaleDateString('pt-BR');
-    const horaStr = hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
     registros.push({
         id: Date.now(),
         data: dataStr,
-        hora: horaStr,
         tipo: tipo,
         descricao: descricao,
         protocoloOs: protocoloOs,
@@ -256,17 +254,15 @@ function renderizarHistorico() {
         diaHtml += `<div class="table-responsive"><table>
             <thead>
                 <tr>
-                    <th>Hora</th>
                     <th>Cliente / Local</th>
-                    <th>KM Painel</th>
-                    <th>Trecho</th>
-                    <th class="col-acoes no-print" style="text-align:right;">Ações</th>
+                    <th>Protocolo / OS</th>
+                    <th style="text-align:right;">KM Rodado</th>
+                    <th class="col-acoes no-print" style="text-align:right;">Ação</th>
                 </tr>
             </thead>
             <tbody>`;
 
-        let primeiroKmDia = null;
-        let ultimoKmDia = null;
+        let totalKmDia = 0;
 
         agrupadoPorData[data].forEach(reg => {
             let trechoKm = 0;
@@ -275,37 +271,34 @@ function renderizarHistorico() {
                     trechoKm = Math.max(0, reg.km - kmAnteriorGeral);
                 }
                 kmAnteriorGeral = reg.km;
-                if (primeiroKmDia === null) primeiroKmDia = reg.km;
-                ultimoKmDia = reg.km;
+                totalKmDia += trechoKm;
             }
 
             let detalheHtml = '';
+            let osTexto = reg.protocoloOs || '-';
+
             if (reg.tipo === 'posto') {
-                detalheHtml = `<span style="color:var(--accent-amber); font-weight:600;">Abastecimento (R$ ${reg.valorGasto.toFixed(2)})</span>`;
+                detalheHtml = `<span class="badge-posto-amber" onclick="abrirModalEdicao(${reg.id})" title="Clique para editar">⛽ Abastecimento (R$ ${reg.valorGasto.toFixed(2)})</span>`;
+                osTexto = '-';
             } else {
-                const osTexto = reg.protocoloOs ? `<br><span style="font-size:0.72rem; color:var(--text-sub);">[Prot: ${reg.protocoloOs}]</span>` : '';
-                detalheHtml = `<span onclick="abrirModalEdicao(${reg.id})" style="cursor:pointer;" title="Clique para editar">${reg.descricao}</span>${osTexto}`;
+                detalheHtml = `<span onclick="abrirModalEdicao(${reg.id})" style="cursor:pointer;" title="Clique para editar">${reg.descricao}</span>`;
             }
 
             diaHtml += `
                 <tr>
-                    <td>${reg.hora || ''}</td>
                     <td>${detalheHtml}</td>
-                    <td>${reg.km ? reg.km + ' KM' : '-'}</td>
-                    <td>${reg.tipo !== 'posto' ? '+' + trechoKm + ' KM' : '-'}</td>
+                    <td>${osTexto}</td>
+                    <td style="text-align:right;">${reg.tipo !== 'posto' ? '+' + trechoKm + ' KM' : '-'}</td>
                     <td class="col-acoes no-print" style="text-align:right;">
-                        <button class="btn-action-text" onclick="abrirModalEdicao(${reg.id})">Editar</button>
-                        <button class="btn-action-delete" onclick="deletarRegistro(${reg.id})">×</button>
+                        <button class="btn-icon-subtle delete" onclick="deletarRegistro(${reg.id})" title="Excluir">×</button>
                     </td>
                 </tr>
             `;
         });
 
-        const totalDiaKm = (primeiroKmDia !== null && ultimoKmDia !== null) ? (ultimoKmDia - primeiroKmDia) : 0;
-
         diaHtml += `</tbody></table></div>`;
-        diaHtml += `<div class="total-dia-print" style="text-align:right; font-size:0.75rem; color:var(--text-sub); margin-top:6px;">
-            Total Rodado no Dia: <strong style="color:var(--primary);">${totalDiaKm} KM</strong>
+        diaHtml += `<div style="text-align:right; font-size:0.75rem; color:var(--text-sub); margin-top:6px;" class="no-print">
+            Total Rodado no Dia: <strong style="color:var(--primary);">${totalKmDia} KM</strong>
         </div>`;
 
         diaBloco.innerHTML = diaHtml;
@@ -335,9 +328,9 @@ function atualizarCalculos() {
         kmTotalRodado = ultimoKm - primeiroKm;
     }
 
-    const ajudaCusto = parseFloat(ajudaCustoInput.value) || 300;
-    const taxa = parseFloat(taxaKmInput.value) || 1.30;
-    const cajuInicial = parseFloat(cartaoCajuInput.value) || 250;
+    const ajudaCusto = parseFloat(ajudaCustoInput.value) || 0;
+    const taxa = parseFloat(taxaKmInput.value) || 0;
+    const cajuInicial = parseFloat(cartaoCajuInput.value) || 0;
 
     const kmValorTotal = kmTotalRodado * taxa;
     const totalEmpresaPaga = ajudaCusto + kmValorTotal;
@@ -345,6 +338,7 @@ function atualizarCalculos() {
     const saldoCajuRestante = Math.max(0, cajuInicial - totalGastosPosto);
     const custoPorKm = kmTotalRodado > 0 ? (totalGastosPosto / kmTotalRodado) : 0;
 
+    // Atualiza Tela
     totalKmEl.textContent = `${kmTotalRodado} KM`;
     totalClientesEl.textContent = `${contadorClientes}`;
     totalKmValorEl.textContent = `R$ ${kmValorTotal.toFixed(2)}`;
@@ -354,10 +348,27 @@ function atualizarCalculos() {
     custoPorKmEl.textContent = `R$ ${custoPorKm.toFixed(2)}/KM`;
     sobraLiquidaEl.textContent = `R$ ${sobraLiquida.toFixed(2)}`;
 
-    // Atualiza metadados do PDF
+    // Metadados do PDF (Cabeçalho)
     const tecNome = nomeTecnicoInput.value || 'Não informado';
     const mesAno = periodoInput.value || 'Não informado';
-    document.getElementById('printMetaInfo').innerHTML = `<strong>TÉCNICO:</strong> ${tecNome} | <strong>PERÍODO:</strong> ${mesAno}`;
+
+    document.getElementById('printMetaInfo').innerHTML = `<strong>TÉCNICO:</strong> ${tecNome} &nbsp;|&nbsp; <strong>PERÍODO:</strong> ${mesAno}`;
+    
+    document.getElementById('printParamsSummary').innerHTML = `
+        <strong>Ajuda de Custo Fixa:</strong> R$ ${ajudaCusto.toFixed(2)} &nbsp;|&nbsp; 
+        <strong>Valor por KM (Empresa):</strong> R$ ${taxa.toFixed(2)} &nbsp;|&nbsp; 
+        <strong>Cartão Caju (Combustível Solicitado):</strong> R$ ${cajuInicial.toFixed(2)}
+    `;
+
+    // Fechamento Financeiro no PDF
+    document.getElementById('printFinalCalc').innerHTML = `
+        <div><strong>TOTAL DE KM RODADOS:</strong> ${kmTotalRodado} KM</div>
+        <div><strong>CÁLCULO KM:</strong> ${kmTotalRodado} KM × R$ ${taxa.toFixed(2)} = <strong>R$ ${kmValorTotal.toFixed(2)}</strong></div>
+        <div><strong>AJUDA DE CUSTO FIXA:</strong> R$ ${ajudaCusto.toFixed(2)}</div>
+        <div style="font-size:0.95rem; font-weight:bold; margin-top:4px; border-top:1px solid #000; padding-top:4px;">
+            VALOR TOTAL DE REEMBOLSO: R$ ${(kmValorTotal + ajudaCusto).toFixed(2)}
+        </div>
+    `;
 }
 
 document.getElementById('btnPdf').addEventListener('click', () => window.print());
