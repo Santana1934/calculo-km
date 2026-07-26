@@ -95,8 +95,12 @@ label {
 }
 
 .label-section {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-sub);
     margin-top: 8px;
     margin-bottom: 6px;
+    font-weight: 600;
 }
 
 input {
@@ -113,7 +117,6 @@ input:disabled {
     opacity: 0.6;
 }
 
-/* ATALHOS RÁPIDOS */
 .shortcut-buttons {
     display: flex;
     gap: 8px;
@@ -131,7 +134,6 @@ input:disabled {
     cursor: pointer;
 }
 
-/* BOTÃO DE TIPO DE LANÇAMENTO */
 .mode-switch {
     display: flex;
     background: var(--input-bg);
@@ -159,7 +161,6 @@ input:disabled {
     border: 1px solid var(--card-border);
 }
 
-/* BOTÃO SALVAR VERDE */
 .btn-action-green {
     width: 100%;
     padding: 12px;
@@ -177,7 +178,6 @@ input:disabled {
     background: var(--accent-green-hover);
 }
 
-/* DASHBOARD GRID */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -248,7 +248,7 @@ td {
     color: var(--text-main);
 }
 
-/* ABASTECIMENTO CLEAN (SEM RETÂNGULO/FUNDO) */
+/* ABASTECIMENTO CLEAN (SUTIL E SEM CAIXA CHAMATIVA) */
 .badge-posto-amber {
     display: inline-flex;
     align-items: center;
@@ -305,7 +305,7 @@ td {
     display: none;
 }
 
-/* OCULTAR ELEMENTOS NO PDF */
+/* REGRA EXCLUSIVA PARA PDF / IMPRESSÃO */
 @media print {
     body {
         background: white !important;
