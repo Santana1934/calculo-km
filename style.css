@@ -248,7 +248,7 @@ td {
     color: var(--text-main);
 }
 
-/* ABASTECIMENTO CLEAN (SUTIL E SEM CAIXA CHAMATIVA) */
+/* ESTILO DO ABASTECIMENTO: MINIMALISTA, SUTIL E SEM CAIXA LARANJA */
 .badge-posto-amber {
     display: inline-flex;
     align-items: center;
@@ -305,14 +305,14 @@ td {
     display: none;
 }
 
-/* REGRA EXCLUSIVA PARA PDF / IMPRESSÃO */
+/* OMITIR ABASTECIMENTO E UI NA IMPRESSÃO */
 @media print {
     body {
         background: white !important;
         color: black !important;
         padding: 0;
     }
-    
+
     .no-print, 
     .btn-icon-subtle,
     tr.row-abastecimento,
