@@ -22,10 +22,15 @@ const saldoCajuEl = document.getElementById('saldoCaju');
 const custoPorKmEl = document.getElementById('custoPorKm');
 const sobraLiquidaEl = document.getElementById('sobraLiquida');
 
+// Modal Posto
+const modalPosto = document.getElementById('modalPosto');
+const valorPostoInput = document.getElementById('valorPostoInput');
+const btnConfirmarPosto = document.getElementById('btnConfirmarPosto');
+const btnCancelarPosto = document.getElementById('btnCancelarPosto');
+
 let tipoAtual = 'cliente';
 let configEditavel = false;
 
-// Carregar Configurações Iniciais
 function carregarConfiguracoes() {
     nomeTecnicoInput.value = localStorage.getItem('cfg_nome') || 'Diego Santana';
     periodoInput.value = localStorage.getItem('cfg_periodo') || '';
@@ -34,7 +39,6 @@ function carregarConfiguracoes() {
     cartaoCajuInput.value = localStorage.getItem('cfg_caju') || '250.00';
 }
 
-// Botão para liberar/bloquear edição
 btnToggleConfig.addEventListener('click', (e) => {
     e.preventDefault();
     configEditavel = !configEditavel;
@@ -61,7 +65,6 @@ btnToggleConfig.addEventListener('click', (e) => {
         btnToggleConfig.style.color = '#000000';
         nomeTecnicoInput.focus();
     } else {
-        // Salvar ao fechar
         localStorage.setItem('cfg_nome', nomeTecnicoInput.value);
         localStorage.setItem('cfg_periodo', periodoInput.value);
         localStorage.setItem('cfg_ajuda', ajudaCustoInput.value);
@@ -76,7 +79,6 @@ btnToggleConfig.addEventListener('click', (e) => {
     }
 });
 
-// Atualizar em tempo real caso digite enquanto liberado
 [nomeTecnicoInput, periodoInput, ajudaCustoInput, taxaKmInput, cartaoCajuInput].forEach(elem => {
     elem.addEventListener('input', () => {
         if (configEditavel) {
@@ -108,11 +110,23 @@ kmForm.addEventListener('submit', (e) => {
     adicionarRegistro(tipoAtual, clienteInput.value, parseFloat(kmAtualInput.value), protocoloOsInput.value);
 });
 
+// ABRIR MODAL CUSTOMIZADO (SEM AVISO DO GITHUB)
 document.getElementById('btnPosto').addEventListener('click', () => {
-    const valorNota = prompt('Informe o valor R$ gasto no Posto:');
-    if (valorNota && !isNaN(valorNota)) {
+    valorPostoInput.value = '';
+    modalPosto.style.display = 'flex';
+    valorPostoInput.focus();
+});
+
+btnCancelarPosto.addEventListener('click', () => {
+    modalPosto.style.display = 'none';
+});
+
+btnConfirmarPosto.addEventListener('click', () => {
+    const valorNota = parseFloat(valorPostoInput.value);
+    if (!isNaN(valorNota) && valorNota > 0) {
         const kmMomento = kmAtualInput.value ? parseFloat(kmAtualInput.value) : (registros.length > 0 ? registros[registros.length - 1].km : 0);
-        adicionarRegistro('posto', `⛽ Abastecimento (R$ ${parseFloat(valorNota).toFixed(2)})`, kmMomento, '', parseFloat(valorNota));
+        adicionarRegistro('posto', `⛽ Abastecimento (R$ ${valorNota.toFixed(2)})`, kmMomento, '', valorNota);
+        modalPosto.style.display = 'none';
     }
 });
 
@@ -255,7 +269,7 @@ function atualizarCalculos() {
     const cajuInicial = parseFloat(cartaoCajuInput.value) || 0;
 
     const kmValorTotal = kmTotalRodado * taxa;
-    const totalEmpresaPaga = ajudaCusto + kmValorTotal;
+    const totalEmpresaPaga = ajudaCusto + kmValorTotal; // CÁLCULO MANTIDO INTEGRALMENTE
     const sobraLiquida = totalEmpresaPaga - totalGastosPosto;
 
     const saldoCajuRestante = Math.max(0, cajuInicial - totalGastosPosto);
@@ -264,7 +278,7 @@ function atualizarCalculos() {
     totalKmEl.textContent = `${kmTotalRodado} KM`;
     totalClientesEl.textContent = `${contadorClientes}`;
     totalKmValorEl.textContent = `R$ ${kmValorTotal.toFixed(2)}`;
-    totalEmpresaEl.textContent = `R$ ${totalEmpresaPaga.toFixed(2)}`;
+    totalEmpresaEl.textContent = `R$ ${totalEmpresaPaga.toFixed(2)}`; // ATUALIZA O VALOR TOTAL (AJUDA FIXA + KM)
     totalGastosPostoEl.textContent = `R$ ${totalGastosPosto.toFixed(2)}`;
     saldoCajuEl.textContent = `R$ ${saldoCajuRestante.toFixed(2)}`;
     custoPorKmEl.textContent = `R$ ${custoPorKm.toFixed(2)}/KM`;
@@ -279,6 +293,5 @@ document.getElementById('btnLimpar').addEventListener('click', () => {
     }
 });
 
-// Inicialização
 carregarConfiguracoes();
 salvarERenderizar();
