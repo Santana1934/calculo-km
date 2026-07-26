@@ -11,7 +11,6 @@ body {
     padding: 16px;
 }
 
-/* Tela de Bloqueio */
 .lock-screen-overlay {
     position: fixed;
     top: 0;
@@ -70,17 +69,12 @@ body {
     cursor: pointer;
 }
 
-.lock-card button:hover {
-    background-color: #2ea043;
-}
-
 .error-msg {
     color: #f85149 !important;
     margin-top: 10px;
     font-size: 13px;
 }
 
-/* App Content */
 .app-container {
     max-width: 480px;
     margin: 0 auto;
@@ -162,13 +156,24 @@ header h1 {
     color: #8b949e;
 }
 
-.action-buttons {
+.action-buttons-grid {
     display: flex;
     gap: 10px;
+    margin-bottom: 16px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    background-color: #21262d;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .primary-btn {
-    flex: 1;
     padding: 12px;
     background-color: #1f6feb;
     color: white;
