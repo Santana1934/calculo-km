@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Operacional - KM</title>
-    <!-- Configurações para PWA e Tela Cheia (Modo App) -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -31,6 +30,7 @@
             <h1>Controle Operacional</h1>
         </header>
 
+        <!-- PARÂMETROS FINANCEIROS -->
         <section class="card parameters-card">
             <div class="card-header">
                 <h2>⚙️ Parâmetros Financeiros</h2>
@@ -44,28 +44,54 @@
                 </div>
                 <div class="input-group">
                     <label>MÊS/ANO</label>
-                    <input type="text" id="month-year" placeholder="JULHO/2026" disabled>
+                    <input type="text" id="month-year" placeholder="Ex: JULHO/2026" disabled>
                 </div>
                 <div class="input-group">
                     <label>AJUDA DE CUSTO FIXA (R$)</label>
-                    <input type="number" id="fixed-aid" value="300" disabled>
+                    <input type="number" id="fixed-aid" placeholder="0.00" disabled>
                 </div>
                 <div class="input-group">
                     <label>R$ / KM (EMPRESA)</label>
-                    <input type="number" step="0.1" id="km-rate" value="1.3" disabled>
+                    <input type="number" step="0.01" id="km-rate" placeholder="0.00" disabled>
                 </div>
                 <div class="input-group full-width">
                     <label>VALOR CAJU DO MÊS (R$)</label>
-                    <input type="number" id="caju-value" value="" placeholder="Informe seu valor particular" disabled>
+                    <input type="number" id="caju-value" placeholder="Informe seu valor particular" disabled>
                 </div>
             </div>
         </section>
 
-        <!-- Seções operacionais e botões -->
-        <div class="action-buttons">
-            <button class="primary-btn">🚗 Parada / Cliente</button>
-            <button class="primary-btn">⛽ Abastecimento</button>
+        <!-- BOTÕES DE AÇÃO RÁPIDA -->
+        <div class="action-buttons-grid">
+            <button id="btn-parada" class="action-btn">🚗 Parada / Cliente</button>
+            <button id="btn-abastecimento" class="action-btn">⛽ Abastecimento</button>
         </div>
+
+        <!-- FORMULÁRIO DE LANÇAMENTO / ETAPA -->
+        <section class="card">
+            <h2>Registro de KM / Atendimento</h2>
+            <div class="input-group" style="margin-top: 12px;">
+                <label>CLIENTE / LOCAL</label>
+                <input type="text" id="local-name" placeholder="Ex: Cliente XYZ ou Av. Paulista">
+            </div>
+            <div class="input-group" style="margin-top: 12px;">
+                <label>Nº PROTOCOLO (OPCIONAL)</label>
+                <input type="text" id="protocol-num" placeholder="Ex: 98452">
+            </div>
+            <div class="input-group" style="margin-top: 12px;">
+                <label>KM ATUAL DO PAINEL / ETAPA</label>
+                <input type="number" id="current-km" placeholder="Ex: 80">
+            </div>
+            <button id="save-entry-btn" class="primary-btn" style="width: 100%; margin-top: 16px;">Salvar Lançamento</button>
+        </section>
+
+        <!-- HISTÓRICO E RESUMO -->
+        <section class="card">
+            <h2>Resumo e Histórico</h2>
+            <div id="history-list" style="margin-top: 12px; font-size: 14px; color: #8b949e;">
+                Nenhum lançamento registrado ainda.
+            </div>
+        </section>
     </div>
 
     <script src="script.js"></script>
