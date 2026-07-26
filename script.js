@@ -37,7 +37,13 @@ btnToggleConfig.addEventListener('click', () => {
     const inputs = [nomeTecnicoInput, periodoInput, ajudaCustoInput, taxaKmInput, cartaoCajuInput];
     
     inputs.forEach(input => {
-        input.disabled = !configEditavel;
+        if (configEditavel) {
+            input.removeAttribute('readonly');
+            input.style.border = '1px solid var(--accent)';
+        } else {
+            input.setAttribute('readonly', 'true');
+            input.style.border = '';
+        }
     });
 
     if (configEditavel) {
