@@ -1,26 +1,24 @@
 :root {
-    --bg-main: #121417;
-    --card-bg: #1e2228;
-    --card-border: #2a2f38;
-    --primary: #10b981;
-    --primary-hover: #059669;
-    --text-main: #f3f4f6;
-    --text-sub: #9ca3af;
-    --input-bg: #16191e;
-    --input-border: #374151;
+    --bg-dark: #0f172a;
+    --card-bg: #1e293b;
+    --card-border: #334155;
+    --text-main: #f8fafc;
+    --text-sub: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-blue-hover: #1d4ed8;
     --danger: #ef4444;
-    --radius: 12px;
+    --success: #10b981;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-    background-color: var(--bg-main);
+    background-color: var(--bg-dark);
     color: var(--text-main);
     padding: 16px;
     display: flex;
@@ -32,162 +30,105 @@ body {
     max-width: 480px;
 }
 
+header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
 header h1 {
     font-size: 1.25rem;
     font-weight: 600;
-    text-align: center;
-    margin-bottom: 16px;
-    color: var(--text-main);
 }
 
 .card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: var(--radius);
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.card h3 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-main);
-    margin-bottom: 12px;
-}
-
-.mode-switch {
-    display: flex;
-    background: var(--input-bg);
-    padding: 4px;
-    border-radius: 10px;
-    border: 1px solid var(--card-border);
-    margin-bottom: 16px;
-}
-
-.switch-btn {
-    flex: 1;
-    padding: 8px 12px;
-    border: none;
-    background: transparent;
-    color: var(--text-sub);
-    font-size: 0.85rem;
-    font-weight: 500;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.switch-btn.active {
-    background: var(--card-bg);
-    color: var(--text-main);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    border: 1px solid var(--card-border);
 }
 
 .form-group {
     margin-bottom: 12px;
 }
 
-.form-group label {
+label {
     display: block;
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     color: var(--text-sub);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-input {
-    width: 100%;
-    padding: 10px 12px;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
-    color: var(--text-main);
-    font-size: 0.9rem;
-    outline: none;
-}
-
-input:focus { border-color: var(--primary); }
-input[readonly] { opacity: 0.75; background: transparent; }
-
-.grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.btn {
-    width: 100%;
-    padding: 11px;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.btn-primary { background: var(--primary); color: #052e16; }
-.btn-secondary { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--card-border); }
-.btn-danger { background: var(--danger); color: #fff; }
-.btn-pdf { background: #2563eb; color: #fff; margin-top: 10px; }
-
-.btn-danger-subtle {
-    background: transparent;
-    color: var(--text-sub);
-    border: none;
-    width: 100%;
-    padding: 10px;
-    font-size: 0.8rem;
-    margin-top: 8px;
-    cursor: pointer;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
-}
-
-.stat-box {
-    background: var(--input-bg);
-    border: 1px solid var(--card-border);
-    padding: 12px;
-    border-radius: 8px;
-}
-
-.stat-label {
-    font-size: 0.68rem;
-    color: var(--text-sub);
-    text-transform: uppercase;
-    display: block;
     margin-bottom: 4px;
 }
 
-.stat-value {
-    font-size: 1.1rem;
-    font-weight: 700;
+input, select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: #0f172a;
     color: var(--text-main);
+    font-size: 0.95rem;
 }
 
-.stat-box.highlight .stat-value { color: var(--primary); }
+/* PILL SWITCH */
+.mode-switch {
+    display: flex;
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 3px;
+    margin-bottom: 16px;
+    border: 1px solid var(--card-border);
+}
 
-.comparativo {
-    font-size: 0.8rem;
+.mode-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: transparent;
     color: var(--text-sub);
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+    background: var(--accent-blue);
+    color: #fff;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.btn-primary:active {
+    background: var(--accent-blue-hover);
+}
+
+.summary-card {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    border-top: 1px solid var(--card-border);
-    padding-top: 10px;
+    gap: 8px;
+    font-size: 0.9rem;
 }
 
-.comparativo div { display: flex; justify-content: space-between; }
-.comparativo span { color: var(--text-main); font-weight: 500; }
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+}
 
-.table-responsive { width: 100%; overflow-x: auto; }
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
 
 table {
     width: 100%;
@@ -209,25 +150,20 @@ td {
     color: var(--text-main);
 }
 
-/* DESTAQUE DE ABASTECIMENTO TRANSLÚCIDO E MODERNO */
+/* ABASTECIMENTO CLEAN E DESTAQUE SUTIL NO APP */
 .badge-posto-amber {
-    display: inline-block;
-    background: rgba(217, 119, 6, 0.15);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
     color: #f59e0b;
-    border: 1px solid rgba(217, 119, 6, 0.4);
+    border: none;
     font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 0.78rem;
+    padding: 0;
+    font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
-.badge-posto-amber:hover {
-    background: rgba(217, 119, 6, 0.25);
-}
-
-/* BOTÃO 'X' DISCRETO SEM FUNDO BRANCO */
 .btn-icon-subtle {
     background: transparent;
     border: none;
@@ -236,136 +172,41 @@ td {
     font-size: 1.1rem;
     padding: 2px 6px;
     line-height: 1;
-    transition: color 0.2s ease;
 }
 
 .btn-icon-subtle.delete:hover {
     color: var(--danger);
 }
 
-footer {
-    text-align: center;
-    font-size: 0.75rem;
-    color: var(--text-sub);
-    margin-top: 24px;
-    margin-bottom: 24px;
-}
-
-/* MODAL */
-.modal-backdrop {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000;
-}
-
-.modal-box {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius);
-    padding: 20px;
-    width: 90%;
-    max-width: 400px;
-}
-
-.print-only { display: none; }
-
-/* REGRAS DE IMPRESSÃO EXCLUSIVAS PARA O PDF */
+/* OCULTAR ELEMENTOS NO IMPRESSO/PDF */
 @media print {
     body {
-        background-color: #fff !important;
-        color: #000 !important;
-        padding: 0 !important;
+        background: white;
+        color: black;
+        padding: 0;
     }
     
-    .container { max-width: 100% !important; }
-    .no-print, .col-acoes, footer { display: none !important; }
-    .print-only { display: block !important; }
-
-    .print-header {
-        border-bottom: 2px solid #000;
-        padding-bottom: 8px;
-        margin-bottom: 12px;
+    .no-print, 
+    .btn-icon-subtle, 
+    .mode-switch,
+    tr.row-abastecimento,
+    .badge-posto-amber {
+        display: none !important;
     }
 
-    .print-header h2 {
-        font-size: 1.1rem;
-        font-weight: bold;
-        color: #000;
-        margin-bottom: 6px;
-    }
-
-    .print-meta {
-        font-size: 0.85rem;
-        color: #111;
-        margin-bottom: 4px;
-    }
-
-    .print-params-summary {
-        font-size: 0.8rem;
-        color: #333;
-        border-top: 1px dashed #ccc;
-        padding-top: 4px;
-        margin-top: 4px;
-    }
-
-    .card {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .dia-bloco-print {
-        background: transparent !important;
-        border: none !important;
-        padding: 0 !important;
-        margin-bottom: 12px !important;
-    }
-
-    .dia-header-print {
-        font-weight: bold !important;
-        color: #000 !important;
-        font-size: 0.82rem !important;
-        border-bottom: 1px solid #444 !important;
-        padding-bottom: 2px !important;
-        margin-bottom: 4px !important;
+    .container, .card {
+        max-width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0;
     }
 
     table {
-        font-size: 0.8rem !important;
-        width: 100% !important;
+        color: black;
     }
 
-    th {
-        color: #000 !important;
-        font-weight: bold !important;
-        border-bottom: 1px solid #000 !important;
-        padding: 4px 2px !important;
-    }
-
-    td {
-        border-bottom: 1px solid #ddd !important;
-        color: #000 !important;
-        padding: 5px 2px !important;
-    }
-
-    .badge-posto-amber {
-        background: transparent !important;
-        border: none !important;
-        color: #000 !important;
-        font-weight: bold !important;
-        padding: 0 !important;
-    }
-
-    .print-final-calc {
-        margin-top: 16px;
-        border-top: 2px solid #000;
-        padding-top: 8px;
-        font-size: 0.85rem;
-        line-height: 1.5;
-        color: #000;
+    th, td {
+        border-bottom: 1px solid #ccc;
+        color: black;
     }
 }
