@@ -10,9 +10,9 @@
 </head>
 <body>
     <div class="container">
-        <!-- CABEÇALHO DEDICADO PARA IMPRESSÃO / PDF -->
+        <!-- CABEÇALHO EXCLUSIVO PARA O PDF -->
         <div class="print-only print-header">
-            <h2>RELATÓRIO OPERACIONAL E REEMBOLSO DE KM</h2>
+            <h2>RELATÓRIO OPERACIONAL DE ATENDIMENTOS E KM</h2>
             <div class="print-meta" id="printMetaInfo"></div>
         </div>
 
@@ -20,7 +20,7 @@
             <h1>Controle Operacional</h1>
         </header>
 
-        <!-- PARÂMETROS FINANCEIROS -->
+        <!-- PARÂMETROS FINANCEIROS (TELA APENAS) -->
         <section class="card no-print">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h3 style="margin: 0;">⚙️ Parâmetros Financeiros</h3>
@@ -54,7 +54,7 @@
             </div>
         </section>
 
-        <!-- REGISTRO COM PILL SWITCH -->
+        <!-- FORMULÁRIO DE REGISTRO (TELA APENAS) -->
         <section class="card no-print">
             <div class="mode-switch">
                 <button type="button" id="tabParada" class="switch-btn active" onclick="alternarModo('parada')">🚗 Parada / Cliente</button>
@@ -98,8 +98,8 @@
             </form>
         </section>
 
-        <!-- RESUMO MENSAL -->
-        <section class="card print-compact-card">
+        <!-- RESUMO FINANCEIRO (TELA APENAS) -->
+        <section class="card no-print">
             <h3>📊 Resumo Geral do Mês</h3>
             <div class="stats-grid">
                 <div class="stat-box">
@@ -128,16 +128,15 @@
             </div>
         </section>
 
-        <!-- HISTÓRICO -->
-        <section class="card">
-            <h3>📅 Histórico por Dia</h3>
+        <!-- HISTÓRICO DE ATENDIMENTOS (IMPRESSO E TELA) -->
+        <section class="card print-clean-card">
+            <h3 class="no-print">📅 Histórico por Dia</h3>
             <div id="historicoAgrupado"></div>
             
             <button id="btnPdf" class="btn btn-pdf no-print">🖨️ Gerar PDF / Imprimir</button>
             <button id="btnLimpar" class="btn-danger-subtle no-print">Apagar Registros do Mês</button>
         </section>
 
-        <!-- RODAPÉ -->
         <footer class="no-print">
             <div style="margin-bottom: 4px;">🔒 Seus dados ficam armazenados exclusivamente no seu dispositivo.</div>
             <div style="letter-spacing: 0.08em; opacity: 0.6; font-size: 0.75rem;">DESENVOLVIDO POR DIEGO SANTANA</div>
@@ -147,11 +146,11 @@
     <!-- MODAL DE EDIÇÃO -->
     <div id="modalEdit" class="modal-backdrop" style="display:none;">
         <div class="modal-box">
-            <h3>✏️ Editar Registro</h3>
+            <h3>Editar Registro</h3>
             <input type="hidden" id="editId">
             
             <div class="form-group">
-                <label>LOCAL / DESCRICAO</label>
+                <label>LOCAL / CLIENTE</label>
                 <input type="text" id="editDescricao">
             </div>
             
@@ -173,6 +172,19 @@
             <div style="display:flex; gap:10px; margin-top:15px;">
                 <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
                 <button type="button" class="btn btn-primary" onclick="salvarEdicao()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO PARA APAGAR -->
+    <div id="modalConfirm" class="modal-backdrop" style="display:none;">
+        <div class="modal-box">
+            <h3>Confirmar Exclusão</h3>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin:12px 0;">Tem certeza de que deseja apagar todos os registros do mês atual? Esta ação não pode ser desfeita.</p>
+            
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalConfirm()">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmarLimpezaGeral()">Sim, Apagar Tudo</button>
             </div>
         </div>
     </div>
