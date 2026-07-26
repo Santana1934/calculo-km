@@ -10,17 +10,18 @@
 </head>
 <body>
     <div class="container">
-        <!-- CABEÇALHO EXCLUSIVO PARA O PDF -->
+        <!-- CABEÇALHO DEDICADO PARA IMPRESSÃO / PDF -->
         <div class="print-only print-header">
-            <h2>RELATÓRIO OPERACIONAL DE ATENDIMENTOS E KM</h2>
+            <h2>RELATÓRIO OPERACIONAL DE ATENDIMENTOS E REEMBOLSO DE KM</h2>
             <div class="print-meta" id="printMetaInfo"></div>
+            <div class="print-params-summary" id="printParamsSummary"></div>
         </div>
 
         <header class="no-print">
             <h1>Controle Operacional</h1>
         </header>
 
-        <!-- PARÂMETROS FINANCEIROS (TELA APENAS) -->
+        <!-- PARÂMETROS FINANCEIROS -->
         <section class="card no-print">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h3 style="margin: 0;">⚙️ Parâmetros Financeiros</h3>
@@ -54,7 +55,7 @@
             </div>
         </section>
 
-        <!-- FORMULÁRIO DE REGISTRO (TELA APENAS) -->
+        <!-- REGISTRO DE PARADA -->
         <section class="card no-print">
             <div class="mode-switch">
                 <button type="button" id="tabParada" class="switch-btn active" onclick="alternarModo('parada')">🚗 Parada / Cliente</button>
@@ -98,7 +99,7 @@
             </form>
         </section>
 
-        <!-- RESUMO FINANCEIRO (TELA APENAS) -->
+        <!-- RESUMO FINANCEIRO NA TELA -->
         <section class="card no-print">
             <h3>📊 Resumo Geral do Mês</h3>
             <div class="stats-grid">
@@ -128,10 +129,13 @@
             </div>
         </section>
 
-        <!-- HISTÓRICO DE ATENDIMENTOS (IMPRESSO E TELA) -->
+        <!-- HISTÓRICO DE ATENDIMENTOS -->
         <section class="card print-clean-card">
             <h3 class="no-print">📅 Histórico por Dia</h3>
             <div id="historicoAgrupado"></div>
+
+            <!-- RESUMO FINAL EXCLUSIVO DO PDF -->
+            <div class="print-only print-final-calc" id="printFinalCalc"></div>
             
             <button id="btnPdf" class="btn btn-pdf no-print">🖨️ Gerar PDF / Imprimir</button>
             <button id="btnLimpar" class="btn-danger-subtle no-print">Apagar Registros do Mês</button>
@@ -176,7 +180,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO PARA APAGAR -->
+    <!-- MODAL DE CONFIRMAÇÃO DE LIMPEZA -->
     <div id="modalConfirm" class="modal-backdrop" style="display:none;">
         <div class="modal-box">
             <h3>Confirmar Exclusão</h3>
