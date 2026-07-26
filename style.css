@@ -314,14 +314,14 @@ td {
     display: none;
 }
 
-/* MODAIS */
-.modal-overlay {
+/* === MODAIS E TELA DE BLOQUEIO === */
+.modal-overlay, .bloqueio-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -329,7 +329,12 @@ td {
     padding: 16px;
 }
 
-.modal-box {
+.bloqueio-container {
+    background-color: var(--bg-dark);
+    z-index: 9999;
+}
+
+.modal-box, .bloqueio-caixa {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 12px;
@@ -340,12 +345,13 @@ td {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
-.modal-box h3 {
-    font-size: 1.1rem;
+.modal-box h3, .bloqueio-caixa h2 {
+    font-size: 1.2rem;
     margin-bottom: 8px;
+    color: var(--text-main);
 }
 
-.modal-box p {
+.modal-box p, .bloqueio-caixa p {
     font-size: 0.85rem;
     color: var(--text-sub);
     margin-bottom: 20px;
@@ -390,7 +396,8 @@ td {
     .btn-icon-subtle,
     tr.row-abastecimento,
     .badge-posto-amber,
-    .modal-overlay {
+    .modal-overlay,
+    .bloqueio-container {
         display: none !important;
     }
 
@@ -416,7 +423,7 @@ td {
         font-size: 0.85rem;
     }
 
-    .container, .card {
+    .container, .card, .bloqueio-caixa {
         max-width: 100% !important;
         border: none !important;
         background: transparent !important;
