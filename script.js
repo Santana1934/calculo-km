@@ -33,7 +33,7 @@ const saldoCajuEl = document.getElementById('saldoCaju');
 const custoPorKmEl = document.getElementById('custoPorKm');
 const sobraLiquidaEl = document.getElementById('sobraLiquida');
 
-// GARANTE OS VALORES PADRÃO SE ESTIVEREM VAZIOS
+// GARANTE VALORES PADRÃO ROBUSTOS (FORÇA 300 SE ESTIVER VAZIO OU INVÁLIDO)
 function carregarConfiguracoes() {
     const nomeSalvo = localStorage.getItem('cfg_nome');
     const periodoSalvo = localStorage.getItem('cfg_periodo');
@@ -41,14 +41,19 @@ function carregarConfiguracoes() {
     const taxaSalva = localStorage.getItem('cfg_taxa');
     const cajuSalvo = localStorage.getItem('cfg_caju');
 
-    nomeTecnicoInput.value = (nomeSalvo !== null && nomeSalvo !== '') ? nomeSalvo : 'Diego Santana';
+    nomeTecnicoInput.value = (nomeSalvo && nomeSalvo.trim() !== '') ? nomeSalvo : 'Diego Santana';
     periodoInput.value = (periodoSalvo !== null) ? periodoSalvo : '';
-    ajudaCustoInput.value = (ajudaSalva !== null && ajudaSalva !== '') ? ajudaSalva : '300.00';
-    taxaKmInput.value = (taxaSalva !== null && taxaSalva !== '') ? taxaSalva : '1.30';
-    cartaoCajuInput.value = (cajuSalvo !== null && cajuSalvo !== '') ? cajuSalvo : '250.00';
+    ajudaCustoInput.value = (ajudaSalva && !isNaN(ajudaSalva) && parseFloat(ajudaSalva) > 0) ? ajudaSalva : '300.00';
+    taxaKmInput.value = (taxaSalva && !isNaN(taxaSalva) && parseFloat(taxaSalva) > 0) ? taxaSalva : '1.30';
+    cartaoCajuInput.value = (cajuSalvo && !isNaN(cajuSalvo) && parseFloat(cajuSalvo) >= 0) ? cajuSalvo : '250.00';
+
+    // Salva os padrões validados caso estivessem em branco no storage
+    localStorage.setItem('cfg_ajuda', ajudaCustoInput.value);
+    localStorage.setItem('cfg_taxa', taxaKmInput.value);
+    localStorage.setItem('cfg_caju', cartaoCajuInput.value);
 }
 
-// ALTERNÂNCIA DE MODO EXPOSTA GLOBALMENTE PARA O HTML
+// ALTERNÂNCIA DE MODO EXPOSTA GLOBALMENTE
 window.alternarModo = function(modo) {
     modoAtual = modo;
     if (modo === 'parada') {
@@ -99,9 +104,9 @@ btnToggleConfig.addEventListener('click', () => {
     } else {
         localStorage.setItem('cfg_nome', nomeTecnicoInput.value);
         localStorage.setItem('cfg_periodo', periodoInput.value);
-        localStorage.setItem('cfg_ajuda', ajudaCustoInput.value);
-        localStorage.setItem('cfg_taxa', taxaKmInput.value);
-        localStorage.setItem('cfg_caju', cartaoCajuInput.value);
+        localStorage.setItem('cfg_ajuda', ajudaCustoInput.value || '300.00');
+        localStorage.setItem('cfg_taxa', taxaKmInput.value || '1.30');
+        localStorage.setItem('cfg_caju', cartaoCajuInput.value || '250.00');
         btnToggleConfig.textContent = '🔒 Editar Parâmetros';
         atualizarCalculos();
     }
@@ -136,10 +141,14 @@ kmForm.addEventListener('submit', (e) => {
         adicionarRegistro(tipoFinal, localTexto || 'Parada', kmVal, protocoloOsInput.value, 0);
     } else {
         const valorGasto = parseFloat(valorPostoInput.value);
-        if (isNaN(valorGasto) || valorGasto <= 0) return;
+        if (isNaN(valorGasto) || valorGasto <= 0) {
+            alert('Por favor, informe um valor válido para o abastecimento.');
+            return;
+        }
 
         let kmVal = parseFloat(kmAtualInput.value);
         if (isNaN(kmVal)) {
+            // Se não preencheu o KM no posto, pega o último KM registrado ou 0
             kmVal = registros.length > 0 ? registros[registros.length - 1].km : 0;
         }
 
@@ -280,9 +289,9 @@ function atualizarCalculos() {
         kmTotalRodado = ultimoKm - primeiroKm;
     }
 
-    const ajudaCusto = parseFloat(ajudaCustoInput.value) || 0;
-    const taxa = parseFloat(taxaKmInput.value) || 0;
-    const cajuInicial = parseFloat(cartaoCajuInput.value) || 0;
+    const ajudaCusto = parseFloat(ajudaCustoInput.value) || 300;
+    const taxa = parseFloat(taxaKmInput.value) || 1.30;
+    const cajuInicial = parseFloat(cartaoCajuInput.value) || 250;
 
     const kmValorTotal = kmTotalRodado * taxa;
     const totalEmpresaPaga = ajudaCusto + kmValorTotal;
