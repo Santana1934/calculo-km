@@ -10,6 +10,7 @@ const periodoInput = document.getElementById('periodoRelatorio');
 const ajudaCustoInput = document.getElementById('ajudaCusto');
 const taxaKmInput = document.getElementById('taxaKm');
 const cartaoCajuInput = document.getElementById('cartaoCaju');
+const btnToggleConfig = document.getElementById('btnToggleConfig');
 
 const totalKmEl = document.getElementById('totalKm');
 const totalClientesEl = document.getElementById('totalClientes');
@@ -20,7 +21,8 @@ const saldoCajuEl = document.getElementById('saldoCaju');
 const custoPorKmEl = document.getElementById('custoPorKm');
 const sobraLiquidaEl = document.getElementById('sobraLiquida');
 
-let tipoAtual = 'cliente'; // Padrão: cliente
+let tipoAtual = 'cliente';
+let configEditavel = false;
 
 // Carregar Configurações
 nomeTecnicoInput.value = localStorage.getItem('cfg_nome') || 'Diego Santana';
@@ -28,6 +30,26 @@ periodoInput.value = localStorage.getItem('cfg_periodo') || '';
 ajudaCustoInput.value = localStorage.getItem('cfg_ajuda') || '300.00';
 taxaKmInput.value = localStorage.getItem('cfg_taxa') || '1.30';
 cartaoCajuInput.value = localStorage.getItem('cfg_caju') || '250.00';
+
+// Alternar Trava/Destrava das Configurações
+btnToggleConfig.addEventListener('click', () => {
+    configEditavel = !configEditavel;
+    const inputs = [nomeTecnicoInput, periodoInput, ajudaCustoInput, taxaKmInput, cartaoCajuInput];
+    
+    inputs.forEach(input => {
+        input.disabled = !configEditavel;
+    });
+
+    if (configEditavel) {
+        btnToggleConfig.textContent = '🔓 Salvar / Bloquear';
+        btnToggleConfig.style.background = 'var(--accent)';
+        btnToggleConfig.style.color = '#000';
+    } else {
+        btnToggleConfig.textContent = '🔒 Editar Parâmetros';
+        btnToggleConfig.style.background = '';
+        btnToggleConfig.style.color = '';
+    }
+});
 
 // Salvar Configurações
 [nomeTecnicoInput, periodoInput, ajudaCustoInput, taxaKmInput, cartaoCajuInput].forEach(elem => {
@@ -47,7 +69,6 @@ function preencherAtalho(nomeLocal, tipo) {
     protocoloOsInput.value = '';
 }
 
-// Reseta o tipo para 'cliente' se o usuário começar a digitar um nome manualmente
 clienteInput.addEventListener('input', () => {
     const val = clienteInput.value.toLowerCase().trim();
     if (val !== 'casa' && val !== 'empresa') {
@@ -78,7 +99,7 @@ function adicionarRegistro(tipo, descricao, km, protocoloOs = '', valorGasto = 0
         id: Date.now(),
         data: dataStr,
         hora: horaStr,
-        tipo: tipo, // 'cliente', 'base', 'posto'
+        tipo: tipo,
         descricao: descricao,
         protocoloOs: protocoloOs,
         km: km,
@@ -89,7 +110,7 @@ function adicionarRegistro(tipo, descricao, km, protocoloOs = '', valorGasto = 0
     clienteInput.value = '';
     protocoloOsInput.value = '';
     kmAtualInput.value = '';
-    tipoAtual = 'cliente'; // Volta ao padrão para o próximo lançamento
+    tipoAtual = 'cliente';
 }
 
 function deletarRegistro(id) {
