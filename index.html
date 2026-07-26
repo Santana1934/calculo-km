@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Operacional</title>
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
     <div class="container">
@@ -17,7 +17,7 @@
         <header class="pdf-header">
             <h2>RELATÓRIO OPERACIONAL DE ATENDIMENTOS</h2>
             <div class="pdf-meta">
-                <span><strong>TÉCNICO:</strong> <span id="pdf-tech-name">DIEGO SANTANA</span></span>
+                <span><strong>TÉCNICO:</strong> <span id="pdf-tech-name">___________________</span></span>
                 <span><strong>PERÍODO:</strong> <span id="pdf-period">JULHO/2026</span></span>
             </div>
             <div class="pdf-submeta">
@@ -36,7 +36,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>TÉCNICO</label>
-                    <input type="text" id="param-tech" value="DIEGO SANTANA" disabled>
+                    <input type="text" id="param-tech" placeholder="Nome do Técnico" disabled>
                 </div>
                 <div class="form-group">
                     <label>MÊS/ANO</label>
@@ -169,7 +169,7 @@
 
             <div class="no-print" style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px;">
                 <button class="btn-primary" onclick="printPDF()">🖨️ Gerar PDF / Imprimir</button>
-                <button class="btn-clear-all" onclick="clearAll()">Apagar Registros do Mês</button>
+                <button class="btn-clear-all" onclick="openConfirmModal()">Apagar Registros do Mês</button>
             </div>
         </div>
 
@@ -179,6 +179,19 @@
         </footer>
 
     </div>
-    <script src="script.js?v=7"></script>
+
+    <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO PARA APAGAR REGISTROS -->
+    <div id="modal-confirm" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3>⚠️ Confirmar Exclusão</h3>
+            <p>Deseja realmente apagar todos os registros do mês?</p>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" onclick="closeConfirmModal()">Cancelar</button>
+                <button class="btn-modal-danger" onclick="confirmClearAll()">Sim, Apagar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=10"></script>
 </body>
 </html>
