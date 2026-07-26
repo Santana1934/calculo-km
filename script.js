@@ -2,6 +2,7 @@ let registros = JSON.parse(localStorage.getItem('registros_km')) || [];
 
 // Elementos DOM
 const kmForm = document.getElementById('kmForm');
+const tipoRegistroInput = document.getElementById('tipoRegistro');
 const clienteInput = document.getElementById('cliente');
 const kmAtualInput = document.getElementById('kmAtual');
 const nomeTecnicoInput = document.getElementById('nomeTecnico');
@@ -10,6 +11,7 @@ const taxaKmInput = document.getElementById('taxaKm');
 const cartaoCajuInput = document.getElementById('cartaoCaju');
 
 const totalKmEl = document.getElementById('totalKm');
+const totalClientesEl = document.getElementById('totalClientes');
 const totalKmValorEl = document.getElementById('totalKmValor');
 const totalEmpresaEl = document.getElementById('totalEmpresa');
 const totalGastosPostoEl = document.getElementById('totalGastosPosto');
@@ -22,7 +24,7 @@ periodoInput.value = localStorage.getItem('cfg_periodo') || '';
 taxaKmInput.value = localStorage.getItem('cfg_taxa') || '1.30';
 cartaoCajuInput.value = localStorage.getItem('cfg_caju') || '250.00';
 
-// Salvar Configurações Automaticamente
+// Salvar Configurações
 [nomeTecnicoInput, periodoInput, taxaKmInput, cartaoCajuInput].forEach(elem => {
     elem.addEventListener('input', () => {
         localStorage.setItem('cfg_nome', nomeTecnicoInput.value);
@@ -36,7 +38,7 @@ cartaoCajuInput.value = localStorage.getItem('cfg_caju') || '250.00';
 // Ações do Formulário
 kmForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    adicionarRegistro('trajeto', clienteInput.value, parseFloat(kmAtualInput.value));
+    adicionarRegistro(tipoRegistroInput.value, clienteInput.value, parseFloat(kmAtualInput.value));
 });
 
 document.getElementById('btnPosto').addEventListener('click', () => {
@@ -48,10 +50,15 @@ document.getElementById('btnPosto').addEventListener('click', () => {
 });
 
 function adicionarRegistro(tipo, descricao, km, valorGasto = 0) {
+    const hoje = new Date();
+    const dataStr = hoje.toLocaleDateString('pt-BR');
+    const horaStr = hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
     const novoRegistro = {
         id: Date.now(),
-        data: new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }),
-        tipo: tipo,
+        data: dataStr,
+        hora: horaStr,
+        tipo: tipo, // 'cliente', 'base', 'posto'
         descricao: descricao,
         km: km,
         valorGasto: valorGasto
@@ -69,34 +76,83 @@ function deletarRegistro(id) {
 
 function salvarERenderizar() {
     localStorage.setItem('registros_km', JSON.stringify(registros));
-    renderizarTabela();
+    renderizarHistoricoAgrupado();
     atualizarCalculos();
 }
 
-function renderizarTabela() {
-    const tbody = document.getElementById('listaRegistros');
-    tbody.innerHTML = '';
-    let kmAnterior = null;
+function renderizarHistoricoAgrupado() {
+    const conteiner = document.getElementById('historicoAgrupado');
+    conteiner.innerHTML = '';
 
-    registros.forEach((reg) => {
-        const tr = document.createElement('tr');
-        if (reg.tipo === 'posto') tr.classList.add('row-posto');
+    if (registros.length === 0) {
+        conteiner.innerHTML = '<p style="text-align:center; color:var(--sub); font-size:0.85rem; padding:15px;">Nenhum registro efetuado este mês.</p>';
+        return;
+    }
 
-        let trechoKm = 0;
-        if (reg.tipo === 'trajeto' && kmAnterior !== null) {
-            trechoKm = reg.km - kmAnterior;
-            if (trechoKm < 0) trechoKm = 0;
-        }
-        if (reg.tipo === 'trajeto') kmAnterior = reg.km;
+    // Agrupar registros por Data
+    const agrupadoPorData = {};
+    registros.forEach(reg => {
+        if (!agrupadoPorData[reg.data]) agrupadoPorData[reg.data] = [];
+        agrupadoPorData[reg.data].push(reg);
+    });
 
-        tr.innerHTML = `
-            <td>${reg.data}</td>
-            <td>${reg.descricao}</td>
-            <td>${reg.km ? reg.km + ' KM' : '-'}</td>
-            <td>${reg.tipo === 'trajeto' ? '+' + trechoKm + ' KM' : '-'}</td>
-            <td><button class="btn-del" onclick="deletarRegistro(${reg.id})">❌</button></td>
-        `;
-        tbody.appendChild(tr);
+    let kmAnteriorGeral = null;
+
+    Object.keys(agrupadoPorData).forEach(data => {
+        const diaBloco = document.createElement('div');
+        diaBloco.style.cssText = 'margin-bottom: 20px; background:#181818; border-radius:8px; padding:10px; border:1px solid var(--border);';
+
+        let diaHtml = `<div style="font-weight:bold; color:var(--accent); margin-bottom:8px; font-size:0.85rem; border-bottom:1px solid var(--border); padding-bottom:4px;">📅 ${data}</div>`;
+        diaHtml += `<div class="table-responsive"><table>
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    <th>Local / Tipo</th>
+                    <th>KM Painel</th>
+                    <th>Trecho</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        let primeiroKmDia = null;
+        let ultimoKmDia = null;
+
+        agrupadoPorData[data].forEach(reg => {
+            let trechoKm = 0;
+            if (reg.tipo !== 'posto') {
+                if (kmAnteriorGeral !== null) {
+                    trechoKm = reg.km - kmAnteriorGeral;
+                    if (trechoKm < 0) trechoKm = 0;
+                }
+                kmAnteriorGeral = reg.km;
+                if (primeiroKmDia === null) primeiroKmDia = reg.km;
+                ultimoKmDia = reg.km;
+            }
+
+            const badgeTipo = reg.tipo === 'cliente' ? '👤' : (reg.tipo === 'base' ? '🏢' : '⛽');
+            const classeLinha = reg.tipo === 'posto' ? 'class="row-posto"' : '';
+
+            diaHtml += `
+                <tr ${classeLinha}>
+                    <td>${reg.hora || ''}</td>
+                    <td>${badgeTipo} ${reg.descricao}</td>
+                    <td>${reg.km ? reg.km + ' KM' : '-'}</td>
+                    <td>${reg.tipo !== 'posto' ? '+' + trechoKm + ' KM' : '-'}</td>
+                    <td><button class="btn-del" onclick="deletarRegistro(${reg.id})">❌</button></td>
+                </tr>
+            `;
+        });
+
+        let totalDiaKm = (primeiroKmDia !== null && ultimoKmDia !== null) ? (ultimoKmDia - primeiroKmDia) : 0;
+
+        diaHtml += `</tbody></table></div>`;
+        diaHtml += `<div style="text-align:right; font-size:0.8rem; font-weight:bold; color:#fff; margin-top:6px; background:#262626; padding:6px 10px; border-radius:4px;">
+            Total Rodado no Dia: <span style="color:var(--accent);">${totalDiaKm} KM</span>
+        </div>`;
+
+        diaBloco.innerHTML = diaHtml;
+        conteiner.appendChild(diaBloco);
     });
 }
 
@@ -105,9 +161,14 @@ function atualizarCalculos() {
     let primeiroKm = null;
     let ultimoKm = null;
     let totalGastosPosto = 0;
+    let contadorClientes = 0;
 
     registros.forEach((reg) => {
-        if (reg.tipo === 'trajeto') {
+        if (reg.tipo === 'cliente') {
+            contadorClientes++;
+        }
+        
+        if (reg.tipo !== 'posto') {
             if (primeiroKm === null) primeiroKm = reg.km;
             ultimoKm = reg.km;
         } else if (reg.tipo === 'posto') {
@@ -128,6 +189,7 @@ function atualizarCalculos() {
     const sobraLiquida = (ajudaCustoFixa + kmValorTotal) - (totalGastosPosto - caju);
 
     totalKmEl.textContent = `${kmTotalRodado} KM`;
+    totalClientesEl.textContent = `${contadorClientes}`;
     totalKmValorEl.textContent = `R$ ${kmValorTotal.toFixed(2)}`;
     totalEmpresaEl.textContent = `R$ ${totalEmpresaPaga.toFixed(2)}`;
     totalGastosPostoEl.textContent = `R$ ${totalGastosPosto.toFixed(2)}`;
