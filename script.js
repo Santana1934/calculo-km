@@ -26,7 +26,7 @@ let lastKmInput = parseFloat(localStorage.getItem('last_km_input')) || 0;
 
 let params = JSON.parse(localStorage.getItem('km_params')) || {
     tech: '',
-    period: 'JULHO/2026',
+    period: '',
     basePay: 300,
     kmRate: 1.30,
     caju: 250
@@ -41,7 +41,7 @@ function initParamsUI() {
     document.getElementById('param-caju').value = params.caju;
 
     document.getElementById('pdf-tech-name').innerText = params.tech || '___________________';
-    document.getElementById('pdf-period').innerText = params.period;
+    document.getElementById('pdf-period').innerText = params.period || '___________________';
     document.getElementById('pdf-base-pay').innerText = parseFloat(params.basePay).toFixed(2);
     document.getElementById('pdf-km-rate').innerText = parseFloat(params.kmRate).toFixed(2);
     document.getElementById('pdf-caju-budget').innerText = parseFloat(params.caju).toFixed(2);
@@ -65,7 +65,7 @@ function toggleEditParams() {
         btn.style.color = '#fff';
     } else {
         params.tech = document.getElementById('param-tech').value.trim();
-        params.period = document.getElementById('param-period').value || 'JULHO/2026';
+        params.period = document.getElementById('param-period').value.trim();
         params.basePay = parseFloat(document.getElementById('param-base-pay').value) || 0;
         params.kmRate = parseFloat(document.getElementById('param-km-rate').value) || 0;
         params.caju = parseFloat(document.getElementById('param-caju').value) || 0;
