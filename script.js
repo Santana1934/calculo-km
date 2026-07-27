@@ -196,7 +196,6 @@ function updateSummaryAndHistory() {
     const kmRate = parseFloat(state.settings.kmRate) || 0;
     const cardRequested = parseFloat(state.settings.cardRequested) || 0;
 
-    // Calcular KM percorrido relativo
     let lastKm = 0;
     const sortedTravels = [...state.records]
         .filter(r => r.type === "travel")
@@ -235,7 +234,6 @@ function renderHistory() {
         return;
     }
 
-    // Agrupar por data (dia)
     const grouped = {};
     state.records.forEach(r => {
         const dateStr = new Date(r.id).toLocaleDateString("pt-BR");
