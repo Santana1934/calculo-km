@@ -1,10 +1,10 @@
 {
-  "name": "Controle Operacional KM",
-  "short_name": "KM Pessoal",
+  "name": "Controle Operacional",
+  "short_name": "Controle KM",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
   "icons": [
     {
       "src": "icon-192.png",
