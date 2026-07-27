@@ -3,18 +3,13 @@
   "short_name": "Controle KM",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0d6efd",
+  "background_color": "#0b0f19",
+  "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M130 340l80-100 70 50 110-130' stroke='%2310b981' stroke-width='28' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='130' cy='340' r='20' fill='%2310b981'/%3E%3Ccircle cx='210' cy='240' r='18' fill='%2310b981'/%3E%3Ccircle cx='280' cy='290' r='18' fill='%2310b981'/%3E%3Ccircle cx='390' cy='160' r='22' fill='%2310b981'/%3E%3C/svg%3E",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
     }
   ]
 }
