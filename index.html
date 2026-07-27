@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Operacional</title>
     <link rel="stylesheet" href="style.css?v=14">
+    <!-- ADIÇÃO PWA: Manifesto e Cor do Tema -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
 </head>
 <body>
     <!-- TELA DE BLOQUEIO -->
@@ -230,5 +233,13 @@
     </div>
 
     <script src="script.js?v=14"></script>
+    <!-- ADIÇÃO PWA: Registro do Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+          .then(() => console.log('Service Worker registrado com sucesso!'))
+          .catch((error) => console.log('Falha ao registrar o Service Worker:', error));
+      }
+    </script>
 </body>
 </html>
