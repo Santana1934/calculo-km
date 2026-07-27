@@ -1,10 +1,3 @@
-const ACCESS_KEY = "ACESSO@KM";
-
-const authScreen = document.getElementById("auth-screen");
-const appScreen = document.getElementById("app-screen");
-const accessKeyInput = document.getElementById("access-key-input");
-const btnLogin = document.getElementById("btn-login");
-
 const tabBtns = document.querySelectorAll(".tab-btn");
 const formTravel = document.getElementById("form-travel");
 const formFuel = document.getElementById("form-fuel");
@@ -86,15 +79,6 @@ function saveData() {
 }
 
 function setupListeners() {
-    btnLogin.addEventListener("click", () => {
-        if (accessKeyInput.value === ACCESS_KEY) {
-            authScreen.classList.remove("active");
-            appScreen.classList.add("active");
-        } else {
-            alert("Chave incorreta!");
-        }
-    });
-
     tabBtns.forEach(btn => {
         btn.addEventListener("click", () => {
             tabBtns.forEach(b => b.classList.remove("active"));
@@ -225,7 +209,7 @@ function updateUI() {
     const reimbursement = totalKm * state.settings.kmRate;
     const fixedAid = state.settings.fixedAid;
     const cajuRequested = state.settings.cardRequested;
-    const netLiquid = fixedAid + reimbursement - totalFuel; // Ajuste conforme lógica de sobra líquida
+    const netLiquid = fixedAid + reimbursement - totalFuel;
     const cajuRemaining = cajuRequested - totalFuel;
     const costPerKm = totalKm > 0 ? (totalFuel / totalKm) : 0;
 
