@@ -10,6 +10,39 @@
     <!-- Ícone PWA: Monograma Técnico "KM" Perfeito e Profissional -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
+    <style>
+        /* Estilo específico para a chave seletora e transparência do placeholder */
+        .mode-selector-app {
+            background: #1e293b;
+            padding: 4px;
+            border-radius: 8px;
+            display: flex;
+            gap: 4px;
+            margin-bottom: 15px;
+        }
+        .mode-btn-app {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.2s;
+        }
+        .mode-btn-app.active {
+            background: #38bdf8;
+            color: #0f172a;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        /* Transparência no placeholder solicitada */
+        input::placeholder {
+            color: #94a3b8;
+            opacity: 0.7;
+        }
+    </style>
 </head>
 <body>
     <!-- Botão de Instalação PWA (Discreto no topo, aparece apenas quando o navegador permite) -->
@@ -73,7 +106,8 @@
                 </div>
                 <div class="form-group">
                     <label>R$ / KM (EMPRESA)</label>
-                    <input type="number" id="param-km-rate" value="1.30" step="0.01" disabled>
+                    <!-- Campo KM Empresa atualizado com placeholder transparente Ex: 1.20 conforme solicitado -->
+                    <input type="number" id="param-km-rate" value="1.30" step="0.01" placeholder="Ex: 1.20" disabled>
                 </div>
                 <div class="form-group full-width">
                     <label>VALOR SOLICITADO EM CARTÃO DO MÊS (R$)</label>
@@ -90,6 +124,12 @@
             </div>
 
             <div id="fields-parada">
+                <!-- Chave Seletora de Modo de Entrada (Odômetro vs Distância Direta) -->
+                <div class="mode-selector-app">
+                    <button type="button" class="mode-btn-app active" id="btnInputOdometro" onclick="setInputMode('odometro')">Modo Odômetro (Painel)</button>
+                    <button type="button" class="mode-btn-app" id="btnInputDistancia" onclick="setInputMode('distancia')">Modo Distância Direta</button>
+                </div>
+
                 <label class="label-section">ATALHOS RÁPIDOS</label>
                 <div class="shortcut-buttons">
                     <button type="button" class="btn-shortcut" onclick="setShortcut('Casa')">🏠 Casa</button>
@@ -104,10 +144,18 @@
                     <label>Nº PROTOCOLO (OPCIONAL)</label>
                     <input type="text" id="input-os" placeholder="Ex: 98452">
                 </div>
-                <div class="form-group">
+                
+                <!-- Campos dinâmicos baseados no modo selecionado -->
+                <div id="groupOdometroInput" class="form-group">
                     <label>KM ATUAL DO PAINEL</label>
                     <input type="number" id="input-km" placeholder="Ex: 80">
                 </div>
+
+                <div id="groupDistanciaInput" class="form-group" style="display: none;">
+                    <label>KM RODADOS NO TRECHO (MAPA/MANUAL)</label>
+                    <input type="number" id="input-km-trecho" step="0.1" placeholder="Ex: 15.5">
+                </div>
+
                 <button class="btn-action-green" onclick="addEntry()">Salvar Parada</button>
             </div>
 
@@ -240,6 +288,31 @@
             </div>
         </div>
     </div>
+
+    <!-- Script de Controle da Chave Seletora de Modo de Entrada -->
+    <script>
+        let inputMode = 'odometro';
+
+        function setInputMode(mode) {
+            inputMode = mode;
+            const btnOdo = document.getElementById('btnInputOdometro');
+            const btnDist = document.getElementById('btnInputDistancia');
+            const groupOdo = document.getElementById('groupOdometroInput');
+            const groupDist = document.getElementById('groupDistanciaInput');
+
+            if (mode === 'odometro') {
+                btnOdo.classList.add('active');
+                btnDist.classList.remove('active');
+                groupOdo.style.display = 'block';
+                groupDist.style.display = 'none';
+            } else {
+                btnDist.classList.add('active');
+                btnOdo.classList.remove('active');
+                groupOdo.style.display = 'none';
+                groupDist.style.display = 'block';
+            }
+        }
+    </script>
 
     <!-- Script de Gatilho de Instalação PWA -->
     <script>
