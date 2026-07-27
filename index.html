@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Operacional</title>
     <link rel="stylesheet" href="style.css?v=14">
-    <!-- ADIÇÃO PWA: Manifesto e Cor do Tema -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0d6efd">
 </head>
 <body>
     <!-- TELA DE BLOQUEIO -->
@@ -52,7 +49,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>TÉCNICO</label>
-                    <input type="text" id="param-tech" placeholder="Seu Nome" disabled>
+                    <input type="text" id="param-tech" placeholder="Ex: João da Silva" disabled>
                 </div>
                 <div class="form-group">
                     <label>MÊS/ANO</label>
@@ -68,7 +65,7 @@
                 </div>
                 <div class="form-group full-width">
                     <label>VALOR SOLICITADO EM CARTÃO DO MÊS (R$)</label>
-                    <input type="number" id="param-caju" placeholder="Ex: 500" step="0.01" disabled>
+                    <input type="number" id="param-caju" placeholder="Ex: 250" step="0.01" disabled>
                 </div>
             </div>
         </div>
@@ -184,7 +181,7 @@
             </div>
 
             <div class="no-print" style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px;">
-                <button class="btn-primary" onclick="printPDF()">🖨️ Gerar PDF / Imprimir</button>
+                <button class="btn-subtle" onclick="printPDF()" style="width: 100%; padding: 12px; font-weight: 600; cursor: pointer;">🖨️ Gerar PDF / Imprimir</button>
                 <button class="btn-clear-all" onclick="openConfirmModal()">Apagar Registros do Mês</button>
             </div>
         </div>
@@ -233,13 +230,5 @@
     </div>
 
     <script src="script.js?v=14"></script>
-    <!-- ADIÇÃO PWA: Registro do Service Worker -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-          .then(() => console.log('Service Worker registrado com sucesso!'))
-          .catch((error) => console.log('Falha ao registrar o Service Worker:', error));
-      }
-    </script>
 </body>
 </html>
