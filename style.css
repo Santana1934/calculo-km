@@ -6,9 +6,9 @@
 }
 
 body {
-    background-color: #0d1117;
+    background-color: #0b0f15;
     color: #c9d1d9;
-    padding: 16px;
+    padding: 12px;
 }
 
 .lock-screen-overlay {
@@ -17,7 +17,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #0d1117;
+    background-color: #0b0f15;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -48,7 +48,7 @@ body {
 .lock-card input {
     width: 100%;
     padding: 12px;
-    background-color: #0d1117;
+    background-color: #0b0f15;
     border: 1px solid #30363d;
     border-radius: 6px;
     color: #fff;
@@ -82,7 +82,7 @@ body {
 
 header {
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 header h1 {
@@ -94,19 +94,19 @@ header h1 {
     background-color: #161b22;
     border: 1px solid #30363d;
     border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 14px;
+    padding: 12px;
+    margin-bottom: 12px;
 }
 
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .card-header h2 {
-    font-size: 14px;
+    font-size: 13px;
     color: #f0f6fc;
 }
 
@@ -114,21 +114,22 @@ header h1 {
     background-color: #21262d;
     color: #c9d1d9;
     border: 1px solid #30363d;
-    padding: 5px 10px;
+    padding: 5px 8px;
     border-radius: 6px;
-    font-size: 11px;
+    font-size: 10px;
     cursor: pointer;
 }
 
 .input-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
 }
 
 .input-group {
     display: flex;
     flex-direction: column;
+    min-width: 0; /* Evita que inputs estourem o grid no celular */
 }
 
 .input-group.full-width {
@@ -136,19 +137,23 @@ header h1 {
 }
 
 .input-group label {
-    font-size: 10px;
+    font-size: 9px;
     color: #8b949e;
     margin-bottom: 4px;
     font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .input-group input {
-    background-color: #0d1117;
+    background-color: #0b0f15;
     border: 1px solid #30363d;
     border-radius: 6px;
     padding: 8px;
     color: #f0f6fc;
-    font-size: 13px;
+    font-size: 12px;
+    width: 100%;
 }
 
 .input-group input:disabled {
@@ -170,7 +175,7 @@ header h1 {
     border: 1px solid #30363d;
     border-radius: 6px;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
 }
 
@@ -180,15 +185,15 @@ header h1 {
 }
 
 .shortcuts-container {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .shortcuts-label {
-    font-size: 10px;
+    font-size: 9px;
     color: #8b949e;
     font-weight: bold;
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .shortcuts-grid {
@@ -203,7 +208,7 @@ header h1 {
     color: #c9d1d9;
     border: 1px solid #30363d;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
 }
 
@@ -214,34 +219,34 @@ header h1 {
     border: none;
     border-radius: 6px;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
 }
 
 .summary-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
 }
 
 .summary-box {
-    background-color: #0d1117;
+    background-color: #0b0f15;
     border: 1px solid #30363d;
     border-radius: 8px;
-    padding: 10px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
 }
 
 .summary-title {
-    font-size: 9px;
+    font-size: 8px;
     color: #8b949e;
     font-weight: bold;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
 }
 
 .summary-value {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: bold;
     color: #f0f6fc;
 }
@@ -249,7 +254,7 @@ header h1 {
 .detail-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     color: #8b949e;
 }
 
@@ -259,13 +264,13 @@ header h1 {
 
 .app-footer {
     text-align: center;
-    margin-top: 20px;
-    font-size: 11px;
+    margin-top: 16px;
+    font-size: 10px;
     color: #8b949e;
 }
 
 .signature {
-    margin-top: 6px;
+    margin-top: 4px;
     font-weight: bold;
     color: #f0f6fc;
     letter-spacing: 0.5px;
