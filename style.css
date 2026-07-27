@@ -53,17 +53,6 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-.auth-card h2, .modal-content h3 {
-    margin-bottom: 8px;
-    color: #fff;
-}
-
-.auth-card p {
-    color: var(--text-muted);
-    margin-bottom: 16px;
-    font-size: 0.9rem;
-}
-
 header {
     display: flex;
     justify-content: space-between;
