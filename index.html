@@ -10,27 +10,90 @@
 </head>
 <body>
 
-    <!-- Botão de Instalação PWA (Aparece apenas se a instalação estiver pendente) -->
-    <div id="install-container" style="display: none; text-align: center; padding: 12px; background-color: #e7f1ff; border-bottom: 1px solid #b6d4fe;">
-        <button id="btn-install" style="background-color: #0d6efd; color: #ffffff; border: none; padding: 10px 20px; font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+    <!-- Botão de Instalação PWA (Discreto no topo, aparece apenas quando pronto) -->
+    <div id="install-container" style="display: none; text-align: center; padding: 10px; background-color: #e7f1ff; border-bottom: 1px solid #b6d4fe;">
+        <button id="btn-install" style="background-color: #0d6efd; color: #ffffff; border: none; padding: 8px 16px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
             📲 Instalar Aplicativo
         </button>
     </div>
 
-    <!-- Cabeçalho Principal -->
-    <header style="text-align: center; padding: 15px 0;">
-        <h1>Controle de KM Pessoal</h1>
-    </header>
+    <!-- TELA DE BLOQUEIO / SENHA (Se aplicável ao seu projeto original) -->
+    <div id="lock-screen" class="lock-container">
+        <div class="lock-box">
+            <h2>🔒 Controle de KM</h2>
+            <p>Digite sua senha de acesso:</p>
+            <input type="password" id="access-password" placeholder="Senha">
+            <button id="btn-unlock">Entrar</button>
+            <p id="lock-error" class="error-msg" style="color: red; display: none;">Senha incorreta</p>
+        </div>
+    </div>
 
-    <!-- Estrutura Principal do Aplicativo -->
-    <main id="app-container">
-        <!-- Todo o layout, parâmetros, formulários e históricos continuam vinculados via script.js -->
-    </main>
+    <!-- CONTEÚDO PRINCIPAL DO APLICATIVO -->
+    <div id="main-app" class="app-content">
+        <!-- Cabeçalho -->
+        <header class="app-header">
+            <h1>Controle de KM Pessoal</h1>
+        </header>
 
-    <!-- Script de Lógica do Aplicativo -->
+        <!-- Container Principal / Formulários / Parâmetros -->
+        <div class="container">
+            <!-- Parâmetros Financeiros -->
+            <section class="card">
+                <h2>Parâmetros</h2>
+                <div class="input-group">
+                    <label for="valor-km">Valor por KM (R$):</label>
+                    <input type="number" id="valor-km" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label for="valor-ajuda">Ajuda de Custo Diária (R$):</label>
+                    <input type="number" id="valor-ajuda" step="0.01">
+                </div>
+            </section>
+
+            <!-- Registro de Viagens / Despesas -->
+            <section class="card">
+                <h2>Registro de Viagem</h2>
+                <form id="trip-form">
+                    <div class="input-group">
+                        <label for="km-inicial">KM Inicial:</label>
+                        <input type="number" id="km-inicial" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="km-final">KM Final:</label>
+                        <input type="number" id="km-final" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="litros-abastecidos">Litros Abastecidos:</label>
+                        <input type="number" id="litros-abastecidos" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label for="valor-combustivel">Valor Total Combustível (R$):</label>
+                        <input type="number" id="valor-combustivel" step="0.01">
+                    </div>
+                    <button type="submit" class="btn-primary">Salvar Lançamento</button>
+                </form>
+            </section>
+
+            <!-- Resumo e Histórico -->
+            <section class="card">
+                <h2>Resumo do Mês</h2>
+                <div id="summary-content">
+                    <!-- Preenchido dinamicamente pelo script.js -->
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Histórico</h2>
+                <div id="history-list">
+                    <!-- Preenchido dinamicamente pelo script.js -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Scripts de Lógica e PWA -->
     <script src="script.js"></script>
 
-    <!-- Script de Controle da Instalação do PWA -->
     <script>
         let deferredPrompt;
         const installContainer = document.getElementById('install-container');
@@ -49,11 +112,10 @@
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        console.log('Instalação aceita pelo usuário');
-                    }
                     deferredPrompt = null;
-                    installContainer.style.display = 'none';
+                    if (installContainer) {
+                        installContainer.style.display = 'none';
+                    }
                 }
             });
         }
@@ -62,7 +124,6 @@
             if (installContainer) {
                 installContainer.style.display = 'none';
             }
-            console.log('PWA instalado com sucesso');
         });
     </script>
 </body>
