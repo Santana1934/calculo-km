@@ -1,9 +1,20 @@
 {
-  "short_name": "FS KM",
-  "name": "Field Service KM",
-  "icons": [],
-  "start_url": "/index.html",
-  "background_color": "#121212",
-  "theme_color": "#121212",
-  "display": "standalone"
+  "name": "Controle Operacional KM",
+  "short_name": "KM Pessoal",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
