@@ -1,6 +1,6 @@
 {
-  "name": "Controle KM Profissional",
-  "short_name": "KM Pro",
+  "name": "Controle Operacional KM",
+  "short_name": "KM Pessoal",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0d1117",
