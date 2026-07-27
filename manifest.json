@@ -1,9 +1,9 @@
 {
-  "name": "Field Service KM",
   "short_name": "FS KM",
-  "start_url": "index.html",
-  "display": "standalone",
+  "name": "Field Service KM",
+  "icons": [],
+  "start_url": "/index.html",
   "background_color": "#121212",
   "theme_color": "#121212",
-  "icons": []
+  "display": "standalone"
 }
