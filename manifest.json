@@ -3,11 +3,11 @@
   "short_name": "Controle KM",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0d6efd",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "icon.svg",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M130 350V162h52l64 96 64-96h52v188h-42V226l-58 84h-32l-58-84v124z' fill='%2338bdf8'/%3E%3Cpath d='M360 270h32v80h-32z' fill='%2334d399'/%3E%3Ccircle cx='376' cy='230' r='18' fill='%2334d399'/%3E%3C/svg%3E",
       "sizes": "any",
       "type": "image/svg+xml"
     }
