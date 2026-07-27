@@ -3,235 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Operacional</title>
-    <link rel="stylesheet" href="style.css?v=14">
-    <!-- Ícone Profissional PWA (Compatível com Android e iOS) -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M130 340l80-100 70 50 110-130' stroke='%2310b981' stroke-width='28' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='130' cy='340' r='20' fill='%2310b981'/%3E%3Ccircle cx='210' cy='240' r='18' fill='%2310b981'/%3E%3Ccircle cx='280' cy='290' r='18' fill='%2310b981'/%3E%3Ccircle cx='390' cy='160' r='22' fill='%2310b981'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M130 340l80-100 70 50 110-130' stroke='%2310b981' stroke-width='28' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='130' cy='340' r='20' fill='%2310b981'/%3E%3Ccircle cx='210' cy='240' r='18' fill='%2310b981'/%3E%3Ccircle cx='280' cy='290' r='18' fill='%2310b981'/%3E%3Ccircle cx='390' cy='160' r='22' fill='%2310b981'/%3E%3C/svg%3E">
+    <title>Controle de KM Pessoal</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- TELA DE BLOQUEIO -->
-    <div id="tela-bloqueio" class="bloqueio-container">
-        <div class="bloqueio-caixa card">
-            <h2>🔒 Acesso Restrito</h2>
-            <p>App de uso exclusivo.<br>Insira a chave para liberar o aplicativo.</p>
-            <input type="password" id="chave-input" placeholder="Digite a chave..." style="margin-bottom: 12px; text-align: center;">
-            <button class="btn-action-green" onclick="verificarChave()">Liberar Acesso</button>
-            <p id="erro-chave" style="color: var(--danger); font-size: 0.8rem; display: none; margin-top: 15px; font-weight: 600;">
-                ❌ Chave incorreta. Entre em contato com Diego Santana.
-            </p>
-        </div>
+
+    <!-- Botão de Instalação PWA (Aparece apenas se a instalação estiver pendente) -->
+    <div id="install-container" style="display: none; text-align: center; padding: 12px; background-color: #e7f1ff; border-bottom: 1px solid #b6d4fe;">
+        <button id="btn-install" style="background-color: #0d6efd; color: #ffffff; border: none; padding: 10px 20px; font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+            📲 Instalar Aplicativo
+        </button>
     </div>
 
-    <div class="container">
-        
-        <header class="no-print">
-            <h1>Controle Operacional</h1>
-        </header>
+    <!-- Cabeçalho Principal -->
+    <header style="text-align: center; padding: 15px 0;">
+        <h1>Controle de KM Pessoal</h1>
+    </header>
 
-        <!-- CABEÇALHO PARA IMPRESSÃO / PDF -->
-        <header class="pdf-header">
-            <h2>RELATÓRIO OPERACIONAL DE ATENDIMENTOS</h2>
-            <div class="pdf-meta">
-                <span><strong>TÉCNICO:</strong> <span id="pdf-tech-name">___________________</span></span>
-                <span><strong>PERÍODO:</strong> <span id="pdf-period">JULHO/2026</span></span>
-            </div>
-            <div class="pdf-submeta">
-                <span>Ajuda de Custo Fixa: R$ <span id="pdf-base-pay">300.00</span></span> | 
-                <span>Valor por KM (Empresa): R$ <span id="pdf-km-rate">1.30</span></span> | 
-                <span>Cartão (Combustível Solicitado): R$ <span id="pdf-caju-budget">250.00</span></span>
-            </div>
-        </header>
+    <!-- Estrutura Principal do Aplicativo -->
+    <main id="app-container">
+        <!-- Todo o layout, parâmetros, formulários e históricos continuam vinculados via script.js -->
+    </main>
 
-        <!-- CARD 1: PARÂMETROS FINANCEIROS -->
-        <div class="card no-print">
-            <div class="card-header-flex">
-                <h3>⚙️ Parâmetros Financeiros</h3>
-                <button id="btn-edit-params" class="btn-subtle" onclick="toggleEditParams()">🔒 Editar Parâmetros</button>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>TÉCNICO</label>
-                    <input type="text" id="param-tech" placeholder="Ex: João da Silva" disabled>
-                </div>
-                <div class="form-group">
-                    <label>MÊS/ANO</label>
-                    <input type="text" id="param-period" placeholder="Ex: JULHO/2026" disabled>
-                </div>
-                <div class="form-group">
-                    <label>AJUDA DE CUSTO FIXA (R$)</label>
-                    <input type="number" id="param-base-pay" value="300" step="0.01" disabled>
-                </div>
-                <div class="form-group">
-                    <label>R$ / KM (EMPRESA)</label>
-                    <input type="number" id="param-km-rate" value="1.30" step="0.01" disabled>
-                </div>
-                <div class="form-group full-width">
-                    <label>VALOR SOLICITADO EM CARTÃO DO MÊS (R$)</label>
-                    <input type="number" id="param-caju" placeholder="Ex: 250" step="0.01" disabled>
-                </div>
-            </div>
-        </div>
+    <!-- Script de Lógica do Aplicativo -->
+    <script src="script.js"></script>
 
-        <!-- CARD 2: LANÇAMENTO DE REGISTRO -->
-        <div class="card no-print">
-            <div class="mode-switch">
-                <button id="btn-mode-parada" class="mode-btn active" onclick="setMode('parada')">🚗 Parada / Cliente</button>
-                <button id="btn-mode-abastecimento" class="mode-btn" onclick="setMode('abastecimento')">⛽ Abastecimento</button>
-            </div>
+    <!-- Script de Controle da Instalação do PWA -->
+    <script>
+        let deferredPrompt;
+        const installContainer = document.getElementById('install-container');
+        const btnInstall = document.getElementById('btn-install');
 
-            <div id="fields-parada">
-                <label class="label-section">ATALHOS RÁPIDOS</label>
-                <div class="shortcut-buttons">
-                    <button type="button" class="btn-shortcut" onclick="setShortcut('Casa')">🏠 Casa</button>
-                    <button type="button" class="btn-shortcut" onclick="setShortcut('Empresa')">🏢 Empresa</button>
-                </div>
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installContainer) {
+                installContainer.style.display = 'block';
+            }
+        });
 
-                <div class="form-group">
-                    <label>CLIENTE / LOCAL</label>
-                    <input type="text" id="input-client" placeholder="Ex: Cliente XYZ ou Av. Paulista">
-                </div>
-                <div class="form-group">
-                    <label>Nº PROTOCOLO (OPCIONAL)</label>
-                    <input type="text" id="input-os" placeholder="Ex: 98452">
-                </div>
-                <div class="form-group">
-                    <label>KM ATUAL DO PAINEL</label>
-                    <input type="number" id="input-km" placeholder="Ex: 80">
-                </div>
-                <button class="btn-action-green" onclick="addEntry()">Salvar Parada</button>
-            </div>
+        if (btnInstall) {
+            btnInstall.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('Instalação aceita pelo usuário');
+                    }
+                    deferredPrompt = null;
+                    installContainer.style.display = 'none';
+                }
+            });
+        }
 
-            <div id="fields-abastecimento" style="display: none;">
-                <div class="form-group" style="margin-top: 10px;">
-                    <label>VALOR DO ABASTECIMENTO (R$)</label>
-                    <input type="number" id="input-fuel" placeholder="Ex: 100.00" step="0.01">
-                </div>
-                <button class="btn-action-green" onclick="addEntry()">Salvar Abastecimento</button>
-            </div>
-        </div>
-
-        <!-- CARD 3: RESUMO GERAL -->
-        <div class="card no-print">
-            <h3>📊 Resumo Geral</h3>
-            <div class="dashboard-grid">
-                <div class="dash-box">
-                    <span>TOTAL RODADO</span>
-                    <strong id="dash-total-km">0 KM</strong>
-                </div>
-                <div class="dash-box">
-                    <span>CLIENTES ATENDIDOS</span>
-                    <strong id="dash-total-clients">0</strong>
-                </div>
-                <div class="dash-box">
-                    <span>REEMBOLSO KM</span>
-                    <strong id="dash-reimbursement-km">R$ 0.00</strong>
-                </div>
-                <div class="dash-box highlight-green">
-                    <span>SOBRA LÍQUIDA REAL</span>
-                    <strong id="dash-net-profit">R$ 300.00</strong>
-                </div>
-            </div>
-
-            <div class="summary-details">
-                <div class="summary-line">
-                    <span>💰 Ajuda de Custo Fixa:</span>
-                    <strong id="detail-base-pay">R$ 300.00</strong>
-                </div>
-                <div class="summary-line">
-                    <span>⛽ Total Gasto no Posto:</span>
-                    <strong id="detail-total-fuel">R$ 0.00</strong>
-                </div>
-                <div class="summary-line">
-                    <span>💳 Saldo Cartão Restante:</span>
-                    <strong id="detail-caju-remaining">R$ 250.00</strong>
-                </div>
-                <div class="summary-line">
-                    <span>✏️ Seu Custo por KM Rodado:</span>
-                    <strong id="detail-cost-per-km">R$ 0.00/KM</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- CARD 4: HISTÓRICO E TABELA -->
-        <div class="card">
-            <h3 class="no-print" style="margin-bottom: 12px;">📅 Histórico por Dia</h3>
-            
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Cliente / Local</th>
-                            <th>Protocolo / OS</th>
-                            <th>KM Rodado</th>
-                            <th class="no-print">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-body">
-                        <!-- Lançamentos via JS -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- RESUMO FINAL EXCLUSIVO DO PDF -->
-            <div class="pdf-totals">
-                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
-                <p><strong>TOTAL DE KM RODADOS:</strong> <span id="pdf-total-km">0</span> KM</p>
-                <p><strong>CÁLCULO KM:</strong> <span id="pdf-calc-km">0 KM × R$ 1.30 = R$ 0.00</span></p>
-                <p><strong>AJUDA DE CUSTO FIXA:</strong> R$ <span id="pdf-summary-base">300.00</span></p>
-                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #000;">
-                <p style="font-size: 1.1rem;"><strong>VALOR TOTAL DE REEMBOLSO:</strong> <span id="pdf-final-reimbursement">R$ 300.00</span></p>
-            </div>
-
-            <div class="no-print" style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px;">
-                <button class="btn-subtle" onclick="printPDF()" style="width: 100%; padding: 12px; font-weight: 600; cursor: pointer;">🖨️ Gerar PDF / Imprimir</button>
-                <button class="btn-clear-all" onclick="openConfirmModal()">Apagar Registros do Mês</button>
-            </div>
-        </div>
-
-        <footer class="footer-credits no-print">
-            <p>🔒 Seus dados ficam armazenados exclusivamente no seu dispositivo.</p>
-            <p><strong>DESENVOLVIDO POR DIEGO SANTANA</strong></p>
-        </footer>
-
-    </div>
-
-    <!-- MODAL CONFIRMAR EXCLUSÃO -->
-    <div id="modal-confirm" class="modal-overlay" style="display: none;">
-        <div class="modal-box">
-            <h3>⚠️ Confirmar Exclusão</h3>
-            <p>Deseja realmente apagar todos os registros do mês?</p>
-            <div class="modal-actions">
-                <button type="button" class="btn-modal-cancel" onclick="closeConfirmModal()">Cancelar</button>
-                <button type="button" class="btn-modal-danger" onclick="confirmClearAll()">Sim, Apagar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL EDITAR REGISTRO -->
-    <div id="modal-edit" class="modal-overlay" style="display: none;">
-        <div class="modal-box">
-            <h3>Editar Registro</h3>
-            <input type="hidden" id="edit-id">
-            <div class="form-group" style="text-align: left; margin-top: 10px;">
-                <label>CLIENTE / LOCAL</label>
-                <input type="text" id="edit-client">
-            </div>
-            <div class="form-group" style="text-align: left;">
-                <label>Nº PROTOCOLO</label>
-                <input type="text" id="edit-os">
-            </div>
-            <div class="form-group" style="text-align: left;">
-                <label>KM RODADO</label>
-                <input type="number" id="edit-km">
-            </div>
-            <div class="modal-actions" style="margin-top: 15px;">
-                <button type="button" class="btn-modal-cancel" onclick="closeEditModal()">Cancelar</button>
-                <button type="button" class="btn-action-green" onclick="saveEditEntry()">Salvar Alteração</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="script.js?v=14"></script>
+        window.addEventListener('appinstalled', () => {
+            if (installContainer) {
+                installContainer.style.display = 'none';
+            }
+            console.log('PWA instalado com sucesso');
+        });
+    </script>
 </body>
 </html>
