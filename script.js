@@ -22,6 +22,7 @@ function verificarChave() {
 let mode = 'parada';
 let paramsUnlocked = false;
 let entries = JSON.parse(localStorage.getItem('km_entries_v2')) || [];
+let lastKmInput = parseFloat(localStorage.getItem('last_km_input')) || 0;
 
 let params = JSON.parse(localStorage.getItem('km_params')) || {
     tech: '',
@@ -99,14 +100,31 @@ function addEntry() {
     if (mode === 'parada') {
         const client = document.getElementById('input-client').value.trim();
         const os = document.getElementById('input-os').value.trim();
-        
-        // Substitui vírgula por ponto para evitar erros matemáticos com teclados de celular
-        let kmInputString = document.getElementById('input-km').value.replace(',', '.');
-        const inputKmVal = parseFloat(kmInputString) || 0;
 
         if (!client) {
             alert('Informe o cliente ou local.');
             return;
+        }
+
+        let kmCalculado = 0;
+
+        // Verifica qual modo de entrada de KM está ativo no HTML (odômetro ou distância direta)
+        if (typeof inputMode !== 'undefined' && inputMode === 'distancia') {
+            let kmTrechoString = document.getElementById('input-km-trecho').value.replace(',', '.');
+            kmCalculado = parseFloat(kmTrechoString) || 0;
+        } else {
+            let kmOdoString = document.getElementById('input-km').value.replace(',', '.');
+            const inputKmVal = parseFloat(kmOdoString) || 0;
+
+            kmCalculado = inputKmVal;
+
+            if (inputKmVal > 0) {
+                if (lastKmInput > 0 && inputKmVal > lastKmInput) {
+                    kmCalculado = inputKmVal - lastKmInput;
+                }
+                lastKmInput = inputKmVal;
+                localStorage.setItem('last_km_input', lastKmInput);
+            }
         }
 
         entries.push({
@@ -114,7 +132,7 @@ function addEntry() {
             type: 'parada',
             client,
             os: os || '-',
-            km: inputKmVal
+            km: kmCalculado
         });
     } else {
         let fuelString = document.getElementById('input-fuel').value.replace(',', '.');
@@ -153,6 +171,8 @@ function closeConfirmModal() {
 
 function confirmClearAll() {
     entries = [];
+    lastKmInput = 0;
+    localStorage.removeItem('last_km_input');
     localStorage.removeItem('km_entries_v2');
     
     saveAndRender();
@@ -202,6 +222,7 @@ function clearInputs() {
     document.getElementById('input-client').value = '';
     document.getElementById('input-os').value = '';
     document.getElementById('input-km').value = '';
+    document.getElementById('input-km-trecho').value = '';
     document.getElementById('input-fuel').value = '';
 }
 
@@ -290,7 +311,7 @@ function printPDF() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    verificarBloqueio(); // Chama a verificação da chave logo ao carregar
+    verificarBloqueio();
     initParamsUI();
     renderHistory();
     calculateTotals();
