@@ -22,7 +22,6 @@ function verificarChave() {
 let mode = 'parada';
 let paramsUnlocked = false;
 let entries = JSON.parse(localStorage.getItem('km_entries_v2')) || [];
-let lastKmInput = parseFloat(localStorage.getItem('last_km_input')) || 0;
 
 let params = JSON.parse(localStorage.getItem('km_params')) || {
     tech: '',
@@ -100,21 +99,14 @@ function addEntry() {
     if (mode === 'parada') {
         const client = document.getElementById('input-client').value.trim();
         const os = document.getElementById('input-os').value.trim();
-        const inputKmVal = parseFloat(document.getElementById('input-km').value) || 0;
+        
+        // Substitui vírgula por ponto para evitar erros matemáticos com teclados de celular
+        let kmInputString = document.getElementById('input-km').value.replace(',', '.');
+        const inputKmVal = parseFloat(kmInputString) || 0;
 
         if (!client) {
             alert('Informe o cliente ou local.');
             return;
-        }
-
-        let kmCalculado = inputKmVal;
-
-        if (inputKmVal > 0) {
-            if (lastKmInput > 0 && inputKmVal > lastKmInput) {
-                kmCalculado = inputKmVal - lastKmInput;
-            }
-            lastKmInput = inputKmVal;
-            localStorage.setItem('last_km_input', lastKmInput);
         }
 
         entries.push({
@@ -122,10 +114,12 @@ function addEntry() {
             type: 'parada',
             client,
             os: os || '-',
-            km: kmCalculado
+            km: inputKmVal
         });
     } else {
-        const fuel = parseFloat(document.getElementById('input-fuel').value) || 0;
+        let fuelString = document.getElementById('input-fuel').value.replace(',', '.');
+        const fuel = parseFloat(fuelString) || 0;
+        
         if (fuel <= 0) {
             alert('Informe um valor de abastecimento válido.');
             return;
@@ -159,8 +153,6 @@ function closeConfirmModal() {
 
 function confirmClearAll() {
     entries = [];
-    lastKmInput = 0;
-    localStorage.removeItem('last_km_input');
     localStorage.removeItem('km_entries_v2');
     
     saveAndRender();
@@ -191,7 +183,9 @@ function saveEditEntry() {
     if (item) {
         item.client = document.getElementById('edit-client').value.trim() || item.client;
         item.os = document.getElementById('edit-os').value.trim() || '-';
-        item.km = parseFloat(document.getElementById('edit-km').value) || 0;
+        
+        let kmEditString = document.getElementById('edit-km').value.replace(',', '.');
+        item.km = parseFloat(kmEditString) || 0;
 
         saveAndRender();
     }
