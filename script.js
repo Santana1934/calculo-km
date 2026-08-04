@@ -108,7 +108,6 @@ function addEntry() {
 
         let kmCalculado = 0;
 
-        // Verifica qual modo de entrada de KM está ativo no HTML (odômetro ou distância direta)
         if (typeof inputMode !== 'undefined' && inputMode === 'distancia') {
             let kmTrechoString = document.getElementById('input-km-trecho').value.replace(',', '.');
             kmCalculado = parseFloat(kmTrechoString) || 0;
@@ -129,6 +128,7 @@ function addEntry() {
 
         entries.push({
             id: Date.now(),
+            date: new Date().toISOString().split('T')[0],
             type: 'parada',
             client,
             os: os || '-',
@@ -145,6 +145,7 @@ function addEntry() {
 
         entries.push({
             id: Date.now(),
+            date: new Date().toISOString().split('T')[0],
             type: 'abastecimento',
             valor: fuel
         });
@@ -226,17 +227,31 @@ function clearInputs() {
     document.getElementById('input-fuel').value = '';
 }
 
-// Render da Tabela Clean
+// Limpar Filtro de Data
+function clearDateFilter() {
+    document.getElementById('filter-date').value = '';
+    renderHistory();
+}
+
+// Render da Tabela com Filtro por Dia
 function renderHistory() {
     const tbody = document.getElementById('history-body');
     tbody.innerHTML = '';
 
-    if (entries.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px 0; color: var(--text-sub);">Nenhum registro efetuado este mês.</td></tr>';
+    const selectedDate = document.getElementById('filter-date').value;
+
+    let filteredEntries = entries;
+    if (selectedDate) {
+        filteredEntries = entries.filter(item => item.date === selectedDate);
+    }
+
+    if (filteredEntries.length === 0) {
+        const msg = selectedDate ? 'Nenhum registro encontrado para esta data.' : 'Nenhum registro efetuado este mês.';
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px 0; color: var(--text-sub);">${msg}</td></tr>`;
         return;
     }
 
-    entries.forEach(item => {
+    filteredEntries.forEach(item => {
         const tr = document.createElement('tr');
 
         if (item.type === 'abastecimento') {
@@ -249,7 +264,10 @@ function renderHistory() {
             `;
         } else {
             tr.innerHTML = `
-                <td class="clickable-cell" onclick="openEditModal(${item.id})" title="Clique para editar">${item.client}</td>
+                <td class="clickable-cell" onclick="openEditModal(${item.id})" title="Clique para editar">
+                    ${item.client}
+                    ${!selectedDate && item.date ? `<br><span style="font-size: 0.7rem; color: var(--text-sub);">${item.date.split('-').reverse().join('/')}</span>` : ''}
+                </td>
                 <td>${item.os}</td>
                 <td>+${item.km} KM</td>
                 <td class="no-print"><button class="btn-icon-subtle" onclick="deleteEntry(${item.id})">×</button></td>
