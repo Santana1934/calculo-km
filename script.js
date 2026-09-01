@@ -296,7 +296,19 @@ function toggleHistoricoCompleto() {
 function filtrarRegistrosAtuais() {
     const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
     
-    let filtrados = registros.filter(r => (r.mesAno || "AGOSTO/2026") === mesAlvo);
+    let filtrados = registros.filter(r => {
+        if (r.mesAno) {
+            return r.mesAno === mesAlvo;
+        }
+        if (r.data) {
+            const dataReg = new Date(r.data);
+            const mesReg = nomesMeses[dataReg.getMonth()];
+            const anoReg = dataReg.getFullYear();
+            const mesAnoCalc = `${mesReg}/${anoReg}`;
+            return mesAnoCalc === mesAlvo;
+        }
+        return false;
+    });
 
     if (!exibirHistoricoCompletoMes) {
         const agora = new Date();
@@ -352,7 +364,14 @@ function renderHistory() {
 
 function atualizarDashboard() {
     const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
-    const regsMes = registros.filter(r => (r.mesAno || "AGOSTO/2026") === mesAlvo);
+    const regsMes = registros.filter(r => {
+        if (r.mesAno) return r.mesAno === mesAlvo;
+        if (r.data) {
+            const dataReg = new Date(r.data);
+            return `${nomesMeses[dataReg.getMonth()]}/${dataReg.getFullYear()}` === mesAlvo;
+        }
+        return false;
+    });
 
     let totalKm = 0;
     let totalAbastecimento = 0;
@@ -464,7 +483,14 @@ function confirmClearAll() {
     
     localStorage.setItem('controle_km_backup_lixeira', JSON.stringify(registros));
 
-    registros = registros.filter(r => (r.mesAno || "AGOSTO/2026") !== mesAlvo);
+    registros = registros.filter(r => {
+        let m = r.mesAno;
+        if (!m && r.data) {
+            const d = new Date(r.data);
+            m = `${nomesMeses[d.getMonth()]}/${d.getFullYear()}`;
+        }
+        return m !== mesAlvo;
+    });
     localStorage.setItem('controle_km_registros', JSON.stringify(registros));
     
     renderHistory();
