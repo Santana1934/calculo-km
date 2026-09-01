@@ -303,18 +303,7 @@
                 <div class="form-group">
                     <label>Mês/Ano</label>
                     <select id="paramMes" disabled onchange="atualizarInterface()">
-                        <option value="Janeiro/2026">Janeiro/2026</option>
-                        <option value="Fevereiro/2026">Fevereiro/2026</option>
-                        <option value="Março/2026">Março/2026</option>
-                        <option value="Abril/2026">Abril/2026</option>
-                        <option value="Maio/2026">Maio/2026</option>
-                        <option value="Junho/2026">Junho/2026</option>
-                        <option value="Julho/2026">Julho/2026</option>
-                        <option value="Agosto/2026">Agosto/2026</option>
-                        <option value="Setembro/2026" selected>Setembro/2026</option>
-                        <option value="Outubro/2026">Outubro/2026</option>
-                        <option value="Novembro/2026">Novembro/2026</option>
-                        <option value="Dezembro/2026">Dezembro/2026</option>
+                        <!-- Preenchido dinamicamente via JavaScript -->
                     </select>
                 </div>
                 <div class="form-group">
@@ -443,14 +432,42 @@
         let modoAtual = 'km';     // 'km' ou 'odo' (Padronizado em KM Rodado)
         let ultimoOdometro = 0;
 
-        let registros = JSON.parse(localStorage.getItem('controle_km_registros')) || [];
-        let parametros = JSON.parse(localStorage.getItem('controle_km_params')) || {
+        // Gerar seletor de meses dinamicamente (Ano atual e próximo ano)
+        function popularMeses() {
+            const selectMes = document.getElementById('paramMes');
+            selectMes.innerHTML = '';
+            const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const anoAtual = new Date().getFullYear();
+            
+            // Gerar o ano anterior, o atual e o próximo para abranger qualquer histórico
+            for (let a = anoAtual - 1; a <= anoAtual + 1; a++) {
+                mesesNomes.forEach(m => {
+                    const optionValue = `${m}/${a}`;
+                    const opt = document.createElement('option');
+                    opt.value = optionValue;
+                    opt.textContent = optionValue;
+                    selectMes.appendChild(opt);
+                });
+            }
+        }
+
+        popularMeses();
+
+        // Recuperando dados das chaves antigas e unificando com segurança
+        let registros = JSON.parse(localStorage.getItem('registros')) || JSON.parse(localStorage.getItem('controle_km_registros')) || [];
+        let parametros = JSON.parse(localStorage.getItem('parametros')) || JSON.parse(localStorage.getItem('controle_km_params')) || {
             tecnico: 'Diego Santana',
-            mes: 'Setembro/2026',
+            mes: `${["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"][new Date().getMonth()]}/${new Date().getFullYear()}`,
             ajuda: 300.00,
             valorKm: 1.27,
             cartao: 0.00
         };
+
+        // Salvar usando as chaves para garantir compatibilidade total
+        localStorage.setItem('registros', JSON.stringify(registros));
+        localStorage.setItem('controle_km_registros', JSON.stringify(registros));
+        localStorage.setItem('parametros', JSON.stringify(parametros));
+        localStorage.setItem('controle_km_params', JSON.stringify(parametros));
 
         // Inicializar campos com dados salvos
         document.getElementById('paramTecnico').value = parametros.tecnico;
@@ -473,7 +490,11 @@
                 parametros.valorKm = parseFloat(document.getElementById('paramValorKm').value) || 0;
                 parametros.cartao = parseFloat(document.getElementById('paramCartao').value) || 0;
                 
+                localStorage.setItem('registros', JSON.stringify(registros));
+                localStorage.setItem('controle_km_registros', JSON.stringify(registros));
+                localStorage.setItem('parametros', JSON.stringify(parametros));
                 localStorage.setItem('controle_km_params', JSON.stringify(parametros));
+                
                 btn.innerText = 'Editar Parâmetros';
                 atualizarInterface();
             } else {
@@ -492,7 +513,6 @@
             const btnA = document.getElementById('btnAbastecimento');
             const grupoC = document.getElementById('grupoCliente');
             const grupoP = document.getElementById('grupoProtocolo');
-            const grupoK = document.getElementById('grupoValorKmOdo');
 
             if (tipo === 'parada') {
                 btnP.classList.add('active');
@@ -580,9 +600,9 @@
             }
 
             registros.push(novoRegistro);
+            localStorage.setItem('registros', JSON.stringify(registros));
             localStorage.setItem('controle_km_registros', JSON.stringify(registros));
 
-            // Limpar campos
             document.getElementById('inputCliente').value = '';
             document.getElementById('inputProtocolo').value = '';
             document.getElementById('inputKmOdo').value = '';
@@ -592,6 +612,7 @@
 
         function excluirRegistro(id) {
             registros = registros.filter(r => r.id !== id);
+            localStorage.setItem('registros', JSON.stringify(registros));
             localStorage.setItem('controle_km_registros', JSON.stringify(registros));
             atualizarInterface();
         }
@@ -600,6 +621,7 @@
             const mesAtual = document.getElementById('paramMes').value;
             if (confirm(`Deseja realmente apagar todos os registros do mês de ${mesAtual}?`)) {
                 registros = registros.filter(r => r.mes !== mesAtual);
+                localStorage.setItem('registros', JSON.stringify(registros));
                 localStorage.setItem('controle_km_registros', JSON.stringify(registros));
                 atualizarInterface();
             }
@@ -613,7 +635,6 @@
             const valorKmEmpresa = parseFloat(document.getElementById('paramValorKm').value) || 0;
             const cartaoMes = parseFloat(document.getElementById('paramCartao').value) || 0;
 
-            // Filtrar apenas registros do mês selecionado
             const registrosMes = registros.filter(r => r.mes === mesSelecionado);
 
             let totalKm = 0;
@@ -627,7 +648,6 @@
                 historyList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.85rem;">Nenhum registro para este mês.</div>';
             }
 
-            // Exibir do mais recente para o mais antigo
             [...registrosMes].reverse().forEach(reg => {
                 if (reg.tipo === 'parada') {
                     totalKm += reg.km;
@@ -664,7 +684,6 @@
             const sobraLiquida = ajudaFixa + reembolsoKm - totalPosto - cartaoMes;
             const custoPorKmRodado = totalKm > 0 ? (totalPosto / totalKm) : 0;
 
-            // Atualizar Resumo
             document.getElementById('resumoTotalKm').innerText = totalKm.toFixed(1) + ' KM';
             document.getElementById('resumoClientes').innerText = clientesAtendidos;
             document.getElementById('resumoReembolso').innerText = 'R$ ' + reembolsoKm.toFixed(2);
@@ -682,7 +701,6 @@
             const editBtn = document.getElementById('editParamsBtn');
             const deleteBtns = document.querySelectorAll('.delete-btn');
 
-            // Esconder elementos de edição para o PDF
             noPrintForm.style.display = 'none';
             noPrintActions.style.display = 'none';
             editBtn.style.display = 'none';
@@ -697,7 +715,6 @@
             };
 
             html2pdf().from(element).set(opt).save().then(() => {
-                // Restaurar elementos após gerar PDF
                 noPrintForm.style.display = 'block';
                 noPrintActions.style.display = 'flex';
                 editBtn.style.display = 'inline-block';
@@ -705,7 +722,6 @@
             });
         }
 
-        // Executar carregamento inicial padrão
         atualizarInterface();
     </script>
 </body>
