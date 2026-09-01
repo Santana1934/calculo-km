@@ -1,21 +1,39 @@
-// --- CONTROLE DE ACESSO E SEGURANÇA ---
-const CHAVE_MESTRE = "ACESSO@KM"; // Sua chave original de acesso
+// --- CONTROLE DE ACESSO E SEGURANÇA (COM CHAVE E VISIBILIDADE) ---
+const CHAVE_MESTRE = "ACESSO@KM";
 
 function verificarChave() {
-    const input = document.getElementById('chave-input').value;
+    const input = document.getElementById('chave-input').value.trim();
     if (input === CHAVE_MESTRE || CHAVE_MESTRE === "") {
         document.getElementById('tela-bloqueio').style.display = 'none';
         localStorage.setItem('app_liberado', 'true');
+        inicializarApp();
     } else {
-        document.getElementById('erro-chave').style.display = 'block';
+        const erroEl = document.getElementById('erro-chave');
+        if (erroEl) erroEl.style.display = 'block';
+        alert("Chave incorreta! Digite ACESSO@KM");
+    }
+}
+
+// Alternar visualização da senha (botão de olho)
+function toggleMostrarSenha() {
+    const input = document.getElementById('chave-input');
+    if (input.type === "password") {
+        input.type = "text";
+    } else {
+        input.type = "password";
     }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('app_liberado') === 'true' || CHAVE_MESTRE === "") {
-        document.getElementById('tela-bloqueio').style.display = 'none';
+        const tela = document.getElementById('tela-bloqueio');
+        if(tela) tela.style.display = 'none';
+        inicializarApp();
+    } else {
+        // Garante que a tela de bloqueio apareça se não estiver liberado
+        const tela = document.getElementById('tela-bloqueio');
+        if(tela) tela.style.display = 'flex';
     }
-    inicializarApp();
 });
 
 // --- VARIÁVEIS GLOBAIS E ESTADO ---
@@ -35,7 +53,7 @@ function obterMesAnoAtual() {
 }
 
 function inicializarApp() {
-    // PROTEÇÃO E RESGATE DE EMERGÊNCIA: Se houver backup na lixeira ou registros órfãos, recupera automaticamente
+    // RESGATE DE EMERGÊNCIA: Puxa backup se os registros estiverem vazios
     let backupLixeira = localStorage.getItem('controle_km_backup_lixeira');
     if (backupLixeira && registros.length === 0) {
         try {
@@ -44,15 +62,14 @@ function inicializarApp() {
         } catch(e) {}
     }
 
-    // Varre e padroniza o mês de cada registro antigo para evitar sumiço
+    // Padroniza o mês de registros antigos para não sumirem de agosto/setembro
     let alterou = false;
     registros.forEach(r => {
-        if (!r.mesAno || r.mesAno.includes("2026") === false) {
-            // Se a data do registro for de agosto (ex: 2026-08), atribui AGOSTO/2026, senão SETEMBRO/2026
+        if (!r.mesAno || !r.mesAno.includes("2026")) {
             if (r.data && r.data.startsWith("2026-08")) {
                 r.mesAno = "AGOSTO/2026";
             } else {
-                r.mesAno = "AGOSTO/2026"; // Padrão de segurança para resgatar o que estava aparecendo antes
+                r.mesAno = "SETEMBRO/2026";
             }
             alterou = true;
         }
@@ -65,7 +82,6 @@ function inicializarApp() {
     carregarParametros();
     popularSeletorMeses();
     
-    // Força inicializar mostrando o mês atual ou agosto caso tenha dados lá
     if (!mesSelecionadoHistorico) {
         mesSelecionadoHistorico = obterMesAnoAtual();
     }
@@ -312,7 +328,6 @@ function toggleHistoricoCompleto() {
 function filtrarRegistrosAtuais() {
     const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
     
-    // Filtra considerando o mês correspondente
     let filtrados = registros.filter(r => (r.mesAno || "AGOSTO/2026") === mesAlvo);
 
     if (!exibirHistoricoCompletoMes) {
@@ -479,7 +494,6 @@ function confirmClearAll() {
 
     const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
     
-    // Salva backup de segurança antes de remover
     localStorage.setItem('controle_km_backup_lixeira', JSON.stringify(registros));
 
     registros = registros.filter(r => (r.mesAno || "AGOSTO/2026") !== mesAlvo);
