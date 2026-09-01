@@ -50,7 +50,7 @@
         .history-sub { font-size: 0.75rem; color: var(--text-muted); }
         .delete-btn { background: none; border: none; color: var(--accent-red); font-size: 1rem; cursor: pointer; padding: 4px; }
         .footer-info { text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
-        .editable-params input:disabled, .editable-params select:disabled { background-color: #0f172a; border-color: transparent; color: var(--text-color); }
+        .editable-params input:disabled { background-color: #0f172a; border-color: transparent; color: var(--text-color); }
     </style>
 </head>
 <body>
@@ -70,8 +70,8 @@
                     <input type="text" id="paramTecnico" disabled>
                 </div>
                 <div class="form-group">
-                    <label>Mês / Ano</label>
-                    <select id="paramMes" disabled onchange="atualizarInterface()"></select>
+                    <label>Mês Atual (Automático)</label>
+                    <input type="text" id="paramMesDisplay" disabled style="font-weight: bold; color: var(--accent-blue);">
                 </div>
                 <div class="form-group">
                     <label>Ajuda de Custo Fixa (R$)</label>
@@ -130,7 +130,7 @@
 
         <!-- Resumo -->
         <div class="card">
-            <div class="card-header"><span>📊 Resumo Geral (<span id="resumoMesLabel">-</span>)</span></div>
+            <div class="card-header"><span>📊 Resumo do Mês (<span id="resumoMesLabel">-</span>)</span></div>
             <div class="stats-grid">
                 <div class="stat-box"><div class="stat-label">Total Rodado</div><div class="stat-value" id="resumoTotalKm">0,0 KM</div></div>
                 <div class="stat-box"><div class="stat-label">Clientes Atendidos</div><div class="stat-value" id="resumoClientes">0</div></div>
@@ -147,17 +147,17 @@
 
         <!-- Histórico -->
         <div class="card">
-            <div class="card-header"><span>📅 Histórico do Mês Selecionado</span></div>
+            <div class="card-header"><span>📅 Histórico de Lançamentos</span></div>
             <div class="history-list" id="historyList"></div>
         </div>
 
         <div id="no-print-actions" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-            <button class="btn btn-secondary" onclick="gerarPDF()">📄 Gerar PDF / Imprimir</button>
+            <button class="btn btn-secondary" onclick="gerarPDF()">📄 Gerar Relatório PDF / Imprimir</button>
             <button class="btn btn-secondary" onclick="exportarBackup()" style="background-color: #1e3a8a;">💾 Baixar Arquivo de Backup</button>
             <label class="btn btn-secondary" style="background-color: #312e81; text-align: center; cursor: pointer; display: block;">
                 📂 Restaurar Backup Salvo <input type="file" id="inputBackup" accept=".json" onchange="importarBackup(event)" style="display: none;">
             </label>
-            <button class="btn btn-danger" onclick="apagarRegistrosMes()">Apagar Registros do Mês Atual</button>
+            <button class="btn btn-danger" onclick="apagarRegistrosMes()">Apagar Registros deste Mês</button>
         </div>
 
         <div class="footer-info">🔒 Seus dados ficam armazenados no seu dispositivo<br>DESENVOLVIDO POR DIEGO SANTANA</div>
@@ -166,53 +166,38 @@
     <script>
         let tipoAtual = 'parada', modoAtual = 'km', ultimoOdometro = 0;
         
+        // Recuperação segura de chaves antigas para não perder nada de agosto
         let registros = JSON.parse(localStorage.getItem('registros')) || 
-                        JSON.parse(localStorage.getItem('controle_km_registros')) || [];
+                        JSON.parse(localStorage.getItem('controle_km_registros')) || 
+                        JSON.parse(localStorage.getItem('km_registros')) || [];
 
         let parametros = JSON.parse(localStorage.getItem('parametros')) || 
                            JSON.parse(localStorage.getItem('controle_km_params')) || {
             tecnico: 'Diego Santana', ajuda: 300.00, valorKm: 1.27, cartao: 0.00
         };
 
-        function popularMeses() {
-            const select = document.getElementById('paramMes');
-            const atualSel = select.value;
-            select.innerHTML = '';
-            
-            const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            const anoAtual = new Date().getFullYear();
-            let lista = new Set();
+        // Definir mês atual automaticamente pelo celular
+        const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        const dataHoje = new Date();
+        const mesAnoAtual = `${mesesNomes[dataHoje.getMonth()]} / ${dataHoje.getFullYear()}`;
 
-            mesesNomes.forEach(m => lista.add(`${m}/${anoAtual}`));
-            registros.forEach(r => { if (r.mes) lista.add(r.mes); });
+        // Preencher campos iniciais
+        document.getElementById('paramTecnico').value = parametros.tecnico || 'Diego Santana';
+        document.getElementById('paramMesDisplay').value = mesAnoAtual;
+        document.getElementById('paramAjuda').value = parametros.ajuda ?? 300.00;
+        document.getElementById('paramValorKm').value = parametros.valorKm ?? 1.27;
+        document.getElementById('paramCartao').value = parametros.cartao ?? 0.00;
 
-            Array.from(lista).forEach(m => {
-                let opt = document.createElement('option');
-                opt.value = m; opt.textContent = m;
-                select.appendChild(opt);
-            });
-
-            const padrao = `${mesesNomes[new Date().getMonth()]}/${anoAtual}`;
-            select.value = (atualSel && lista.has(atualSel)) ? atualSel : (parametros.mes && lista.has(parametros.mes) ? parametros.mes : padrao);
-        }
-
-        popularMeses();
         salvarDados();
 
-        document.getElementById('paramTecnico').value = parametros.tecnico;
-        document.getElementById('paramAjuda').value = parametros.ajuda;
-        document.getElementById('paramValorKm').value = parametros.valorKm;
-        document.getElementById('paramCartao').value = parametros.cartao;
-
         function toggleEditParams() {
-            const inputs = document.querySelectorAll('.editable-params input, .editable-params select');
+            const inputs = document.querySelectorAll('.editable-params input:not(#paramMesDisplay)');
             const btn = document.getElementById('editParamsBtn');
             const editando = !inputs[0].disabled;
 
             inputs.forEach(i => i.disabled = editando);
             if (editando) {
                 parametros.tecnico = document.getElementById('paramTecnico').value;
-                parametros.mes = document.getElementById('paramMes').value;
                 parametros.ajuda = parseFloat(document.getElementById('paramAjuda').value) || 0;
                 parametros.valorKm = parseFloat(document.getElementById('paramValorKm').value) || 0;
                 parametros.cartao = parseFloat(document.getElementById('paramCartao').value) || 0;
@@ -243,11 +228,18 @@
         function setLocal(loc) { document.getElementById('inputCliente').value = loc; }
 
         function registrarItem() {
-            const mes = document.getElementById('paramMes').value;
             const valor = parseFloat(document.getElementById('inputKmOdo').value);
             if (isNaN(valor) || valor <= 0) return alert('Informe um valor válido.');
 
-            let item = { id: Date.now(), mes, data: new Date().toLocaleDateString('pt-BR'), tipo: tipoAtual };
+            // Identificar a data formatada para exibição (ex: 01/09/2026) e o mês de referência (ex: Setembro / 2026)
+            const dataStr = dataHoje.toLocaleDateString('pt-BR');
+            
+            let item = { 
+                id: Date.now(), 
+                mes: mesAnoAtual, 
+                data: dataStr, 
+                tipo: tipoAtual 
+            };
 
             if (tipoAtual === 'parada') {
                 const cliente = document.getElementById('inputCliente').value.trim();
@@ -266,7 +258,6 @@
 
             registros.push(item);
             salvarDados();
-            popularMeses();
             document.getElementById('inputCliente').value = '';
             document.getElementById('inputProtocolo').value = '';
             document.getElementById('inputKmOdo').value = '';
@@ -280,11 +271,9 @@
         }
 
         function apagarRegistrosMes() {
-            const mes = document.getElementById('paramMes').value;
-            if (confirm(`Deseja apagar os registros de ${mes}?`)) {
-                registros = registros.filter(r => r.mes !== mes);
+            if (confirm(`Deseja apagar os registros de ${mesAnoAtual}?`)) {
+                registros = registros.filter(r => r.mes !== mesAnoAtual);
                 salvarDados();
-                popularMeses();
                 atualizarInterface();
             }
         }
@@ -322,17 +311,20 @@
         }
 
         function atualizarInterface() {
-            const mesSel = document.getElementById('paramMes').value;
-            document.getElementById('resumoMesLabel').innerText = mesSel;
+            document.getElementById('resumoMesLabel').innerText = mesAnoAtual;
 
             const ajuda = parseFloat(document.getElementById('paramAjuda').value) || 0;
             const valorKm = parseFloat(document.getElementById('paramValorKm').value) || 0;
             const cartao = parseFloat(document.getElementById('paramCartao').value) || 0;
 
-            const listaMes = registros.filter(r => r.mes === mesSel);
+            // Filtra os registros do mês atual do celular (ex: Setembro / 2026)
+            // Caso queira ver agosto ou outro mês se houver dados antigos salvos em outro formato, ajustamos na busca:
+            const listaMes = registros.filter(r => r.mes === mesAnoAtual || r.mes === 'Agosto/2026' || r.mes === 'Agosto / 2026');
+            
             let totalKm = 0, clientes = 0, totalPosto = 0;
             const historyList = document.getElementById('historyList');
-            historyList.innerHTML = listaMes.length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.85rem;">Nenhum registro para este mês.</div>' : '';
+            
+            historyList.innerHTML = listaMes.length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.85rem;">Nenhum registro para este mês ainda.</div>' : '';
 
             [...listaMes].reverse().forEach(r => {
                 if (r.tipo === 'parada') {
@@ -362,14 +354,22 @@
         function gerarPDF() {
             const el = document.getElementById('pdf-content');
             const form = document.getElementById('no-print-form'), actions = document.getElementById('no-print-actions'), edit = document.getElementById('editParamsBtn'), dels = document.querySelectorAll('.delete-btn');
+            
             form.style.display = actions.style.display = edit.style.display = 'none';
             dels.forEach(d => d.style.display = 'none');
 
-            html2pdf().from(el).set({
-                margin: 10, filename: `Controle_KM_${document.getElementById('paramMes').value.replace('/', '_').replace(/\s+/g, '')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).save().then(() => {
-                form.style.display = 'block'; actions.style.display = 'flex'; edit.style.display = 'inline-block';
+            const opt = {
+                margin:       10,
+                filename:     `Relatorio_KM_${mesAnoAtual.replace(/\s+/g, '')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(el).set(opt).save().then(() => {
+                form.style.display = 'block'; 
+                actions.style.display = 'flex'; 
+                edit.style.display = 'inline-block';
                 dels.forEach(d => d.style.display = 'inline-block');
             });
         }
