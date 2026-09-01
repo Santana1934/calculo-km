@@ -16,272 +16,41 @@
             --accent-red: #ef4444;
             --border-color: #334155;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 1.25rem;
-            margin-bottom: 4px;
-            color: var(--text-color);
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: var(--text-muted);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-bottom: 10px;
-        }
-
-        .form-group.full {
-            grid-column: span 2;
-        }
-
-        label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        input, select {
-            background-color: #0f172a;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-color);
-            padding: 10px;
-            font-size: 0.9rem;
-            width: 100%;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-        }
-
-        .btn {
-            background-color: var(--accent-green);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            text-align: center;
-            transition: opacity 0.2s;
-        }
-
-        .btn:active {
-            opacity: 0.8;
-        }
-
-        .btn-secondary {
-            background-color: var(--border-color);
-            color: var(--text-color);
-            padding: 8px 12px;
-            font-size: 0.8rem;
-        }
-
-        .btn-danger {
-            background-color: var(--accent-red);
-            color: white;
-            padding: 8px 12px;
-            font-size: 0.8rem;
-        }
-
-        .toggle-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .toggle-btn {
-            background-color: #0f172a;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .toggle-btn.active {
-            background-color: var(--accent-blue);
-            color: white;
-            border-color: var(--accent-blue);
-        }
-
-        .shortcuts {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .shortcut-btn {
-            background-color: #0f172a;
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .stat-box {
-            background-color: #0f172a;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
-        .stat-value {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-top: 2px;
-        }
-
-        .summary-details {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-size: 0.85rem;
-            border-top: 1px solid var(--border-color);
-            padding-top: 10px;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 320px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .history-item {
-            background-color: #0f172a;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-        }
-
-        .history-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .history-title {
-            font-weight: bold;
-        }
-
-        .history-sub {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .history-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: var(--accent-red);
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .footer-info {
-            text-align: center;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 8px;
-            line-height: 1.4;
-        }
-
-        .editable-params input:disabled, .editable-params select:disabled {
-            background-color: #0f172a;
-            border-color: transparent;
-            color: var(--text-color);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 12px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
+        h1 { text-align: center; font-size: 1.25rem; margin-bottom: 4px; }
+        .card { background-color: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.95rem; font-weight: bold; color: var(--text-muted); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+        .form-group.full { grid-column: span 2; }
+        label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { background-color: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); padding: 10px; font-size: 0.9rem; width: 100%; }
+        input:focus, select:focus { outline: none; border-color: var(--accent-blue); }
+        .btn { background-color: var(--accent-green); color: white; border: none; border-radius: 8px; padding: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; text-align: center; }
+        .btn:active { opacity: 0.8; }
+        .btn-secondary { background-color: var(--border-color); color: var(--text-color); padding: 8px 12px; font-size: 0.8rem; }
+        .btn-danger { background-color: var(--accent-red); color: white; padding: 8px 12px; font-size: 0.8rem; }
+        .toggle-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .toggle-btn { background-color: #0f172a; border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: center; }
+        .toggle-btn.active { background-color: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+        .shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .shortcut-btn { background-color: #0f172a; border: 1px solid var(--border-color); color: var(--text-color); padding: 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .stat-box { background-color: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); }
+        .stat-value { font-size: 1.1rem; font-weight: bold; margin-top: 2px; }
+        .summary-details { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; border-top: 1px solid var(--border-color); padding-top: 10px; }
+        .summary-row { display: flex; justify-content: space-between; }
+        .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 4px; }
+        .history-item { background-color: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+        .history-info { display: flex; flex-direction: column; gap: 2px; }
+        .history-title { font-weight: bold; }
+        .history-sub { font-size: 0.75rem; color: var(--text-muted); }
+        .delete-btn { background: none; border: none; color: var(--accent-red); font-size: 1rem; cursor: pointer; padding: 4px; }
+        .footer-info { text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+        .editable-params input:disabled, .editable-params select:disabled { background-color: #0f172a; border-color: transparent; color: var(--text-color); }
     </style>
 </head>
 <body>
@@ -289,7 +58,7 @@
     <div class="container" id="pdf-content">
         <h1>Controle de KM Pessoal</h1>
 
-        <!-- Parâmetros Financeiros -->
+        <!-- Parâmetros -->
         <div class="card">
             <div class="card-header">
                 <span>⚙️ Parâmetros Financeiros</span>
@@ -298,46 +67,42 @@
             <div class="form-grid editable-params">
                 <div class="form-group">
                     <label>Técnico</label>
-                    <input type="text" id="paramTecnico" value="Diego Santana" disabled>
+                    <input type="text" id="paramTecnico" disabled>
                 </div>
                 <div class="form-group">
-                    <label>Mês/Ano</label>
-                    <select id="paramMes" disabled onchange="atualizarInterface()">
-                        <!-- Preenchido dinamicamente via JavaScript -->
-                    </select>
+                    <label>Mês / Ano</label>
+                    <select id="paramMes" disabled onchange="atualizarInterface()"></select>
                 </div>
                 <div class="form-group">
                     <label>Ajuda de Custo Fixa (R$)</label>
-                    <input type="number" step="0.01" id="paramAjuda" value="300.00" disabled oninput="atualizarInterface()">
+                    <input type="number" step="0.01" id="paramAjuda" disabled oninput="atualizarInterface()">
                 </div>
                 <div class="form-group">
                     <label>R$ / KM (Empresa)</label>
-                    <input type="number" step="0.01" id="paramValorKm" value="1.27" disabled oninput="atualizarInterface()">
+                    <input type="number" step="0.01" id="paramValorKm" disabled oninput="atualizarInterface()">
                 </div>
                 <div class="form-group full">
                     <label>Valor Solicitado em Cartão do Mês (R$)</label>
-                    <input type="number" step="0.01" id="paramCartao" value="0.00" disabled oninput="atualizarInterface()">
+                    <input type="number" step="0.01" id="paramCartao" disabled oninput="atualizarInterface()">
                 </div>
             </div>
         </div>
 
-        <!-- Área de Registro -->
+        <!-- Registro -->
         <div class="card" id="no-print-form">
-            <div class="card-header">
-                <span>📝 Registro</span>
-            </div>
+            <div class="card-header"><span>📝 Registro</span></div>
             
             <div class="form-group" style="margin-bottom: 12px;">
                 <label>Tipo de Lançamento</label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <button type="button" class="toggle-btn active" id="btnParada" onclick="setTipoRegistro('parada')">🚗 Parada / Cliente</button>
-                    <button type="button" class="toggle-btn" id="btnAbastecimento" onclick="setTipoRegistro('abastecimento')">⛽ Abastecimento</button>
+                    <button type="button" class="toggle-btn active" id="btnParada" onclick="setTipo('parada')">🚗 Parada / Cliente</button>
+                    <button type="button" class="toggle-btn" id="btnAbastecimento" onclick="setTipo('abastecimento')">⛽ Abastecimento</button>
                 </div>
             </div>
 
             <div class="toggle-group">
                 <button type="button" class="toggle-btn active" id="modeKm" onclick="setMode('km')">Modo KM Rodado</button>
-                <button type="button" class="toggle-btn" id="modeOdo" onclick="setMode('odo')">Modo Odômetro (Painel)</button>
+                <button type="button" class="toggle-btn" id="modeOdo" onclick="setMode('odo')">Modo Odômetro</button>
             </div>
 
             <div class="shortcuts">
@@ -347,7 +112,7 @@
 
             <div class="form-group" id="grupoCliente">
                 <label id="labelClienteLocal">Cliente / Local</label>
-                <input type="text" id="inputCliente" placeholder="Ex: Cliente XYZ ou Av. Paulista">
+                <input type="text" id="inputCliente" placeholder="Ex: Cliente XYZ">
             </div>
 
             <div class="form-group" id="grupoProtocolo">
@@ -355,7 +120,7 @@
                 <input type="text" id="inputProtocolo" placeholder="Ex: 98402">
             </div>
 
-            <div class="form-group" id="grupoValorKmOdo">
+            <div class="form-group">
                 <label id="labelKmOdo">KM Rodado</label>
                 <input type="number" step="0.1" id="inputKmOdo" placeholder="Ex: 15">
             </div>
@@ -363,115 +128,78 @@
             <button class="btn" onclick="registrarItem()">Registrar</button>
         </div>
 
-        <!-- Resumo Geral -->
+        <!-- Resumo -->
         <div class="card">
-            <div class="card-header">
-                <span>📊 Resumo Geral (<span id="resumoMesLabel">Setembro/2026</span>)</span>
-            </div>
+            <div class="card-header"><span>📊 Resumo Geral (<span id="resumoMesLabel">-</span>)</span></div>
             <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-label">Total Rodado</div>
-                    <div class="stat-value" id="resumoTotalKm">0,0 KM</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Clientes Atendidos</div>
-                    <div class="stat-value" id="resumoClientes">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Reembolso KM</div>
-                    <div class="stat-value" id="resumoReembolso">R$ 0,00</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label" style="color: var(--accent-green);">Sobra Líquida Real</div>
-                    <div class="stat-value" id="resumoSobra" style="color: var(--accent-green);">R$ 0,00</div>
-                </div>
+                <div class="stat-box"><div class="stat-label">Total Rodado</div><div class="stat-value" id="resumoTotalKm">0,0 KM</div></div>
+                <div class="stat-box"><div class="stat-label">Clientes Atendidos</div><div class="stat-value" id="resumoClientes">0</div></div>
+                <div class="stat-box"><div class="stat-label">Reembolso KM</div><div class="stat-value" id="resumoReembolso">R$ 0,00</div></div>
+                <div class="stat-box"><div class="stat-label" style="color: var(--accent-green);">Sobra Líquida Real</div><div class="stat-value" id="resumoSobra" style="color: var(--accent-green);">R$ 0,00</div></div>
             </div>
             <div class="summary-details">
-                <div class="summary-row">
-                    <span>💰 Ajuda de Custo Fixa:</span>
-                    <span id="resumoAjudaTxt">R$ 300,00</span>
-                </div>
-                <div class="summary-row">
-                    <span>⛽ Total Gasto no Posto:</span>
-                    <span id="resumoPostoTxt">R$ 0,00</span>
-                </div>
-                <div class="summary-row">
-                    <span>💳 Saldo Cartão Restante:</span>
-                    <span id="resumoCartaoTxt">R$ 0,00</span>
-                </div>
-                <div class="summary-row">
-                    <span>📉 Seu Custo por KM Rodado:</span>
-                    <span id="resumoCustoKmTxt">R$ 0,00/KM</span>
-                </div>
+                <div class="summary-row"><span>💰 Ajuda de Custo Fixa:</span><span id="resumoAjudaTxt">R$ 300,00</span></div>
+                <div class="summary-row"><span>⛽ Total Gasto no Posto:</span><span id="resumoPostoTxt">R$ 0,00</span></div>
+                <div class="summary-row"><span>💳 Saldo Cartão Restante:</span><span id="resumoCartaoTxt">R$ 0,00</span></div>
+                <div class="summary-row"><span>📉 Seu Custo por KM Rodado:</span><span id="resumoCustoKmTxt">R$ 0,00/KM</span></div>
             </div>
         </div>
 
-        <!-- Histórico por Dia -->
+        <!-- Histórico -->
         <div class="card">
-            <div class="card-header">
-                <span>📅 Histórico por Mês</span>
-            </div>
-            <div class="history-list" id="historyList">
-                <!-- Itens injetados via JS -->
-            </div>
+            <div class="card-header"><span>📅 Histórico do Mês Selecionado</span></div>
+            <div class="history-list" id="historyList"></div>
         </div>
 
         <div id="no-print-actions" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
             <button class="btn btn-secondary" onclick="gerarPDF()">📄 Gerar PDF / Imprimir</button>
+            <button class="btn btn-secondary" onclick="exportarBackup()" style="background-color: #1e3a8a;">💾 Baixar Arquivo de Backup</button>
+            <label class="btn btn-secondary" style="background-color: #312e81; text-align: center; cursor: pointer; display: block;">
+                📂 Restaurar Backup Salvo <input type="file" id="inputBackup" accept=".json" onchange="importarBackup(event)" style="display: none;">
+            </label>
             <button class="btn btn-danger" onclick="apagarRegistrosMes()">Apagar Registros do Mês Atual</button>
         </div>
 
-        <div class="footer-info">
-            🔒 Seus dados ficam armazenados exclusivamente no seu dispositivo<br>
-            DESENVOLVIDO POR DIEGO SANTANA
-        </div>
+        <div class="footer-info">🔒 Seus dados ficam armazenados no seu dispositivo<br>DESENVOLVIDO POR DIEGO SANTANA</div>
     </div>
 
     <script>
-        let tipoAtual = 'parada'; // 'parada' ou 'abastecimento'
-        let modoAtual = 'km';     // 'km' ou 'odo' (Padronizado em KM Rodado)
-        let ultimoOdometro = 0;
+        let tipoAtual = 'parada', modoAtual = 'km', ultimoOdometro = 0;
+        
+        let registros = JSON.parse(localStorage.getItem('registros')) || 
+                        JSON.parse(localStorage.getItem('controle_km_registros')) || [];
 
-        // Gerar seletor de meses dinamicamente (Ano atual e próximo ano)
+        let parametros = JSON.parse(localStorage.getItem('parametros')) || 
+                           JSON.parse(localStorage.getItem('controle_km_params')) || {
+            tecnico: 'Diego Santana', ajuda: 300.00, valorKm: 1.27, cartao: 0.00
+        };
+
         function popularMeses() {
-            const selectMes = document.getElementById('paramMes');
-            selectMes.innerHTML = '';
+            const select = document.getElementById('paramMes');
+            const atualSel = select.value;
+            select.innerHTML = '';
+            
             const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             const anoAtual = new Date().getFullYear();
-            
-            // Gerar o ano anterior, o atual e o próximo para abranger qualquer histórico
-            for (let a = anoAtual - 1; a <= anoAtual + 1; a++) {
-                mesesNomes.forEach(m => {
-                    const optionValue = `${m}/${a}`;
-                    const opt = document.createElement('option');
-                    opt.value = optionValue;
-                    opt.textContent = optionValue;
-                    selectMes.appendChild(opt);
-                });
-            }
+            let lista = new Set();
+
+            mesesNomes.forEach(m => lista.add(`${m}/${anoAtual}`));
+            registros.forEach(r => { if (r.mes) lista.add(r.mes); });
+
+            Array.from(lista).forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m; opt.textContent = m;
+                select.appendChild(opt);
+            });
+
+            const padrao = `${mesesNomes[new Date().getMonth()]}/${anoAtual}`;
+            select.value = (atualSel && lista.has(atualSel)) ? atualSel : (parametros.mes && lista.has(parametros.mes) ? parametros.mes : padrao);
         }
 
         popularMeses();
+        salvarDados();
 
-        // Recuperando dados das chaves antigas e unificando com segurança
-        let registros = JSON.parse(localStorage.getItem('registros')) || JSON.parse(localStorage.getItem('controle_km_registros')) || [];
-        let parametros = JSON.parse(localStorage.getItem('parametros')) || JSON.parse(localStorage.getItem('controle_km_params')) || {
-            tecnico: 'Diego Santana',
-            mes: `${["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"][new Date().getMonth()]}/${new Date().getFullYear()}`,
-            ajuda: 300.00,
-            valorKm: 1.27,
-            cartao: 0.00
-        };
-
-        // Salvar usando as chaves para garantir compatibilidade total
-        localStorage.setItem('registros', JSON.stringify(registros));
-        localStorage.setItem('controle_km_registros', JSON.stringify(registros));
-        localStorage.setItem('parametros', JSON.stringify(parametros));
-        localStorage.setItem('controle_km_params', JSON.stringify(parametros));
-
-        // Inicializar campos com dados salvos
         document.getElementById('paramTecnico').value = parametros.tecnico;
-        document.getElementById('paramMes').value = parametros.mes;
         document.getElementById('paramAjuda').value = parametros.ajuda;
         document.getElementById('paramValorKm').value = parametros.valorKm;
         document.getElementById('paramCartao').value = parametros.cartao;
@@ -479,246 +207,170 @@
         function toggleEditParams() {
             const inputs = document.querySelectorAll('.editable-params input, .editable-params select');
             const btn = document.getElementById('editParamsBtn');
-            const isEditing = !inputs[0].disabled;
+            const editando = !inputs[0].disabled;
 
-            inputs.forEach(input => input.disabled = isEditing);
-            
-            if (isEditing) {
+            inputs.forEach(i => i.disabled = editando);
+            if (editando) {
                 parametros.tecnico = document.getElementById('paramTecnico').value;
                 parametros.mes = document.getElementById('paramMes').value;
                 parametros.ajuda = parseFloat(document.getElementById('paramAjuda').value) || 0;
                 parametros.valorKm = parseFloat(document.getElementById('paramValorKm').value) || 0;
                 parametros.cartao = parseFloat(document.getElementById('paramCartao').value) || 0;
-                
-                localStorage.setItem('registros', JSON.stringify(registros));
-                localStorage.setItem('controle_km_registros', JSON.stringify(registros));
-                localStorage.setItem('parametros', JSON.stringify(parametros));
-                localStorage.setItem('controle_km_params', JSON.stringify(parametros));
-                
+                salvarDados();
                 btn.innerText = 'Editar Parâmetros';
                 atualizarInterface();
             } else {
                 btn.innerText = 'Salvar Parâmetros';
-                inputs[0].disabled = false;
-                inputs[1].disabled = false;
-                inputs[2].disabled = false;
-                inputs[3].disabled = false;
-                inputs[4].disabled = false;
             }
         }
 
-        function setTipoRegistro(tipo) {
+        function setTipo(tipo) {
             tipoAtual = tipo;
-            const btnP = document.getElementById('btnParada');
-            const btnA = document.getElementById('btnAbastecimento');
-            const grupoC = document.getElementById('grupoCliente');
-            const grupoP = document.getElementById('grupoProtocolo');
-
-            if (tipo === 'parada') {
-                btnP.classList.add('active');
-                btnA.classList.remove('active');
-                grupoC.style.display = 'flex';
-                grupoP.style.display = 'flex';
-                document.getElementById('labelKmOdo').innerText = modoAtual === 'km' ? 'KM Rodado' : 'Odômetro Atual (KM)';
-            } else {
-                btnA.classList.add('active');
-                btnP.classList.remove('active');
-                grupoC.style.display = 'none';
-                grupoP.style.display = 'none';
-                document.getElementById('labelKmOdo').innerText = 'Valor Gasto no Posto (R$)';
-            }
+            document.getElementById('btnParada').classList.toggle('active', tipo === 'parada');
+            document.getElementById('btnAbastecimento').classList.toggle('active', tipo === 'abastecimento');
+            document.getElementById('grupoCliente').style.display = tipo === 'parada' ? 'flex' : 'none';
+            document.getElementById('grupoProtocolo').style.display = tipo === 'parada' ? 'flex' : 'none';
+            document.getElementById('labelKmOdo').innerText = tipo === 'parada' ? (modoAtual === 'km' ? 'KM Rodado' : 'Odômetro Atual (KM)') : 'Valor Gasto no Posto (R$)';
         }
 
         function setMode(mode) {
             modoAtual = mode;
-            const btnKm = document.getElementById('modeKm');
-            const btnOdo = document.getElementById('modeOdo');
-            const label = document.getElementById('labelKmOdo');
-
-            if (tipoAtual === 'parada') {
-                if (mode === 'km') {
-                    btnKm.classList.add('active');
-                    btnOdo.classList.remove('active');
-                    label.innerText = 'KM Rodado';
-                } else {
-                    btnOdo.classList.add('active');
-                    btnKm.classList.remove('active');
-                    label.innerText = 'Odômetro Atual (KM)';
-                }
-            }
+            document.getElementById('modeKm').classList.toggle('active', mode === 'km');
+            document.getElementById('modeOdo').classList.toggle('active', mode === 'odo');
+            document.getElementById('labelKmOdo').innerText = mode === 'km' ? 'KM Rodado' : 'Odômetro Atual (KM)';
         }
 
-        function setLocal(local) {
-            document.getElementById('inputCliente').value = local;
-        }
+        function setLocal(loc) { document.getElementById('inputCliente').value = loc; }
 
         function registrarItem() {
-            const mesAtual = document.getElementById('paramMes').value;
-            const dataHoje = new Date().toLocaleDateString('pt-BR');
-            const valorInput = parseFloat(document.getElementById('inputKmOdo').value);
+            const mes = document.getElementById('paramMes').value;
+            const valor = parseFloat(document.getElementById('inputKmOdo').value);
+            if (isNaN(valor) || valor <= 0) return alert('Informe um valor válido.');
 
-            if (isNaN(valorInput) || valorInput <= 0) {
-                alert('Por favor, informe um valor válido.');
-                return;
-            }
-
-            let novoRegistro = {
-                id: Date.now(),
-                mes: mesAtual,
-                data: dataHoje,
-                tipo: tipoAtual
-            };
+            let item = { id: Date.now(), mes, data: new Date().toLocaleDateString('pt-BR'), tipo: tipoAtual };
 
             if (tipoAtual === 'parada') {
                 const cliente = document.getElementById('inputCliente').value.trim();
-                const protocolo = document.getElementById('inputProtocolo').value.trim();
-
-                if (!cliente) {
-                    alert('Informe o cliente ou local.');
-                    return;
-                }
-
-                let kmRodadoCalculado = 0;
-                if (modoAtual === 'km') {
-                    kmRodadoCalculado = valorInput;
-                } else {
-                    if (valorInput <= ultimoOdometro) {
-                        alert('O odômetro atual deve ser maior que o anterior (' + ultimoOdometro + ').');
-                        return;
-                    }
-                    kmRodadoCalculado = valorInput - ultimoOdometro;
-                    ultimoOdometro = valorInput;
-                }
-
-                novoRegistro.cliente = cliente;
-                novoRegistro.protocolo = protocolo || '-';
-                novoRegistro.km = kmRodadoCalculado;
+                if (!cliente) return alert('Informe o cliente ou local.');
+                let km = (modoAtual === 'km') ? valor : (valor > ultimoOdometro ? valor - ultimoOdometro : (alert('Odômetro menor que o anterior.'), null));
+                if (km === null) return;
+                if (modoAtual === 'odo') ultimoOdometro = valor;
+                item.cliente = cliente;
+                item.protocolo = document.getElementById('inputProtocolo').value.trim() || '-';
+                item.km = km;
             } else {
-                novoRegistro.cliente = '⛽ Abastecimento';
-                novoRegistro.protocolo = '-';
-                novoRegistro.valorPosto = valorInput;
+                item.cliente = '⛽ Abastecimento';
+                item.protocolo = '-';
+                item.valorPosto = valor;
             }
 
-            registros.push(novoRegistro);
-            localStorage.setItem('registros', JSON.stringify(registros));
-            localStorage.setItem('controle_km_registros', JSON.stringify(registros));
-
+            registros.push(item);
+            salvarDados();
+            popularMeses();
             document.getElementById('inputCliente').value = '';
             document.getElementById('inputProtocolo').value = '';
             document.getElementById('inputKmOdo').value = '';
-
             atualizarInterface();
         }
 
         function excluirRegistro(id) {
             registros = registros.filter(r => r.id !== id);
-            localStorage.setItem('registros', JSON.stringify(registros));
-            localStorage.setItem('controle_km_registros', JSON.stringify(registros));
+            salvarDados();
             atualizarInterface();
         }
 
         function apagarRegistrosMes() {
-            const mesAtual = document.getElementById('paramMes').value;
-            if (confirm(`Deseja realmente apagar todos os registros do mês de ${mesAtual}?`)) {
-                registros = registros.filter(r => r.mes !== mesAtual);
-                localStorage.setItem('registros', JSON.stringify(registros));
-                localStorage.setItem('controle_km_registros', JSON.stringify(registros));
+            const mes = document.getElementById('paramMes').value;
+            if (confirm(`Deseja apagar os registros de ${mes}?`)) {
+                registros = registros.filter(r => r.mes !== mes);
+                salvarDados();
+                popularMeses();
                 atualizarInterface();
             }
         }
 
+        function salvarDados() {
+            localStorage.setItem('registros', JSON.stringify(registros));
+            localStorage.setItem('controle_km_registros', JSON.stringify(registros));
+            localStorage.setItem('parametros', JSON.stringify(parametros));
+        }
+
+        function exportarBackup() {
+            const blob = new Blob([JSON.stringify({ registros, parametros })], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `backup_controle_km_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+        }
+
+        function importarBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    if (data.registros) {
+                        registros = data.registros;
+                        if (data.parametros) parametros = data.parametros;
+                        salvarDados();
+                        location.reload();
+                    } else { alert('Arquivo inválido.'); }
+                } catch { alert('Erro ao ler arquivo.'); }
+            };
+            reader.readAsText(file);
+        }
+
         function atualizarInterface() {
-            const mesSelecionado = document.getElementById('paramMes').value;
-            document.getElementById('resumoMesLabel').innerText = mesSelecionado;
+            const mesSel = document.getElementById('paramMes').value;
+            document.getElementById('resumoMesLabel').innerText = mesSel;
 
-            const ajudaFixa = parseFloat(document.getElementById('paramAjuda').value) || 0;
-            const valorKmEmpresa = parseFloat(document.getElementById('paramValorKm').value) || 0;
-            const cartaoMes = parseFloat(document.getElementById('paramCartao').value) || 0;
+            const ajuda = parseFloat(document.getElementById('paramAjuda').value) || 0;
+            const valorKm = parseFloat(document.getElementById('paramValorKm').value) || 0;
+            const cartao = parseFloat(document.getElementById('paramCartao').value) || 0;
 
-            const registrosMes = registros.filter(r => r.mes === mesSelecionado);
-
-            let totalKm = 0;
-            let clientesAtendidos = 0;
-            let totalPosto = 0;
-
+            const listaMes = registros.filter(r => r.mes === mesSel);
+            let totalKm = 0, clientes = 0, totalPosto = 0;
             const historyList = document.getElementById('historyList');
-            historyList.innerHTML = '';
+            historyList.innerHTML = listaMes.length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.85rem;">Nenhum registro para este mês.</div>' : '';
 
-            if (registrosMes.length === 0) {
-                historyList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.85rem;">Nenhum registro para este mês.</div>';
-            }
-
-            [...registrosMes].reverse().forEach(reg => {
-                if (reg.tipo === 'parada') {
-                    totalKm += reg.km;
-                    clientesAtendidos++;
-
-                    historyList.innerHTML += `
-                        <div class="history-item">
-                            <div class="history-info">
-                                <span class="history-title">${reg.cliente}</span>
-                                <span class="history-sub">📅 ${reg.data} | OS: ${reg.protocolo} | +${reg.km.toFixed(1)} KM</span>
-                            </div>
-                            <div class="history-actions">
-                                <button class="delete-btn" onclick="excluirRegistro(${reg.id})">✕</button>
-                            </div>
-                        </div>
-                    `;
+            [...listaMes].reverse().forEach(r => {
+                if (r.tipo === 'parada') {
+                    totalKm += r.km;
+                    clientes++;
+                    historyList.innerHTML += `<div class="history-item"><div class="history-info"><span class="history-title">${r.cliente}</span><span class="history-sub">📅 ${r.data} | OS: ${r.protocolo} | +${r.km.toFixed(1)} KM</span></div><button class="delete-btn" onclick="excluirRegistro(${r.id})">✕</button></div>`;
                 } else {
-                    totalPosto += reg.valorPosto;
-                    historyList.innerHTML += `
-                        <div class="history-item" style="border-color: var(--accent-blue);">
-                            <div class="history-info">
-                                <span class="history-title" style="color: var(--accent-blue);">Abastecimento</span>
-                                <span class="history-sub">📅 ${reg.data} | Valor: R$ ${reg.valorPosto.toFixed(2)}</span>
-                            </div>
-                            <div class="history-actions">
-                                <button class="delete-btn" onclick="excluirRegistro(${reg.id})">✕</button>
-                            </div>
-                        </div>
-                    `;
+                    totalPosto += r.valorPosto;
+                    historyList.innerHTML += `<div class="history-item" style="border-color: var(--accent-blue);"><div class="history-info"><span class="history-title" style="color: var(--accent-blue);">Abastecimento</span><span class="history-sub">📅 ${r.data} | R$ ${r.valorPosto.toFixed(2)}</span></div><button class="delete-btn" onclick="excluirRegistro(${r.id})">✕</button></div>`;
                 }
             });
 
-            const reembolsoKm = totalKm * valorKmEmpresa;
-            const sobraLiquida = ajudaFixa + reembolsoKm - totalPosto - cartaoMes;
-            const custoPorKmRodado = totalKm > 0 ? (totalPosto / totalKm) : 0;
+            const reembolso = totalKm * valorKm;
+            const sobra = ajuda + reembolso - totalPosto - cartao;
+            const custoKm = totalKm > 0 ? (totalPosto / totalKm) : 0;
 
             document.getElementById('resumoTotalKm').innerText = totalKm.toFixed(1) + ' KM';
-            document.getElementById('resumoClientes').innerText = clientesAtendidos;
-            document.getElementById('resumoReembolso').innerText = 'R$ ' + reembolsoKm.toFixed(2);
-            document.getElementById('resumoSobra').innerText = 'R$ ' + sobraLiquida.toFixed(2);
-            document.getElementById('resumoAjudaTxt').innerText = 'R$ ' + ajudaFixa.toFixed(2);
+            document.getElementById('resumoClientes').innerText = clientes;
+            document.getElementById('resumoReembolso').innerText = 'R$ ' + reembolso.toFixed(2);
+            document.getElementById('resumoSobra').innerText = 'R$ ' + sobra.toFixed(2);
+            document.getElementById('resumoAjudaTxt').innerText = 'R$ ' + ajuda.toFixed(2);
             document.getElementById('resumoPostoTxt').innerText = 'R$ ' + totalPosto.toFixed(2);
-            document.getElementById('resumoCartaoTxt').innerText = 'R$ ' + cartaoMes.toFixed(2);
-            document.getElementById('resumoCustoKmTxt').innerText = 'R$ ' + custoPorKmRodado.toFixed(2) + '/KM';
+            document.getElementById('resumoCartaoTxt').innerText = 'R$ ' + cartao.toFixed(2);
+            document.getElementById('resumoCustoKmTxt').innerText = 'R$ ' + custoKm.toFixed(2) + '/KM';
         }
 
         function gerarPDF() {
-            const element = document.getElementById('pdf-content');
-            const noPrintForm = document.getElementById('no-print-form');
-            const noPrintActions = document.getElementById('no-print-actions');
-            const editBtn = document.getElementById('editParamsBtn');
-            const deleteBtns = document.querySelectorAll('.delete-btn');
+            const el = document.getElementById('pdf-content');
+            const form = document.getElementById('no-print-form'), actions = document.getElementById('no-print-actions'), edit = document.getElementById('editParamsBtn'), dels = document.querySelectorAll('.delete-btn');
+            form.style.display = actions.style.display = edit.style.display = 'none';
+            dels.forEach(d => d.style.display = 'none');
 
-            noPrintForm.style.display = 'none';
-            noPrintActions.style.display = 'none';
-            editBtn.style.display = 'none';
-            deleteBtns.forEach(btn => btn.style.display = 'none');
-
-            const opt = {
-                margin:       10,
-                filename:     `Controle_KM_${document.getElementById('paramMes').value}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().from(element).set(opt).save().then(() => {
-                noPrintForm.style.display = 'block';
-                noPrintActions.style.display = 'flex';
-                editBtn.style.display = 'inline-block';
-                deleteBtns.forEach(btn => btn.style.display = 'inline-block');
+            html2pdf().from(el).set({
+                margin: 10, filename: `Controle_KM_${document.getElementById('paramMes').value.replace('/', '_').replace(/\s+/g, '')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).save().then(() => {
+                form.style.display = 'block'; actions.style.display = 'flex'; edit.style.display = 'inline-block';
+                dels.forEach(d => d.style.display = 'inline-block');
             });
         }
 
