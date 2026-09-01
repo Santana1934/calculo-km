@@ -1,9 +1,8 @@
-// --- CONTROLE DE ACESSO ORIGINAL COM SENHA ---
+// --- CONTROLE DE ACESSO COM SENHA E OLHINHO ---
 const CHAVE_MESTRE = "ACESSO@KM";
 
 function verificarChave() {
-    // Procura o input pelo ID padrão que estava funcionando antes
-    const inputEl = document.getElementById('chave-input') || document.querySelector('input[type="password"]');
+    const inputEl = document.getElementById('chave-input');
     const valorDigitado = inputEl ? inputEl.value.trim() : "";
 
     if (valorDigitado === CHAVE_MESTRE) {
@@ -12,7 +11,8 @@ function verificarChave() {
         localStorage.setItem('app_liberado', 'true');
         inicializarApp();
     } else {
-        alert("Chave incorreta! Digite a senha correta.");
+        const erroEl = document.getElementById('erro-chave');
+        if (erroEl) erroEl.style.display = 'block';
     }
 }
 
@@ -130,7 +130,6 @@ function salvarParametros() {
 
 // --- MODOS DE REGISTRO ---
 let modoAtual = 'parada';
-let inputMode = 'trecho';
 
 function setMode(mode) {
     modoAtual = mode;
@@ -149,26 +148,6 @@ function setMode(mode) {
         btnParada.classList.remove('active');
         fieldsParada.style.display = 'none';
         fieldsAbastecimento.style.display = 'block';
-    }
-}
-
-function setInputMode(m) {
-    inputMode = m;
-    const btnOdometro = document.getElementById('btn-odometro');
-    const btnTrecho = document.getElementById('btn-trecho');
-    const groupOdometro = document.getElementById('group-odometro');
-    const groupTrecho = document.getElementById('group-trecho');
-
-    if (m === 'odometro') {
-        if(btnOdometro) btnOdometro.classList.add('active');
-        if(btnTrecho) btnTrecho.classList.remove('active');
-        if(groupOdometro) groupOdometro.style.display = 'block';
-        if(groupTrecho) groupTrecho.style.display = 'none';
-    } else {
-        if(btnTrecho) btnTrecho.classList.add('active');
-        if(btnOdometro) btnOdometro.classList.remove('active');
-        if(groupTrecho) groupTrecho.style.display = 'block';
-        if(groupOdometro) groupOdometro.style.display = 'none';
     }
 }
 
@@ -460,7 +439,7 @@ function restaurarDadosEmergencia() {
     }
 }
 
-// --- MODAL DE EXCLUSÃO DO MÊS COM DUPLO AVISO E BACKUP ---
+// --- MODAL DE EXCLUSÃO DO MÊS ---
 function openConfirmModal() {
     document.getElementById('modal-confirm').style.display = 'flex';
 }
@@ -498,4 +477,47 @@ function printPDF() {
     exibirHistoricoCompletoMes = true;
     renderHistory();
     window.print();
+}
+
+// --- MODAL DE EDIÇÃO ---
+function openEditModal(id) {
+    const reg = registros.find(r => r.id === id);
+    if (!reg) return;
+
+    document.getElementById('edit-id').value = reg.id;
+    document.getElementById('edit-client').value = reg.cliente;
+    document.getElementById('edit-os').value = reg.os || '';
+    document.getElementById('edit-km').value = reg.kmRodado || 0;
+    
+    document.getElementById('modal-edit').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('modal-edit').style.display = 'none';
+}
+
+function saveEditEntry() {
+    const id = parseInt(document.getElementById('edit-id').value);
+    const novoCliente = document.getElementById('edit-client').value.trim();
+    const novaOs = document.getElementById('edit-os').value.trim();
+    const novoKm = parseFloat(document.getElementById('edit-km').value);
+
+    if (!novoCliente) {
+        alert("O cliente/local não pode ficar vazio.");
+        return;
+    }
+
+    const index = registros.findIndex(r => r.id === id);
+    if (index !== -1) {
+        registros[index].cliente = novoCliente;
+        registros[index].os = novaOs || '-';
+        if (registros[index].tipo === 'parada') {
+            registros[index].kmRodado = isNaN(novoKm) ? 0 : novoKm;
+        }
+        
+        localStorage.setItem('controle_km_registros', JSON.stringify(registros));
+        closeEditModal();
+        renderHistory();
+        atualizarDashboard();
+    }
 }
