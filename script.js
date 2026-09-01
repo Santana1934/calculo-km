@@ -30,8 +30,10 @@ window.addEventListener('DOMContentLoaded', () => {
 // --- VARIÁVEIS GLOBAIS E ESTADO ---
 let registros = JSON.parse(localStorage.getItem('controle_km_registros')) || [];
 let parametros = JSON.parse(localStorage.getItem('controle_km_params')) || {};
+
+// Variáveis separadas para não embolar o mês atual de cadastro com o mês que você está consultando no histórico
 let mesSelecionadoHistorico = ""; 
-let exibirHistoricoCompletoMes = true; // Mantém completo por padrão para facilitar
+let exibirHistoricoCompletoMes = true; 
 
 const nomesMeses = [
     "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
@@ -45,26 +47,26 @@ function obterMesAnoAtual() {
 
 function inicializarApp() {
     carregarParametros();
-    popularSeletorMeses();
     
+    // Se o histórico ainda não foi escolhido, define o padrão inicial como Agosto para você ver os dados passados
     if (!mesSelecionadoHistorico) {
-        mesSelecionadoHistorico = parametros.mesAno || "AGOSTO/2026";
+        mesSelecionadoHistorico = "AGOSTO/2026";
     }
 
+    popularSeletorMeses();
     renderHistory();
     atualizarDashboard();
 }
 
 // --- PARÂMETROS FINANCEIROS E MESES ---
 function carregarParametros() {
-    const mesAtualAutomatico = obterMesAnoAtual();
+    const mesAtualAutomatico = obterMesAnoAtual(); // Pega Setembro/2026 do relógio do celular
     
-    if (!parametros.mesAno) {
-        parametros.mesAno = "AGOSTO/2026";
-    }
+    // O topo sempre assume o mês atual do sistema para novos lançamentos
+    parametros.mesAno = mesAtualAutomatico;
     
     document.getElementById('param-tech').value = parametros.tecnico || "Diego Santana";
-    document.getElementById('param-period').value = parametros.mesAno || mesAtualAutomatico;
+    document.getElementById('param-period').value = mesAtualAutomatico;
     document.getElementById('param-base-pay').value = parametros.ajudaCusto !== undefined ? parametros.ajudaCusto : 300;
     document.getElementById('param-km-rate').value = parametros.taxaKm !== undefined ? parametros.taxaKm : 1.30;
     document.getElementById('param-caju').value = parametros.caju !== undefined ? parametros.caju : 250;
@@ -94,7 +96,7 @@ function toggleEditParams() {
 function salvarParametros() {
     parametros = {
         tecnico: document.getElementById('param-tech').value || "Diego Santana",
-        mesAno: document.getElementById('param-period').value || obterMesAnoAtual(),
+        mesAno: obterMesAnoAtual(), // Mantém travado no mês atual do sistema para novos registros
         ajudaCusto: parseFloat(document.getElementById('param-base-pay').value) || 0,
         taxaKm: parseFloat(document.getElementById('param-km-rate').value) || 1.30,
         caju: parseFloat(document.getElementById('param-caju').value) || 0
@@ -131,10 +133,10 @@ function setShortcut(local) {
     document.getElementById('input-client').value = local;
 }
 
-// --- ADICIONAR REGISTROS ---
+// --- ADICIONAR REGISTROS (Sempre salvos no mês atual do relógio) ---
 function addEntry() {
     const dataAtual = new Date();
-    const mesAnoRegistro = obterMesAnoAtual();
+    const mesAnoRegistro = obterMesAnoAtual(); // Salva no mês corrente do celular
     
     let novoRegistro = {
         id: Date.now(),
@@ -213,10 +215,7 @@ function popularSeletorMeses() {
         const option = document.createElement('option');
         option.value = mes;
         option.textContent = `Mês: ${mes}`;
-        if (mes.includes("AGOSTO") && (!mesSelecionadoHistorico || mesSelecionadoHistorico.includes("AGOSTO"))) {
-            option.selected = true;
-            mesSelecionadoHistorico = mes;
-        } else if (mes === mesSelecionadoHistorico) {
+        if (mes === mesSelecionadoHistorico) {
             option.selected = true;
         }
         select.appendChild(option);
@@ -262,7 +261,7 @@ function filtrarRegistrosAtuais() {
             }
         }
 
-        // Compatibilidade flexível para aceitar "Agosto", "AGOSTO/2026", etc.
+        // Compatibilidade flexível para encontrar os dados de Agosto ou Setembro
         if (mesAlvo.includes("AGOSTO") && (mesDoRegistro.includes("AGOSTO") || mesDoRegistro.includes("AGO"))) {
             return true;
         }
@@ -306,7 +305,7 @@ function renderHistory() {
 
     dadosFiltrados.forEach(reg => {
         const tr = document.createElement('tr');
-        const dataFormatada = reg.data ? new Date(reg.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '04/08/2026';
+        const dataFormatada = reg.data ? new Date(reg.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '';
         
         let kmTexto = reg.tipo === 'abastecimento' ? `<span style="color: #34d399;">Abastecimento (R$ ${(reg.valorAbastecimento || 0).toFixed(2)})</span>` : `+${(reg.kmRodado || 0).toFixed(1)} KM`;
         if (reg.tipo === 'parada' || !reg.tipo) totalKmPeriodo += (reg.kmRodado || 0);
@@ -399,47 +398,4 @@ function printPDF() {
     exibirHistoricoCompletoMes = true;
     renderHistory();
     window.print();
-}
-
-// --- MODAL DE EDIÇÃO ---
-function openEditModal(id) {
-    const reg = registros.find(r => r.id === id);
-    if (!reg) return;
-
-    document.getElementById('edit-id').value = reg.id;
-    document.getElementById('edit-client').value = reg.cliente;
-    document.getElementById('edit-os').value = reg.os || '';
-    document.getElementById('edit-km').value = reg.kmRodado || 0;
-    
-    document.getElementById('modal-edit').style.display = 'flex';
-}
-
-function closeEditModal() {
-    document.getElementById('modal-edit').style.display = 'none';
-}
-
-function saveEditEntry() {
-    const id = parseInt(document.getElementById('edit-id').value);
-    const novoCliente = document.getElementById('edit-client').value.trim();
-    const novaOs = document.getElementById('edit-os').value.trim();
-    const novoKm = parseFloat(document.getElementById('edit-km').value);
-
-    if (!novoCliente) {
-        alert("O cliente/local não pode ficar vazio.");
-        return;
-    }
-
-    const index = registros.findIndex(r => r.id === id);
-    if (index !== -1) {
-        registros[index].cliente = novoCliente;
-        registros[index].os = novaOs || '-';
-        if (registros[index].tipo === 'parada' || !registros[index].tipo) {
-            registros[index].kmRodado = isNaN(novoKm) ? 0 : novoKm;
-        }
-        
-        localStorage.setItem('controle_km_registros', JSON.stringify(registros));
-        closeEditModal();
-        renderHistory();
-        atualizarDashboard();
-    }
 }
