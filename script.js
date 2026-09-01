@@ -31,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
 let registros = JSON.parse(localStorage.getItem('controle_km_registros')) || [];
 let parametros = JSON.parse(localStorage.getItem('controle_km_params')) || {};
 let mesSelecionadoHistorico = ""; 
-let exibirHistoricoCompletoMes = false; 
+let exibirHistoricoCompletoMes = true; // Mantém completo por padrão para facilitar
 
 const nomesMeses = [
     "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
@@ -44,35 +44,11 @@ function obterMesAnoAtual() {
 }
 
 function inicializarApp() {
-    let backupLixeira = localStorage.getItem('controle_km_backup_lixeira');
-    if (backupLixeira && registros.length === 0) {
-        try {
-            registros = JSON.parse(backupLixeira);
-            localStorage.setItem('controle_km_registros', JSON.stringify(registros));
-        } catch(e) {}
-    }
-
-    let alterou = false;
-    registros.forEach(r => {
-        if (!r.mesAno || !r.mesAno.includes("2026")) {
-            if (r.data && r.data.startsWith("2026-08")) {
-                r.mesAno = "AGOSTO/2026";
-            } else {
-                r.mesAno = "SETEMBRO/2026";
-            }
-            alterou = true;
-        }
-    });
-
-    if (alterou) {
-        localStorage.setItem('controle_km_registros', JSON.stringify(registros));
-    }
-
     carregarParametros();
     popularSeletorMeses();
     
     if (!mesSelecionadoHistorico) {
-        mesSelecionadoHistorico = obterMesAnoAtual();
+        mesSelecionadoHistorico = parametros.mesAno || "AGOSTO/2026";
     }
 
     renderHistory();
@@ -84,7 +60,7 @@ function carregarParametros() {
     const mesAtualAutomatico = obterMesAnoAtual();
     
     if (!parametros.mesAno) {
-        parametros.mesAno = mesAtualAutomatico;
+        parametros.mesAno = "AGOSTO/2026";
     }
     
     document.getElementById('param-tech').value = parametros.tecnico || "Diego Santana";
@@ -176,26 +152,10 @@ function addEntry() {
             return;
         }
 
-        let kmRodado = 0;
-        if (inputMode === 'odometro') {
-            const kmPainel = parseFloat(document.getElementById('input-km').value);
-            if (isNaN(kmPainel)) {
-                alert('Informe o KM atual do painel.');
-                return;
-            }
-            const ultimoKm = obterUltimoKmPainel();
-            if (ultimoKm > 0 && kmPainel < ultimoKm) {
-                alert('O KM do painel não pode ser menor que o anterior.');
-                return;
-            }
-            kmRodado = ultimoKm > 0 ? kmPainel - ultimoKm : 0;
-            novoRegistro.kmPainel = kmPainel;
-        } else {
-            kmRodado = parseFloat(document.getElementById('input-km-trecho').value);
-            if (isNaN(kmRodado) || kmRodado <= 0) {
-                alert('Informe a distância correta do trecho.');
-                return;
-            }
+        let kmRodado = parseFloat(document.getElementById('input-km-trecho').value);
+        if (isNaN(kmRodado) || kmRodado <= 0) {
+            alert('Informe a distância correta do trecho.');
+            return;
         }
 
         novoRegistro.cliente = cliente;
@@ -204,11 +164,7 @@ function addEntry() {
 
         document.getElementById('input-client').value = '';
         document.getElementById('input-os').value = '';
-        if (inputMode === 'odometro') {
-            document.getElementById('input-km').value = '';
-        } else {
-            document.getElementById('input-km-trecho').value = '';
-        }
+        document.getElementById('input-km-trecho').value = '';
 
     } else {
         const valorFuel = parseFloat(document.getElementById('input-fuel').value);
@@ -227,16 +183,9 @@ function addEntry() {
     registros.push(novoRegistro);
     localStorage.setItem('controle_km_registros', JSON.stringify(registros));
     
-    mesSelecionadoHistorico = mesAnoRegistro;
     popularSeletorMeses();
     renderHistory();
     atualizarDashboard();
-}
-
-function obterUltimoKmPainel() {
-    const registrosParada = registros.filter(r => r.tipo === 'parada' && r.kmPainel);
-    if (registrosParada.length === 0) return 0;
-    return registrosParada[registrosParada.length - 1].kmPainel;
 }
 
 // --- GERENCIAMENTO DE MESES E HISTÓRICO ---
@@ -245,20 +194,29 @@ function popularSeletorMeses() {
     if (!select) return;
 
     const mesesSet = new Set();
-    mesesSet.add(obterMesAnoAtual());
-    mesesSet.add("AGOSTO/2026"); 
+    mesesSet.add("AGOSTO/2026");
+    mesesSet.add("SETEMBRO/2026");
+    
     registros.forEach(r => {
-        if (r.mesAno) mesesSet.add(r.mesAno);
+        if (r.mesAno) {
+            mesesSet.add(r.mesAno.toUpperCase());
+        } else if (r.data) {
+            const d = new Date(r.data);
+            if (!isNaN(d)) {
+                mesesSet.add(`${nomesMeses[d.getMonth()]}/${d.getFullYear()}`);
+            }
+        }
     });
 
-    const mesesArray = Array.from(mesesSet);
-    
     select.innerHTML = '';
-    mesesArray.forEach(mes => {
+    mesesSet.forEach(mes => {
         const option = document.createElement('option');
         option.value = mes;
         option.textContent = `Mês: ${mes}`;
-        if (mes === mesSelecionadoHistorico) {
+        if (mes.includes("AGOSTO") && (!mesSelecionadoHistorico || mesSelecionadoHistorico.includes("AGOSTO"))) {
+            option.selected = true;
+            mesSelecionadoHistorico = mes;
+        } else if (mes === mesSelecionadoHistorico) {
             option.selected = true;
         }
         select.appendChild(option);
@@ -270,10 +228,6 @@ function mudarMesReferencia() {
     if (select) {
         mesSelecionadoHistorico = select.value;
         exibirHistoricoCompletoMes = true; 
-        const btnSemanas = document.getElementById('btn-toggle-semanas');
-        if(btnSemanas) btnSemanas.textContent = "Visualizando Mês Selecionado";
-        const labelSemana = document.getElementById('label-semana-atual');
-        if(labelSemana) labelSemana.textContent = `Exibindo: Mês Completo (${mesSelecionadoHistorico})`;
         renderHistory();
         atualizarDashboard();
     }
@@ -294,20 +248,29 @@ function toggleHistoricoCompleto() {
 }
 
 function filtrarRegistrosAtuais() {
-    const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
+    const mesAlvo = (mesSelecionadoHistorico || "AGOSTO/2026").toUpperCase();
     
     let filtrados = registros.filter(r => {
+        let mesDoRegistro = "";
+        
         if (r.mesAno) {
-            return r.mesAno === mesAlvo;
+            mesDoRegistro = r.mesAno.toUpperCase();
+        } else if (r.data) {
+            const d = new Date(r.data);
+            if (!isNaN(d)) {
+                mesDoRegistro = `${nomesMeses[d.getMonth()]}/${d.getFullYear()}`;
+            }
         }
-        if (r.data) {
-            const dataReg = new Date(r.data);
-            const mesReg = nomesMeses[dataReg.getMonth()];
-            const anoReg = dataReg.getFullYear();
-            const mesAnoCalc = `${mesReg}/${anoReg}`;
-            return mesAnoCalc === mesAlvo;
+
+        // Compatibilidade flexível para aceitar "Agosto", "AGOSTO/2026", etc.
+        if (mesAlvo.includes("AGOSTO") && (mesDoRegistro.includes("AGOSTO") || mesDoRegistro.includes("AGO"))) {
+            return true;
         }
-        return false;
+        if (mesAlvo.includes("SETEMBRO") && (mesDoRegistro.includes("SETEMBRO") || mesDoRegistro.includes("SET"))) {
+            return true;
+        }
+
+        return mesDoRegistro === mesAlvo;
     });
 
     if (!exibirHistoricoCompletoMes) {
@@ -334,7 +297,7 @@ function renderHistory() {
     const dadosFiltrados = filtrarRegistrosAtuais();
 
     if (dadosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum registro encontrado para este período. <br><br> <button onclick="restaurarDadosEmergencia()" style="background:#34d399; color:#0f172a; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">🔄 Restaurar Dados (Lixeira)</button></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum registro encontrado para este período.</td></tr>`;
         atualizarTotaisPDF(0, 0);
         return;
     }
@@ -343,10 +306,10 @@ function renderHistory() {
 
     dadosFiltrados.forEach(reg => {
         const tr = document.createElement('tr');
-        const dataFormatada = new Date(reg.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        const dataFormatada = reg.data ? new Date(reg.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '04/08/2026';
         
-        let kmTexto = reg.tipo === 'abastecimento' ? `<span style="color: #34d399;">Abastecimento (R$ ${reg.valorAbastecimento.toFixed(2)})</span>` : `+${reg.kmRodado.toFixed(1)} KM`;
-        if (reg.tipo === 'parada') totalKmPeriodo += reg.kmRodado;
+        let kmTexto = reg.tipo === 'abastecimento' ? `<span style="color: #34d399;">Abastecimento (R$ ${(reg.valorAbastecimento || 0).toFixed(2)})</span>` : `+${(reg.kmRodado || 0).toFixed(1)} KM`;
+        if (reg.tipo === 'parada' || !reg.tipo) totalKmPeriodo += (reg.kmRodado || 0);
 
         tr.innerHTML = `
             <td>${reg.cliente} <br><small style="color: #94a3b8;">${dataFormatada}</small></td>
@@ -363,32 +326,24 @@ function renderHistory() {
 }
 
 function atualizarDashboard() {
-    const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
-    const regsMes = registros.filter(r => {
-        if (r.mesAno) return r.mesAno === mesAlvo;
-        if (r.data) {
-            const dataReg = new Date(r.data);
-            return `${nomesMeses[dataReg.getMonth()]}/${dataReg.getFullYear()}` === mesAlvo;
-        }
-        return false;
-    });
+    const dadosMes = filtrarRegistrosAtuais();
 
     let totalKm = 0;
     let totalAbastecimento = 0;
     const clientesSet = new Set();
 
-    regsMes.forEach(r => {
-        if (r.tipo === 'parada') {
-            totalKm += r.kmRodado;
-            if (r.cliente && !r.cliente.includes('Casa') && !r.cliente.includes('Empresa')) {
+    dadosMes.forEach(r => {
+        if (r.tipo === 'parada' || !r.tipo) {
+            totalKm += (r.kmRodado || 0);
+            if (r.cliente && !r.cliente.includes('Casa') && !r.cliente.includes('Empresa') && !r.cliente.includes('Abastecimento')) {
                 clientesSet.add(r.cliente);
             }
         } else if (r.tipo === 'abastecimento') {
-            totalAbastecimento += r.valorAbastecimento;
+            totalAbastecimento += (r.valorAbastecimento || 0);
         }
     });
 
-    const taxaKm = parametros.taxaKm !== undefined ? parametros.taxaKm : 1.30;
+    const taxaKm = parametros.taxaKm !== undefined ? parametros.taxaKm : 1.27;
     const ajudaCusto = parametros.ajudaCusto !== undefined ? parametros.ajudaCusto : 300;
     const cajuTotal = parametros.caju !== undefined ? parametros.caju : 250;
 
@@ -413,13 +368,13 @@ function reimbursementFormat(val) {
 }
 
 function atualizarTotaisPDF(totalKm, dados) {
-    const taxaKm = parametros.taxaKm !== undefined ? parametros.taxaKm : 1.30;
+    const taxaKm = parametros.taxaKm !== undefined ? parametros.taxaKm : 1.27;
     const ajudaCusto = parametros.ajudaCusto !== undefined ? parametros.ajudaCusto : 300;
     const reembolsoKm = totalKm * taxaKm;
     const totalGeral = reembolsoKm + ajudaCusto;
 
     document.getElementById('pdf-tech-name').textContent = parametros.tecnico || "Diego Santana";
-    document.getElementById('pdf-period').textContent = mesSelecionadoHistorico || obterMesAnoAtual();
+    document.getElementById('pdf-period').textContent = mesSelecionadoHistorico || "AGOSTO/2026";
     document.getElementById('pdf-base-pay').textContent = ajudaCusto.toFixed(2);
     document.getElementById('pdf-km-rate').textContent = taxaKm.toFixed(2);
     document.getElementById('pdf-caju-budget').textContent = (parametros.caju !== undefined ? parametros.caju : 250).toFixed(2);
@@ -437,65 +392,6 @@ function deletarRegistro(id) {
         renderHistory();
         atualizarDashboard();
     }
-}
-
-// --- BOTÃO DE RESTAURAR EMERGÊNCIA ---
-function restaurarDadosEmergencia() {
-    let backup = localStorage.getItem('controle_km_backup_lixeira');
-    if (!backup) {
-        alert("Nenhum backup automático encontrado no navegador.");
-        return;
-    }
-    try {
-        registros = JSON.parse(backup);
-        localStorage.setItem('controle_km_registros', JSON.stringify(registros));
-        alert("✅ Registros restaurados com sucesso!");
-        popularSeletorMeses();
-        renderHistory();
-        atualizarDashboard();
-    } catch(e) {
-        alert("Erro ao tentar restaurar os dados.");
-    }
-}
-
-// --- MODAL DE EXCLUSÃO DO MÊS ---
-function openConfirmModal() {
-    document.getElementById('modal-confirm').style.display = 'flex';
-}
-
-function closeConfirmModal() {
-    document.getElementById('modal-confirm').style.display = 'none';
-}
-
-function confirmClearAll() {
-    closeConfirmModal();
-    
-    let aviso1 = confirm("⚠️ ATENÇÃO: Deseja realmente apagar os registros do mês de " + (mesSelecionadoHistorico || obterMesAnoAtual()) + "?");
-    if (!aviso1) return;
-
-    let aviso2 = prompt("Para confirmar e mover para a lixeira, digite a palavra APAGAR abaixo:");
-    if (aviso2 !== "APAGAR") {
-        alert("Operação cancelada com segurança!");
-        return;
-    }
-
-    const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
-    
-    localStorage.setItem('controle_km_backup_lixeira', JSON.stringify(registros));
-
-    registros = registros.filter(r => {
-        let m = r.mesAno;
-        if (!m && r.data) {
-            const d = new Date(r.data);
-            m = `${nomesMeses[d.getMonth()]}/${d.getFullYear()}`;
-        }
-        return m !== mesAlvo;
-    });
-    localStorage.setItem('controle_km_registros', JSON.stringify(registros));
-    
-    renderHistory();
-    atualizarDashboard();
-    alert(`📁 Registros do mês de ${mesAlvo} removidos. Se precisar voltar atrás, clique no botão de Restaurar Dados.`);
 }
 
 // --- IMPRESSÃO / PDF ---
@@ -537,7 +433,7 @@ function saveEditEntry() {
     if (index !== -1) {
         registros[index].cliente = novoCliente;
         registros[index].os = novaOs || '-';
-        if (registros[index].tipo === 'parada') {
+        if (registros[index].tipo === 'parada' || !registros[index].tipo) {
             registros[index].kmRodado = isNaN(novoKm) ? 0 : novoKm;
         }
         
