@@ -1,5 +1,5 @@
 // --- CONTROLE DE ACESSO E SEGURANÇA ---
-const CHAVE_MESTRE = "102030"; // Defina sua senha aqui se necessário, ou deixe livre
+const CHAVE_MESTRE = "102030"; // Chave de liberação do app
 
 function verificarChave() {
     const input = document.getElementById('chave-input').value;
@@ -21,16 +21,33 @@ window.addEventListener('DOMContentLoaded', () => {
 // --- VARIÁVEIS GLOBAIS E ESTADO ---
 let registros = JSON.parse(localStorage.getItem('controle_km_registros')) || [];
 let parametros = JSON.parse(localStorage.getItem('controle_km_params')) || {};
-let mesSelecionadoHistorico = ""; // Se vazio, usa o mês atual
-let exibirHistoricoCompletoMes = false; // Alterna entre semana atual e mês todo
+let mesSelecionadoHistorico = ""; 
+let exibirHistoricoCompletoMes = false; 
 
-// Meses do ano para formatação automática
+// Meses do ano para formatação automática baseada no relógio do dispositivo
 const nomesMeses = [
     "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
     "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
 ];
 
+function obterMesAnoAtual() {
+    const agora = new Date();
+    return `${nomesMeses[agora.getMonth()]}/${agora.getFullYear()}`;
+}
+
 function inicializarApp() {
+    // Migração de segurança: se houver registros antigos sem propriedade mesAno, atribui AGOSTO/2026 para protegê-los
+    let alterou = false;
+    registros.forEach(r => {
+        if (!r.mesAno) {
+            r.mesAno = "AGOSTO/2026";
+            alterou = true;
+        }
+    });
+    if (alterou) {
+        localStorage.setItem('controle_km_registros', JSON.stringify(registros));
+    }
+
     carregarParametros();
     popularSeletorMeses();
     renderHistory();
@@ -38,16 +55,11 @@ function inicializarApp() {
 }
 
 // --- PARÂMETROS FINANCEIROS E MESES ---
-function obterMesAnoAtual() {
-    const agora = new Date();
-    return `${nomesMeses[agora.getMonth()]}/${agora.getFullYear()}`;
-}
-
 function carregarParametros() {
     const mesAtualAutomatico = obterMesAnoAtual();
     
-    // Se não houver parâmetros salvos ou se o mês salvo for antigo, sincroniza com o relógio do celular
-    if (!parametros.mesAno) {
+    // Força a sincronização do mês atual com o relógio do celular se estiver vazio ou travado em mês antigo
+    if (!parametros.mesAno || parametros.mesAno.includes("Agosto") || parametros.mesAno === "AGOSTO/2026") {
         parametros.mesAno = mesAtualAutomatico;
     }
     
@@ -57,7 +69,7 @@ function carregarParametros() {
     document.getElementById('param-km-rate').value = parametros.taxaKm !== undefined ? parametros.taxaKm : 1.30;
     document.getElementById('param-caju').value = parametros.caju !== undefined ? parametros.caju : 250;
 
-    // Seta o mês selecionado no histórico para o mês atual por padrão
+    // Garante que o histórico inicialize focado no mês atual do relógio
     if (!mesSelecionadoHistorico) {
         mesSelecionadoHistorico = parametros.mesAno;
     }
@@ -127,7 +139,7 @@ function setShortcut(local) {
 // --- ADICIONAR REGISTROS ---
 function addEntry() {
     const dataAtual = new Date();
-    const mesAnoRegistro = `${nomesMeses[dataAtual.getMonth()]}/${dataAtual.getFullYear()}`;
+    const mesAnoRegistro = obterMesAnoAtual();
     
     let novoRegistro = {
         id: Date.now(),
@@ -152,7 +164,6 @@ function addEntry() {
                 alert('Informe o KM atual do painel.');
                 return;
             }
-            // Pega o último KM registrado para calcular a diferença
             const ultimoKm = obterUltimoKmPainel();
             if (ultimoKm > 0 && kmPainel < ultimoKm) {
                 alert('O KM do painel não pode ser menor que o anterior.');
@@ -172,7 +183,6 @@ function addEntry() {
         novoRegistro.os = os || '-';
         novoRegistro.kmRodado = kmRodado;
 
-        // Limpa campos
         document.getElementById('input-client').value = '';
         document.getElementById('input-os').value = '';
         if (inputMode === 'odometro') {
@@ -198,7 +208,6 @@ function addEntry() {
     registros.push(novoRegistro);
     localStorage.setItem('controle_km_registros', JSON.stringify(registros));
     
-    // Garante que ao cadastrar, exibe o mês atual do registro
     mesSelecionadoHistorico = mesAnoRegistro;
     popularSeletorMeses();
     renderHistory();
@@ -216,9 +225,9 @@ function popularSeletorMeses() {
     const select = document.getElementById('select-mes-referencia');
     if (!select) return;
 
-    // Coleta todos os meses presentes nos registros + o mês atual do relógio
     const mesesSet = new Set();
     mesesSet.add(obterMesAnoAtual());
+    mesesSet.add("AGOSTO/2026"); // Garante AGOSTO fixo na lista para você acessar seus dados salvos
     registros.forEach(r => {
         if (r.mesAno) mesesSet.add(r.mesAno);
     });
@@ -241,8 +250,9 @@ function mudarMesReferencia() {
     const select = document.getElementById('select-mes-referencia');
     if (select) {
         mesSelecionadoHistorico = select.value;
-        exibirHistoricoCompletoMes = true; // Ao trocar de mês, mostra o mês inteiro selecionado
+        exibirHistoricoCompletoMes = true; 
         document.getElementById('btn-toggle-semanas').textContent = "Visualizando Mês Selecionado";
+        document.getElementById('label-semana-atual').textContent = `Exibindo: Mês Completo (${mesSelecionadoHistorico})`;
         renderHistory();
         atualizarDashboard();
     }
@@ -264,14 +274,12 @@ function toggleHistoricoCompleto() {
 function filtrarRegistrosAtuais() {
     const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
     
-    // Filtra pelo mês selecionado
-    let filtrados = registros.filter(r => (r.mesAno || obterMesAnoAtual()) === mesAlvo);
+    let filtrados = registros.filter(r => (r.mesAno || "AGOSTO/2026") === mesAlvo);
 
-    // Se não estiver no modo completo, filtra apenas os registros da semana atual
     if (!exibirHistoricoCompletoMes) {
         const agora = new Date();
         const inicioSemana = new Date(agora);
-        inicioSemana.setDate(agora.getDate() - agora.getDay()); // Domingo da semana atual
+        inicioSemana.setDate(agora.getDate() - agora.getDay()); 
         inicioSemana.setHours(0, 0, 0, 0);
 
         filtrados = filtrados.filter(r => {
@@ -321,9 +329,8 @@ function renderHistory() {
 }
 
 function atualizarDashboard() {
-    // O dashboard calcula sempre o mês selecionado completo para controle financeiro preciso
     const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
-    const regsMes = registros.filter(r => (r.mesAno || obterMesAnoAtual()) === mesAlvo);
+    const regsMes = registros.filter(r => (r.mesAno || "AGOSTO/2026") === mesAlvo);
 
     let totalKm = 0;
     let totalAbastecimento = 0;
@@ -391,7 +398,7 @@ function deletarRegistro(id) {
     }
 }
 
-// --- MODAL DE EXCLUSÃO DO MÊS ---
+// --- MODAL DE EXCLUSÃO DO MÊS COM DUPLO AVISO E BACKUP DE SEGURANÇA ---
 function openConfirmModal() {
     document.getElementById('modal-confirm').style.display = 'flex';
 }
@@ -401,19 +408,34 @@ function closeConfirmModal() {
 }
 
 function confirmClearAll() {
-    const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
-    // Remove apenas os registros do mês selecionado, preservando os outros meses (como agosto)
-    registros = registros.filter(r => (r.mesAno || obterMesAnoAtual()) !== mesAlvo);
-    localStorage.setItem('controle_km_registros', JSON.stringify(registros));
     closeConfirmModal();
+    
+    // Duplo aviso de segurança rigoroso contra exclusão acidental
+    let aviso1 = confirm("⚠️ ATENÇÃO: Você solicitou apagar todos os registros do mês de " + (mesSelecionadoHistorico || obterMesAnoAtual()) + ". Tem certeza absoluta?");
+    if (!aviso1) return;
+
+    let aviso2 = prompt("Para confirmar e proteger seus dados contra erros, digite a palavra APAGAR abaixo:");
+    if (aviso2 !== "APAGAR") {
+        alert("Operação cancelada com segurança. Seus dados continuam intactos!");
+        return;
+    }
+
+    const mesAlvo = mesSelecionadoHistorico || obterMesAnoAtual();
+    
+    // Cria um backup completo na lixeira antes de remover do app
+    localStorage.setItem('controle_km_backup_lixeira', JSON.stringify(registros));
+
+    // Remove apenas os registros do mês selecionado
+    registros = registros.filter(r => (r.mesAno || "AGOSTO/2026") !== mesAlvo);
+    localStorage.setItem('controle_km_registros', JSON.stringify(registros));
+    
     renderHistory();
     atualizarDashboard();
-    alert(`Registros do mês de ${mesAlvo} foram apagados com sucesso.`);
+    alert(`📁 Registros do mês de ${mesAlvo} apagados. Um backup de segurança foi armazenado no navegador caso precise restaurar.`);
 }
 
 // --- IMPRESSÃO / PDF ---
 function printPDF() {
-    // Garante que o PDF imprima o mês selecionado completo
     exibirHistoricoCompletoMes = true;
     renderHistory();
     window.print();
