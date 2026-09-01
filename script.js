@@ -1,38 +1,29 @@
-// --- CONTROLE DE ACESSO E SEGURANÇA (COM CHAVE E VISIBILIDADE) ---
+// --- CONTROLE DE ACESSO ORIGINAL COM SENHA ---
 const CHAVE_MESTRE = "ACESSO@KM";
 
 function verificarChave() {
-    const input = document.getElementById('chave-input').value.trim();
-    if (input === CHAVE_MESTRE || CHAVE_MESTRE === "") {
-        document.getElementById('tela-bloqueio').style.display = 'none';
+    // Procura o input pelo ID padrão que estava funcionando antes
+    const inputEl = document.getElementById('chave-input') || document.querySelector('input[type="password"]');
+    const valorDigitado = inputEl ? inputEl.value.trim() : "";
+
+    if (valorDigitado === CHAVE_MESTRE) {
+        const tela = document.getElementById('tela-bloqueio');
+        if (tela) tela.style.display = 'none';
         localStorage.setItem('app_liberado', 'true');
         inicializarApp();
     } else {
-        const erroEl = document.getElementById('erro-chave');
-        if (erroEl) erroEl.style.display = 'block';
-        alert("Chave incorreta! Digite ACESSO@KM");
-    }
-}
-
-// Alternar visualização da senha (botão de olho)
-function toggleMostrarSenha() {
-    const input = document.getElementById('chave-input');
-    if (input.type === "password") {
-        input.type = "text";
-    } else {
-        input.type = "password";
+        alert("Chave incorreta! Digite a senha correta.");
     }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('app_liberado') === 'true' || CHAVE_MESTRE === "") {
+    if (localStorage.getItem('app_liberado') === 'true') {
         const tela = document.getElementById('tela-bloqueio');
-        if(tela) tela.style.display = 'none';
+        if (tela) tela.style.display = 'none';
         inicializarApp();
     } else {
-        // Garante que a tela de bloqueio apareça se não estiver liberado
         const tela = document.getElementById('tela-bloqueio');
-        if(tela) tela.style.display = 'flex';
+        if (tela) tela.style.display = 'flex';
     }
 });
 
@@ -53,7 +44,6 @@ function obterMesAnoAtual() {
 }
 
 function inicializarApp() {
-    // RESGATE DE EMERGÊNCIA: Puxa backup se os registros estiverem vazios
     let backupLixeira = localStorage.getItem('controle_km_backup_lixeira');
     if (backupLixeira && registros.length === 0) {
         try {
@@ -62,7 +52,6 @@ function inicializarApp() {
         } catch(e) {}
     }
 
-    // Padroniza o mês de registros antigos para não sumirem de agosto/setembro
     let alterou = false;
     registros.forEach(r => {
         if (!r.mesAno || !r.mesAno.includes("2026")) {
