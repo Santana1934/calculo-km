@@ -4,426 +4,280 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de KM Pessoal</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent-green: #10b981;
-            --accent-blue: #3b82f6;
-            --accent-red: #ef4444;
-            --border-color: #334155;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 12px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
-        h1 { text-align: center; font-size: 1.25rem; margin-bottom: 4px; }
-        .card { background-color: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.95rem; font-weight: bold; color: var(--text-muted); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-        .form-group.full { grid-column: span 2; }
-        label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select { background-color: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); padding: 10px; font-size: 0.9rem; width: 100%; }
-        input:focus, select:focus { outline: none; border-color: var(--accent-blue); }
-        .btn { background-color: var(--accent-green); color: white; border: none; border-radius: 8px; padding: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; text-align: center; }
-        .btn:active { opacity: 0.8; }
-        .btn-secondary { background-color: var(--border-color); color: var(--text-color); padding: 8px 12px; font-size: 0.8rem; }
-        .btn-danger { background-color: var(--accent-red); color: white; padding: 8px 12px; font-size: 0.8rem; }
-        .toggle-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .toggle-btn { background-color: #0f172a; border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: center; }
-        .toggle-btn.active { background-color: var(--accent-blue); color: white; border-color: var(--accent-blue); }
-        .shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .shortcut-btn { background-color: #0f172a; border: 1px solid var(--border-color); color: var(--text-color); padding: 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-align: center; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        .stat-box { background-color: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .stat-label { font-size: 0.7rem; color: var(--text-muted); }
-        .stat-value { font-size: 1.1rem; font-weight: bold; margin-top: 2px; }
-        .summary-details { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; border-top: 1px solid var(--border-color); padding-top: 10px; }
-        .summary-row { display: flex; justify-content: space-between; }
-        .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 4px; margin-top: 10px; }
-        .history-item { background-color: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
-        .history-info { display: flex; flex-direction: column; gap: 2px; }
-        .history-title { font-weight: bold; }
-        .history-sub { font-size: 0.75rem; color: var(--text-muted); }
-        .delete-btn { background: none; border: none; color: var(--accent-red); font-size: 1rem; cursor: pointer; padding: 4px; }
-        .footer-info { text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
-        .editable-params input:disabled { background-color: #0f172a; border-color: transparent; color: var(--text-color); }
-    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="stylesheet" href="style.css?v=15">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
 </head>
 <body>
+    <div id="install-container" class="no-print" style="display: none; text-align: center; padding: 10px; background-color: #0f172a; border-bottom: 1px solid #1e293b;">
+        <button id="btn-install" style="background-color: #38bdf8; color: #0f172a; border: none; padding: 8px 16px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+            📲 Instalar Aplicativo
+        </button>
+    </div>
 
-    <div class="container" id="pdf-content">
-        <h1>Controle de KM Pessoal</h1>
+    <!-- TELA DE BLOQUEIO -->
+    <div id="tela-bloqueio" class="bloqueio-container">
+        <div class="bloqueio-caixa card">
+            <h2>🔒 Acesso Restrito</h2>
+            <p>App de uso exclusivo.<br>Insira a chave para liberar o aplicativo.</p>
+            <input type="password" id="chave-input" placeholder="Digite a chave..." style="margin-bottom: 12px; text-align: center;">
+            <button class="btn-action-green" onclick="verificarChave()">Liberar Acesso</button>
+            <p id="erro-chave" style="color: var(--danger); font-size: 0.8rem; display: none; margin-top: 15px; font-weight: 600;">
+                ❌ Chave incorreta. Entre em contato com Diego Santana.
+            </p>
+        </div>
+    </div>
 
-        <!-- Parâmetros (Apenas dados fixos e mês atual automático) -->
-        <div class="card">
-            <div class="card-header">
-                <span>⚙️ Parâmetros Financeiros</span>
-                <button class="btn btn-secondary" id="editParamsBtn" onclick="toggleEditParams()">Editar Parâmetros</button>
+    <div class="container">
+        <header class="no-print">
+            <h1>Controle de KM Pessoal</h1>
+        </header>
+
+        <!-- SELETOR DE MÊS -->
+        <div class="card no-print" style="padding: 12px; margin-bottom: 15px;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.75rem; color: #94a3b8; font-weight: bold; margin-bottom: 6px; display: block;">📅 SELECIONAR MÊS DE REFERÊNCIA</label>
+                <select id="select-mes-referencia" onchange="mudarMesReferencia()" style="width: 100%; padding: 10px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 8px; font-weight: 600;">
+                    <!-- Preenchido via script.js -->
+                </select>
             </div>
-            <div class="form-grid editable-params">
+        </div>
+
+        <header class="pdf-header">
+            <h2>RELATÓRIO OPERACIONAL DE ATENDIMENTOS</h2>
+            <div class="pdf-meta">
+                <span><strong>TÉCNICO:</strong> <span id="pdf-tech-name">___________________</span></span>
+                <span><strong>PERÍODO:</strong> <span id="pdf-period">JULHO/2026</span></span>
+            </div>
+            <div class="pdf-submeta">
+                <span>Ajuda de Custo Fixa: R$ <span id="pdf-base-pay">300.00</span></span> | 
+                <span>Valor por KM (Empresa): R$ <span id="pdf-km-rate">1.30</span></span> | 
+                <span>Cartão (Combustível Solicitado): R$ <span id="pdf-caju-budget">250.00</span></span>
+            </div>
+        </header>
+
+        <!-- PARÂMETROS FINANCEIROS -->
+        <div class="card no-print">
+            <div class="card-header-flex">
+                <h3>⚙️ Parâmetros Financeiros</h3>
+                <button id="btn-edit-params" class="btn-subtle" onclick="toggleEditParams()">🔒 Editar Parâmetros</button>
+            </div>
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>Técnico</label>
-                    <input type="text" id="paramTecnico" disabled>
+                    <label>TÉCNICO</label>
+                    <input type="text" id="param-tech" placeholder="Ex: João da Silva" disabled>
                 </div>
                 <div class="form-group">
-                    <label>Mês Atual (Celular)</label>
-                    <input type="text" id="paramMesDisplay" disabled style="font-weight: bold; color: var(--accent-blue);">
+                    <label>MÊS/ANO</label>
+                    <input type="text" id="param-period" placeholder="Ex: JULHO/2026" disabled>
                 </div>
                 <div class="form-group">
-                    <label>Ajuda de Custo Fixa (R$)</label>
-                    <input type="number" step="0.01" id="paramAjuda" disabled oninput="atualizarInterface()">
+                    <label>AJUDA DE CUSTO FIXA (R$)</label>
+                    <input type="number" id="param-base-pay" value="300" step="0.01" disabled>
                 </div>
                 <div class="form-group">
-                    <label>R$ / KM (Empresa)</label>
-                    <input type="number" step="0.01" id="paramValorKm" disabled oninput="atualizarInterface()">
+                    <label>R$ / KM (EMPRESA)</label>
+                    <input type="number" id="param-km-rate" value="1.30" step="0.01" disabled>
                 </div>
-                <div class="form-group full">
-                    <label>Valor Solicitado em Cartão do Mês (R$)</label>
-                    <input type="number" step="0.01" id="paramCartao" disabled oninput="atualizarInterface()">
+                <div class="form-group full-width">
+                    <label>VALOR SOLICITADO EM CARTÃO DO MÊS (R$)</label>
+                    <input type="number" id="param-caju" placeholder="Ex: 250" step="0.01" disabled>
                 </div>
             </div>
         </div>
 
-        <!-- Registro (Lança sempre no mês atual do celular) -->
-        <div class="card" id="no-print-form">
-            <div class="card-header"><span>📝 Novo Registro</span></div>
-            
-            <div class="form-group" style="margin-bottom: 12px;">
-                <label>Tipo de Lançamento</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <button type="button" class="toggle-btn active" id="btnParada" onclick="setTipo('parada')">🚗 Parada / Cliente</button>
-                    <button type="button" class="toggle-btn" id="btnAbastecimento" onclick="setTipo('abastecimento')">⛽ Abastecimento</button>
+        <!-- LANÇAMENTO DE REGISTRO -->
+        <div class="card no-print">
+            <div class="mode-switch">
+                <button id="btn-mode-parada" class="mode-btn active" onclick="setMode('parada')">🚗 Parada / Cliente</button>
+                <button id="btn-mode-abastecimento" class="mode-btn" onclick="setMode('abastecimento')">⛽ Abastecimento</button>
+            </div>
+
+            <div id="fields-parada">
+                <label class="label-section">ATALHOS RÁPIDOS</label>
+                <div class="shortcut-buttons">
+                    <button type="button" class="btn-shortcut" onclick="setShortcut('Casa')">🏠 Casa</button>
+                    <button type="button" class="btn-shortcut" onclick="setShortcut('Empresa')">🏢 Empresa</button>
+                </div>
+
+                <div class="form-group">
+                    <label>CLIENTE / LOCAL</label>
+                    <input type="text" id="input-client" placeholder="Ex: Cliente XYZ ou Av. Paulista">
+                </div>
+                <div class="form-group">
+                    <label>Nº PROTOCOLO (OPCIONAL)</label>
+                    <input type="text" id="input-os" placeholder="Ex: 98452">
+                </div>
+                <div class="form-group">
+                    <label>KM ATUAL DO PAINEL</label>
+                    <input type="number" id="input-km" placeholder="Ex: 80">
+                </div>
+
+                <button class="btn-action-green" onclick="addEntry()">Salvar Parada</button>
+            </div>
+
+            <div id="fields-abastecimento" style="display: none;">
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>VALOR DO ABASTECIMENTO (R$)</label>
+                    <input type="number" id="input-fuel" placeholder="Ex: 100.00" step="0.01">
+                </div>
+                <button class="btn-action-green" onclick="addEntry()">Salvar Abastecimento</button>
+            </div>
+        </div>
+
+        <!-- RESUMO GERAL -->
+        <div class="card no-print">
+            <h3>📊 Resumo Geral</h3>
+            <div class="dashboard-grid">
+                <div class="dash-box">
+                    <span>TOTAL RODADO</span>
+                    <strong id="dash-total-km">0 KM</strong>
+                </div>
+                <div class="dash-box">
+                    <span>CLIENTES ATENDIDOS</span>
+                    <strong id="dash-total-clients">0</strong>
+                </div>
+                <div class="dash-box">
+                    <span>REEMBOLSO KM</span>
+                    <strong id="dash-reimbursement-km">R$ 0.00</strong>
+                </div>
+                <div class="dash-box highlight-green">
+                    <span>SOBRA LÍQUIDA REAL</span>
+                    <strong id="dash-net-profit">R$ 300.00</strong>
                 </div>
             </div>
 
-            <div class="toggle-group">
-                <button type="button" class="toggle-btn active" id="modeKm" onclick="setMode('km')">Modo KM Rodado</button>
-                <button type="button" class="toggle-btn" id="modeOdo" onclick="setMode('odo')">Modo Odômetro</button>
-            </div>
-
-            <div class="shortcuts">
-                <button type="button" class="shortcut-btn" onclick="setLocal('Casa')">🏠 Casa</button>
-                <button type="button" class="shortcut-btn" onclick="setLocal('Empresa')">🏢 Empresa</button>
-            </div>
-
-            <div class="form-group" id="grupoCliente">
-                <label id="labelClienteLocal">Cliente / Local</label>
-                <input type="text" id="inputCliente" placeholder="Ex: Cliente XYZ">
-            </div>
-
-            <div class="form-group" id="grupoProtocolo">
-                <label>Nº Protocolo (Opcional)</label>
-                <input type="text" id="inputProtocolo" placeholder="Ex: 98402">
-            </div>
-
-            <div class="form-group">
-                <label id="labelKmOdo">KM Rodado</label>
-                <input type="number" step="0.1" id="inputKmOdo" placeholder="Ex: 15">
-            </div>
-
-            <button class="btn" onclick="registrarItem()">Registrar</button>
-        </div>
-
-        <!-- Resumo -->
-        <div class="card">
-            <div class="card-header"><span>📊 Resumo do Mês (<span id="resumoMesLabel">-</span>)</span></div>
-            <div class="stats-grid">
-                <div class="stat-box"><div class="stat-label">Total Rodado</div><div class="stat-value" id="resumoTotalKm">0,0 KM</div></div>
-                <div class="stat-box"><div class="stat-label">Clientes Atendidos</div><div class="stat-value" id="resumoClientes">0</div></div>
-                <div class="stat-box"><div class="stat-label">Reembolso KM</div><div class="stat-value" id="resumoReembolso">R$ 0,00</div></div>
-                <div class="stat-box"><div class="stat-label" style="color: var(--accent-green);">Sobra Líquida Real</div><div class="stat-value" id="resumoSobra" style="color: var(--accent-green);">R$ 0,00</div></div>
-            </div>
             <div class="summary-details">
-                <div class="summary-row"><span>💰 Ajuda de Custo Fixa:</span><span id="resumoAjudaTxt">R$ 300,00</span></div>
-                <div class="summary-row"><span>⛽ Total Gasto no Posto:</span><span id="resumoPostoTxt">R$ 0,00</span></div>
-                <div class="summary-row"><span>💳 Saldo Cartão Restante:</span><span id="resumoCartaoTxt">R$ 0,00</span></div>
-                <div class="summary-row"><span>📉 Seu Custo por KM Rodado:</span><span id="resumoCustoKmTxt">R$ 0,00/KM</span></div>
-            </div>
-        </div>
-
-        <!-- Histórico com Seletor de Mês Integrado -->
-        <div class="card">
-            <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-                <span style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📅 Histórico de Lançamentos</span>
-                </span>
-                <div style="width: 100%;">
-                    <label style="font-size: 0.65rem;">Visualizar Mês de Referência:</label>
-                    <select id="filtroMesHistorico" onchange="atualizarInterface()" style="margin-top: 2px; padding: 6px; font-size: 0.85rem;">
-                        <!-- Preenchido dinamicamente (Agosto, Setembro, etc) -->
-                    </select>
+                <div class="summary-line">
+                    <span>💰 Ajuda de Custo Fixa:</span>
+                    <strong id="detail-base-pay">R$ 300.00</strong>
+                </div>
+                <div class="summary-line">
+                    <span>⛽ Total Gasto no Posto:</span>
+                    <strong id="detail-total-fuel">R$ 0.00</strong>
+                </div>
+                <div class="summary-line">
+                    <span>💳 Saldo Cartão Restante:</span>
+                    <strong id="detail-caju-remaining">R$ 250.00</strong>
+                </div>
+                <div class="summary-line">
+                    <span>✏️ Seu Custo por KM Rodado:</span>
+                    <strong id="detail-cost-per-km">R$ 0.00/KM</strong>
                 </div>
             </div>
-            <div class="history-list" id="historyList"></div>
         </div>
 
-        <div id="no-print-actions" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-            <button class="btn btn-secondary" onclick="gerarPDF()">📄 Gerar Relatório PDF / Imprimir</button>
-            <button class="btn btn-secondary" onclick="exportarBackup()" style="background-color: #1e3a8a;">💾 Baixar Arquivo de Backup</button>
-            <label class="btn btn-secondary" style="background-color: #312e81; text-align: center; cursor: pointer; display: block;">
-                📂 Restaurar Backup Salvo <input type="file" id="inputBackup" accept=".json" onchange="importarBackup(event)" style="display: none;">
-            </label>
-            <button class="btn btn-danger" onclick="apagarRegistrosMes()">Apagar Registros do Mês Visualizado</button>
+        <!-- HISTÓRICO E TABELA -->
+        <div class="card">
+            <h3 class="no-print" style="margin-bottom: 12px;">📅 Histórico por Dia</h3>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente / Local</th>
+                            <th>Protocolo / OS</th>
+                            <th>KM Rodado</th>
+                            <th class="no-print">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <!-- Lançamentos via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pdf-totals">
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
+                <p><strong>TOTAL DE KM RODADOS:</strong> <span id="pdf-total-km">0</span> KM</p>
+                <p><strong>CÁLCULO KM:</strong> <span id="pdf-calc-km">0 KM × R$ 1.30 = R$ 0.00</span></p>
+                <p><strong>AJUDA DE CUSTO FIXA:</strong> R$ <span id="pdf-summary-base">300.00</span></p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #000;">
+                <p style="font-size: 1.1rem;"><strong>VALOR TOTAL DE REEMBOLSO:</strong> <span id="pdf-final-reimbursement">R$ 300.00</span></p>
+            </div>
+
+            <div class="no-print" style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn-subtle" onclick="printPDF()" style="width: 100%; padding: 12px; font-weight: 600; cursor: pointer;">🖨️ Gerar PDF / Imprimir</button>
+                <button class="btn-clear-all" onclick="openConfirmModal()">Apagar Registros do Mês</button>
+            </div>
         </div>
 
-        <div class="footer-info">🔒 Seus dados ficam armazenados no seu dispositivo<br>DESENVOLVIDO POR DIEGO SANTANA</div>
+        <footer class="footer-credits no-print">
+            <p>🔒 Seus dados ficam armazenados exclusivamente no seu dispositivo.</p>
+            <p><strong>DESENVOLVIDO POR DIEGO SANTANA</strong></p>
+        </footer>
+    </div>
+
+    <!-- MODAIS -->
+    <div id="modal-confirm" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3>⚠️ Confirmar Exclusão</h3>
+            <p>Deseja realmente apagar todos os registros do mês?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="closeConfirmModal()">Cancelar</button>
+                <button type="button" class="btn-modal-danger" onclick="confirmClearAll()">Sim, Apagar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-edit" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3>Editar Registro</h3>
+            <input type="hidden" id="edit-id">
+            <div class="form-group" style="text-align: left; margin-top: 10px;">
+                <label>CLIENTE / LOCAL</label>
+                <input type="text" id="edit-client">
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label>Nº PROTOCOLO</label>
+                <input type="text" id="edit-os">
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label>KM RODADO</label>
+                <input type="number" id="edit-km">
+            </div>
+            <div class="modal-actions" style="margin-top: 15px;">
+                <button type="button" class="btn-modal-cancel" onclick="closeEditModal()">Cancelar</button>
+                <button type="button" class="btn-action-green" onclick="saveEditEntry()">Salvar Alteração</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        let tipoAtual = 'parada', modoAtual = 'km', ultimoOdometro = 0;
-        
-        let registros = JSON.parse(localStorage.getItem('registros')) || 
-                        JSON.parse(localStorage.getItem('controle_km_registros')) || 
-                        JSON.parse(localStorage.getItem('km_registros')) || [];
+        let deferredPrompt;
+        const installContainer = document.getElementById('install-container');
+        const btnInstall = document.getElementById('btn-install');
 
-        let parametros = JSON.parse(localStorage.getItem('parametros')) || 
-                           JSON.parse(localStorage.getItem('controle_km_params')) || {
-            tecnico: 'Diego Santana', ajuda: 300.00, valorKm: 1.27, cartao: 0.00
-        };
-
-        const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-        const dataHoje = new Date();
-        const mesAnoAtual = `${mesesNomes[dataHoje.getMonth()]} / ${dataHoje.getFullYear()}`;
-
-        // Popular o seletor de meses no Histórico
-        function popularSeletorMeses() {
-            const select = document.getElementById('filtroMesHistorico');
-            const valorAtual = select.value;
-            select.innerHTML = '';
-
-            let mesesDisponiveis = new Set();
-            mesesDisponiveis.add(mesAnoAtual);
-            mesesDisponiveis.add("Agosto / 2026");
-            mesesDisponiveis.add("Agosto/2026");
-
-            registros.forEach(r => {
-                if (r.mes) mesesDisponiveis.add(r.mes);
-            });
-
-            Array.from(mesesDisponiveis).forEach(m => {
-                let opt = document.createElement('option');
-                opt.value = m;
-                opt.textContent = m;
-                select.appendChild(opt);
-            });
-
-            if (valorAtual && mesesDisponiveis.has(valorAtual)) {
-                select.value = valorAtual;
-            } else {
-                select.value = mesAnoAtual;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installContainer) {
+                installContainer.style.display = 'block';
             }
-        }
+        });
 
-        popularSeletorMeses();
-        salvarDados();
-
-        document.getElementById('paramTecnico').value = parametros.tecnico || 'Diego Santana';
-        document.getElementById('paramMesDisplay').value = mesAnoAtual;
-        document.getElementById('paramAjuda').value = parametros.ajuda ?? 300.00;
-        document.getElementById('paramValorKm').value = parametros.valorKm ?? 1.27;
-        document.getElementById('paramCartao').value = parametros.cartao ?? 0.00;
-
-        function toggleEditParams() {
-            const inputs = document.querySelectorAll('.editable-params input:not(#paramMesDisplay)');
-            const btn = document.getElementById('editParamsBtn');
-            const editando = !inputs[0].disabled;
-
-            inputs.forEach(i => i.disabled = editando);
-            if (editando) {
-                parametros.tecnico = document.getElementById('paramTecnico').value;
-                parametros.ajuda = parseFloat(document.getElementById('paramAjuda').value) || 0;
-                parametros.valorKm = parseFloat(document.getElementById('paramValorKm').value) || 0;
-                parametros.cartao = parseFloat(document.getElementById('paramCartao').value) || 0;
-                salvarDados();
-                btn.innerText = 'Editar Parâmetros';
-                atualizarInterface();
-            } else {
-                btn.innerText = 'Salvar Parâmetros';
-            }
-        }
-
-        function setTipo(tipo) {
-            tipoAtual = tipo;
-            document.getElementById('btnParada').classList.toggle('active', tipo === 'parada');
-            document.getElementById('btnAbastecimento').classList.toggle('active', tipo === 'abastecimento');
-            document.getElementById('grupoCliente').style.display = tipo === 'parada' ? 'flex' : 'none';
-            document.getElementById('grupoProtocolo').style.display = tipo === 'parada' ? 'flex' : 'none';
-            document.getElementById('labelKmOdo').innerText = tipo === 'parada' ? (modoAtual === 'km' ? 'KM Rodado' : 'Odômetro Atual (KM)') : 'Valor Gasto no Posto (R$)';
-        }
-
-        function setMode(mode) {
-            modoAtual = mode;
-            document.getElementById('modeKm').classList.toggle('active', mode === 'km');
-            document.getElementById('modeOdo').classList.toggle('active', mode === 'odo');
-            document.getElementById('labelKmOdo').innerText = mode === 'km' ? 'KM Rodado' : 'Odômetro Atual (KM)';
-        }
-
-        function setLocal(loc) { document.getElementById('inputCliente').value = loc; }
-
-        function registrarItem() {
-            const valor = parseFloat(document.getElementById('inputKmOdo').value);
-            if (isNaN(valor) || valor <= 0) return alert('Informe um valor válido.');
-
-            const dataStr = dataHoje.toLocaleDateString('pt-BR');
-            
-            let item = { 
-                id: Date.now(), 
-                mes: mesAnoAtual, // Novos lançamentos sempre entram no mês atual do celular
-                data: dataStr, 
-                tipo: tipoAtual 
-            };
-
-            if (tipoAtual === 'parada') {
-                const cliente = document.getElementById('inputCliente').value.trim();
-                if (!cliente) return alert('Informe o cliente ou local.');
-                let km = (modoAtual === 'km') ? valor : (valor > ultimoOdometro ? valor - ultimoOdometro : (alert('Odômetro menor que o anterior.'), null));
-                if (km === null) return;
-                if (modoAtual === 'odo') ultimoOdometro = valor;
-                item.cliente = cliente;
-                item.protocolo = document.getElementById('inputProtocolo').value.trim() || '-';
-                item.km = km;
-            } else {
-                item.cliente = '⛽ Abastecimento';
-                item.protocolo = '-';
-                item.valorPosto = valor;
-            }
-
-            registros.push(item);
-            salvarDados();
-            popularSeletorMeses();
-            
-            // Deixa o seletor focado no mês atual onde acabou de registrar
-            document.getElementById('filtroMesHistorico').value = mesAnoAtual;
-
-            document.getElementById('inputCliente').value = '';
-            document.getElementById('inputProtocolo').value = '';
-            document.getElementById('inputKmOdo').value = '';
-            atualizarInterface();
-        }
-
-        function excluirRegistro(id) {
-            registros = registros.filter(r => r.id !== id);
-            salvarDados();
-            popularSeletorMeses();
-            atualizarInterface();
-        }
-
-        function apagarRegistrosMes() {
-            const mesSelecionado = document.getElementById('filtroMesHistorico').value;
-            if (confirm(`Deseja apagar todos os registros de ${mesSelecionado}?`)) {
-                registros = registros.filter(r => r.mes !== mesSelecionado && !(mesSelecionado.includes('Agosto') && r.mes && r.mes.includes('Agosto')));
-                salvarDados();
-                popularSeletorMeses();
-                atualizarInterface();
-            }
-        }
-
-        function salvarDados() {
-            localStorage.setItem('registros', JSON.stringify(registros));
-            localStorage.setItem('controle_km_registros', JSON.stringify(registros));
-            localStorage.setItem('parametros', JSON.stringify(parametros));
-        }
-
-        function exportarBackup() {
-            const blob = new Blob([JSON.stringify({ registros, parametros })], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `backup_controle_km_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-        }
-
-        function importarBackup(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const data = JSON.parse(evt.target.result);
-                    if (data.registros) {
-                        registros = data.registros;
-                        if (data.parametros) parametros = data.parametros;
-                        salvarDados();
-                        location.reload();
-                    } else { alert('Arquivo inválido.'); }
-                } catch { alert('Erro ao ler arquivo.'); }
-            };
-            reader.readAsText(file);
-        }
-
-        function atualizarInterface() {
-            const mesSelecionado = document.getElementById('filtroMesHistorico').value || mesAnoAtual;
-            document.getElementById('resumoMesLabel').innerText = mesSelecionado;
-
-            const ajuda = parseFloat(document.getElementById('paramAjuda').value) || 0;
-            const valorKm = parseFloat(document.getElementById('paramValorKm').value) || 0;
-            const cartao = parseFloat(document.getElementById('paramCartao').value) || 0;
-
-            const listaMes = registros.filter(r => {
-                if (!r.mes) return false;
-                if (mesSelecionado.includes('Agosto')) {
-                    return r.mes.includes('Agosto');
-                }
-                return r.mes === mesSelecionado;
-            });
-            
-            let totalKm = 0, clientes = 0, totalPosto = 0;
-            const historyList = document.getElementById('historyList');
-            
-            historyList.innerHTML = listaMes.length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.85rem;">Nenhum registro para este mês.</div>' : '';
-
-            [...listaMes].reverse().forEach(r => {
-                if (r.tipo === 'parada') {
-                    totalKm += r.km;
-                    clientes++;
-                    historyList.innerHTML += `<div class="history-item"><div class="history-info"><span class="history-title">${r.cliente}</span><span class="history-sub">📅 ${r.data} | OS: ${r.protocolo} | +${r.km.toFixed(1)} KM</span></div><button class="delete-btn" onclick="excluirRegistro(${r.id})">✕</button></div>`;
-                } else {
-                    totalPosto += r.valorPosto;
-                    historyList.innerHTML += `<div class="history-item" style="border-color: var(--accent-blue);"><div class="history-info"><span class="history-title" style="color: var(--accent-blue);">Abastecimento</span><span class="history-sub">📅 ${r.data} | R$ ${r.valorPosto.toFixed(2)}</span></div><button class="delete-btn" onclick="excluirRegistro(${r.id})">✕</button></div>`;
+        if (btnInstall) {
+            btnInstall.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    if (installContainer) {
+                        installContainer.style.display = 'none';
+                    }
                 }
             });
-
-            const reembolso = totalKm * valorKm;
-            const sobra = ajuda + reembolso - totalPosto - cartao;
-            const custoKm = totalKm > 0 ? (totalPosto / totalKm) : 0;
-
-            document.getElementById('resumoTotalKm').innerText = totalKm.toFixed(1) + ' KM';
-            document.getElementById('resumoClientes').innerText = clientes;
-            document.getElementById('resumoReembolso').innerText = 'R$ ' + reembolso.toFixed(2);
-            document.getElementById('resumoSobra').innerText = 'R$ ' + sobra.toFixed(2);
-            document.getElementById('resumoAjudaTxt').innerText = 'R$ ' + ajuda.toFixed(2);
-            document.getElementById('resumoPostoTxt').innerText = 'R$ ' + totalPosto.toFixed(2);
-            document.getElementById('resumoCartaoTxt').innerText = 'R$ ' + cartao.toFixed(2);
-            document.getElementById('resumoCustoKmTxt').innerText = 'R$ ' + custoKm.toFixed(2) + '/KM';
         }
 
-        function gerarPDF() {
-            const el = document.getElementById('pdf-content');
-            const form = document.getElementById('no-print-form'), actions = document.getElementById('no-print-actions'), edit = document.getElementById('editParamsBtn'), dels = document.querySelectorAll('.delete-btn');
-            
-            form.style.display = actions.style.display = edit.style.display = 'none';
-            dels.forEach(d => d.style.display = 'none');
-
-            const opt = {
-                margin:       10,
-                filename:     `Relatorio_KM_${document.getElementById('filtroMesHistorico').value.replace('/', '_').replace(/\s+/g, '')}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().from(el).set(opt).save().then(() => {
-                form.style.display = 'block'; 
-                actions.style.display = 'flex'; 
-                edit.style.display = 'inline-block';
-                dels.forEach(d => d.style.display = 'inline-block');
-            });
-        }
-
-        atualizarInterface();
+        window.addEventListener('appinstalled', () => {
+            if (installContainer) {
+                installContainer.style.display = 'none';
+            }
+        });
     </script>
+
+    <script src="script.js?v=15"></script>
 </body>
 </html>
