@@ -43,7 +43,7 @@
         .stat-value { font-size: 1.1rem; font-weight: bold; margin-top: 2px; }
         .summary-details { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; border-top: 1px solid var(--border-color); padding-top: 10px; }
         .summary-row { display: flex; justify-content: space-between; }
-        .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 4px; }
+        .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 4px; margin-top: 10px; }
         .history-item { background-color: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
         .history-info { display: flex; flex-direction: column; gap: 2px; }
         .history-title { font-weight: bold; }
@@ -58,7 +58,7 @@
     <div class="container" id="pdf-content">
         <h1>Controle de KM Pessoal</h1>
 
-        <!-- Parâmetros -->
+        <!-- Parâmetros (Apenas dados fixos e mês atual automático) -->
         <div class="card">
             <div class="card-header">
                 <span>⚙️ Parâmetros Financeiros</span>
@@ -70,7 +70,7 @@
                     <input type="text" id="paramTecnico" disabled>
                 </div>
                 <div class="form-group">
-                    <label>Mês Atual (Automático)</label>
+                    <label>Mês Atual (Celular)</label>
                     <input type="text" id="paramMesDisplay" disabled style="font-weight: bold; color: var(--accent-blue);">
                 </div>
                 <div class="form-group">
@@ -88,9 +88,9 @@
             </div>
         </div>
 
-        <!-- Registro -->
+        <!-- Registro (Lança sempre no mês atual do celular) -->
         <div class="card" id="no-print-form">
-            <div class="card-header"><span>📝 Registro</span></div>
+            <div class="card-header"><span>📝 Novo Registro</span></div>
             
             <div class="form-group" style="margin-bottom: 12px;">
                 <label>Tipo de Lançamento</label>
@@ -145,9 +145,19 @@
             </div>
         </div>
 
-        <!-- Histórico -->
+        <!-- Histórico com Seletor de Mês Integrado -->
         <div class="card">
-            <div class="card-header"><span>📅 Histórico de Lançamentos</span></div>
+            <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                <span style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📅 Histórico de Lançamentos</span>
+                </span>
+                <div style="width: 100%;">
+                    <label style="font-size: 0.65rem;">Visualizar Mês de Referência:</label>
+                    <select id="filtroMesHistorico" onchange="atualizarInterface()" style="margin-top: 2px; padding: 6px; font-size: 0.85rem;">
+                        <!-- Preenchido dinamicamente (Agosto, Setembro, etc) -->
+                    </select>
+                </div>
+            </div>
             <div class="history-list" id="historyList"></div>
         </div>
 
@@ -157,7 +167,7 @@
             <label class="btn btn-secondary" style="background-color: #312e81; text-align: center; cursor: pointer; display: block;">
                 📂 Restaurar Backup Salvo <input type="file" id="inputBackup" accept=".json" onchange="importarBackup(event)" style="display: none;">
             </label>
-            <button class="btn btn-danger" onclick="apagarRegistrosMes()">Apagar Registros deste Mês</button>
+            <button class="btn btn-danger" onclick="apagarRegistrosMes()">Apagar Registros do Mês Visualizado</button>
         </div>
 
         <div class="footer-info">🔒 Seus dados ficam armazenados no seu dispositivo<br>DESENVOLVIDO POR DIEGO SANTANA</div>
@@ -166,7 +176,6 @@
     <script>
         let tipoAtual = 'parada', modoAtual = 'km', ultimoOdometro = 0;
         
-        // Recuperação segura de chaves antigas para não perder nada de agosto
         let registros = JSON.parse(localStorage.getItem('registros')) || 
                         JSON.parse(localStorage.getItem('controle_km_registros')) || 
                         JSON.parse(localStorage.getItem('km_registros')) || [];
@@ -176,19 +185,47 @@
             tecnico: 'Diego Santana', ajuda: 300.00, valorKm: 1.27, cartao: 0.00
         };
 
-        // Definir mês atual automaticamente pelo celular
         const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
         const dataHoje = new Date();
         const mesAnoAtual = `${mesesNomes[dataHoje.getMonth()]} / ${dataHoje.getFullYear()}`;
 
-        // Preencher campos iniciais
+        // Popular o seletor de meses no Histórico
+        function popularSeletorMeses() {
+            const select = document.getElementById('filtroMesHistorico');
+            const valorAtual = select.value;
+            select.innerHTML = '';
+
+            let mesesDisponiveis = new Set();
+            mesesDisponiveis.add(mesAnoAtual);
+            mesesDisponiveis.add("Agosto / 2026");
+            mesesDisponiveis.add("Agosto/2026");
+
+            registros.forEach(r => {
+                if (r.mes) mesesDisponiveis.add(r.mes);
+            });
+
+            Array.from(mesesDisponiveis).forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                select.appendChild(opt);
+            });
+
+            if (valorAtual && mesesDisponiveis.has(valorAtual)) {
+                select.value = valorAtual;
+            } else {
+                select.value = mesAnoAtual;
+            }
+        }
+
+        popularSeletorMeses();
+        salvarDados();
+
         document.getElementById('paramTecnico').value = parametros.tecnico || 'Diego Santana';
         document.getElementById('paramMesDisplay').value = mesAnoAtual;
         document.getElementById('paramAjuda').value = parametros.ajuda ?? 300.00;
         document.getElementById('paramValorKm').value = parametros.valorKm ?? 1.27;
         document.getElementById('paramCartao').value = parametros.cartao ?? 0.00;
-
-        salvarDados();
 
         function toggleEditParams() {
             const inputs = document.querySelectorAll('.editable-params input:not(#paramMesDisplay)');
@@ -231,12 +268,11 @@
             const valor = parseFloat(document.getElementById('inputKmOdo').value);
             if (isNaN(valor) || valor <= 0) return alert('Informe um valor válido.');
 
-            // Identificar a data formatada para exibição (ex: 01/09/2026) e o mês de referência (ex: Setembro / 2026)
             const dataStr = dataHoje.toLocaleDateString('pt-BR');
             
             let item = { 
                 id: Date.now(), 
-                mes: mesAnoAtual, 
+                mes: mesAnoAtual, // Novos lançamentos sempre entram no mês atual do celular
                 data: dataStr, 
                 tipo: tipoAtual 
             };
@@ -258,6 +294,11 @@
 
             registros.push(item);
             salvarDados();
+            popularSeletorMeses();
+            
+            // Deixa o seletor focado no mês atual onde acabou de registrar
+            document.getElementById('filtroMesHistorico').value = mesAnoAtual;
+
             document.getElementById('inputCliente').value = '';
             document.getElementById('inputProtocolo').value = '';
             document.getElementById('inputKmOdo').value = '';
@@ -267,13 +308,16 @@
         function excluirRegistro(id) {
             registros = registros.filter(r => r.id !== id);
             salvarDados();
+            popularSeletorMeses();
             atualizarInterface();
         }
 
         function apagarRegistrosMes() {
-            if (confirm(`Deseja apagar os registros de ${mesAnoAtual}?`)) {
-                registros = registros.filter(r => r.mes !== mesAnoAtual);
+            const mesSelecionado = document.getElementById('filtroMesHistorico').value;
+            if (confirm(`Deseja apagar todos os registros de ${mesSelecionado}?`)) {
+                registros = registros.filter(r => r.mes !== mesSelecionado && !(mesSelecionado.includes('Agosto') && r.mes && r.mes.includes('Agosto')));
                 salvarDados();
+                popularSeletorMeses();
                 atualizarInterface();
             }
         }
@@ -311,20 +355,25 @@
         }
 
         function atualizarInterface() {
-            document.getElementById('resumoMesLabel').innerText = mesAnoAtual;
+            const mesSelecionado = document.getElementById('filtroMesHistorico').value || mesAnoAtual;
+            document.getElementById('resumoMesLabel').innerText = mesSelecionado;
 
             const ajuda = parseFloat(document.getElementById('paramAjuda').value) || 0;
             const valorKm = parseFloat(document.getElementById('paramValorKm').value) || 0;
             const cartao = parseFloat(document.getElementById('paramCartao').value) || 0;
 
-            // Filtra os registros do mês atual do celular (ex: Setembro / 2026)
-            // Caso queira ver agosto ou outro mês se houver dados antigos salvos em outro formato, ajustamos na busca:
-            const listaMes = registros.filter(r => r.mes === mesAnoAtual || r.mes === 'Agosto/2026' || r.mes === 'Agosto / 2026');
+            const listaMes = registros.filter(r => {
+                if (!r.mes) return false;
+                if (mesSelecionado.includes('Agosto')) {
+                    return r.mes.includes('Agosto');
+                }
+                return r.mes === mesSelecionado;
+            });
             
             let totalKm = 0, clientes = 0, totalPosto = 0;
             const historyList = document.getElementById('historyList');
             
-            historyList.innerHTML = listaMes.length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.85rem;">Nenhum registro para este mês ainda.</div>' : '';
+            historyList.innerHTML = listaMes.length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.85rem;">Nenhum registro para este mês.</div>' : '';
 
             [...listaMes].reverse().forEach(r => {
                 if (r.tipo === 'parada') {
@@ -360,7 +409,7 @@
 
             const opt = {
                 margin:       10,
-                filename:     `Relatorio_KM_${mesAnoAtual.replace(/\s+/g, '')}.pdf`,
+                filename:     `Relatorio_KM_${document.getElementById('filtroMesHistorico').value.replace('/', '_').replace(/\s+/g, '')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
