@@ -6,9 +6,40 @@
     <title>Controle de KM Pessoal</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
-    <link rel="stylesheet" href="style.css?v=15">
+    <link rel="stylesheet" href="style.css?v=14">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
+    <style>
+        .mode-selector-app {
+            background: #1e293b;
+            padding: 4px;
+            border-radius: 8px;
+            display: flex;
+            gap: 4px;
+            margin-bottom: 15px;
+        }
+        .mode-btn-app {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.2s;
+        }
+        .mode-btn-app.active {
+            background: #38bdf8;
+            color: #0f172a;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        input::placeholder {
+            color: #94a3b8;
+            opacity: 0.7;
+        }
+    </style>
 </head>
 <body>
     <div id="install-container" class="no-print" style="display: none; text-align: center; padding: 10px; background-color: #0f172a; border-bottom: 1px solid #1e293b;">
@@ -17,7 +48,6 @@
         </button>
     </div>
 
-    <!-- TELA DE BLOQUEIO -->
     <div id="tela-bloqueio" class="bloqueio-container">
         <div class="bloqueio-caixa card">
             <h2>🔒 Acesso Restrito</h2>
@@ -31,19 +61,10 @@
     </div>
 
     <div class="container">
+        
         <header class="no-print">
             <h1>Controle de KM Pessoal</h1>
         </header>
-
-        <!-- SELETOR DE MÊS -->
-        <div class="card no-print" style="padding: 12px; margin-bottom: 15px;">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-size: 0.75rem; color: #94a3b8; font-weight: bold; margin-bottom: 6px; display: block;">📅 SELECIONAR MÊS DE REFERÊNCIA</label>
-                <select id="select-mes-referencia" onchange="mudarMesReferencia()" style="width: 100%; padding: 10px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 8px; font-weight: 600;">
-                    <!-- Preenchido via script.js -->
-                </select>
-            </div>
-        </div>
 
         <header class="pdf-header">
             <h2>RELATÓRIO OPERACIONAL DE ATENDIMENTOS</h2>
@@ -58,7 +79,6 @@
             </div>
         </header>
 
-        <!-- PARÂMETROS FINANCEIROS -->
         <div class="card no-print">
             <div class="card-header-flex">
                 <h3>⚙️ Parâmetros Financeiros</h3>
@@ -79,23 +99,28 @@
                 </div>
                 <div class="form-group">
                     <label>R$ / KM (EMPRESA)</label>
-                    <input type="number" id="param-km-rate" value="1.30" step="0.01" disabled>
+                    <input type="number" id="param-km-rate" value="1.30" step="0.01" placeholder="Ex: 1.20" disabled>
                 </div>
                 <div class="form-group full-width">
                     <label>VALOR SOLICITADO EM CARTÃO DO MÊS (R$)</label>
-                    <input type="number" id="param-caju" placeholder="Ex: 250" step="0.01" disabled>
+                    <input type="number" id="param-caju" placeholder="Ex: 500" step="0.01" disabled>
                 </div>
             </div>
         </div>
 
-        <!-- LANÇAMENTO DE REGISTRO -->
         <div class="card no-print">
+            <h3 style="margin-bottom: 12px;">📝 Registro</h3>
             <div class="mode-switch">
                 <button id="btn-mode-parada" class="mode-btn active" onclick="setMode('parada')">🚗 Parada / Cliente</button>
                 <button id="btn-mode-abastecimento" class="mode-btn" onclick="setMode('abastecimento')">⛽ Abastecimento</button>
             </div>
 
             <div id="fields-parada">
+                <div class="mode-selector-app">
+                    <button type="button" class="mode-btn-app active" id="btnInputOdometro" onclick="setInputMode('odometro')">Modo Odômetro (Painel)</button>
+                    <button type="button" class="mode-btn-app" id="btnInputDistancia" onclick="setInputMode('distancia')">Modo KM Rodado</button>
+                </div>
+
                 <label class="label-section">ATALHOS RÁPIDOS</label>
                 <div class="shortcut-buttons">
                     <button type="button" class="btn-shortcut" onclick="setShortcut('Casa')">🏠 Casa</button>
@@ -110,12 +135,18 @@
                     <label>Nº PROTOCOLO (OPCIONAL)</label>
                     <input type="text" id="input-os" placeholder="Ex: 98452">
                 </div>
-                <div class="form-group">
+                
+                <div id="groupOdometroInput" class="form-group">
                     <label>KM ATUAL DO PAINEL</label>
                     <input type="number" id="input-km" placeholder="Ex: 80">
                 </div>
 
-                <button class="btn-action-green" onclick="addEntry()">Salvar Parada</button>
+                <div id="groupDistanciaInput" class="form-group" style="display: none;">
+                    <label>KM RODADOS NO TRECHO (MAPA/MANUAL)</label>
+                    <input type="number" id="input-km-trecho" step="0.1" placeholder="Ex: 15.5">
+                </div>
+
+                <button class="btn-action-green" onclick="addEntry()">Registrar</button>
             </div>
 
             <div id="fields-abastecimento" style="display: none;">
@@ -123,11 +154,10 @@
                     <label>VALOR DO ABASTECIMENTO (R$)</label>
                     <input type="number" id="input-fuel" placeholder="Ex: 100.00" step="0.01">
                 </div>
-                <button class="btn-action-green" onclick="addEntry()">Salvar Abastecimento</button>
+                <button class="btn-action-green" onclick="addEntry()">Registrar Abastecimento</button>
             </div>
         </div>
 
-        <!-- RESUMO GERAL -->
         <div class="card no-print">
             <h3>📊 Resumo Geral</h3>
             <div class="dashboard-grid">
@@ -169,9 +199,14 @@
             </div>
         </div>
 
-        <!-- HISTÓRICO E TABELA -->
         <div class="card">
-            <h3 class="no-print" style="margin-bottom: 12px;">📅 Histórico por Dia</h3>
+            <div class="card-header-flex no-print" style="margin-bottom: 12px; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <h3 style="margin: 0;">📅 Histórico por Dia</h3>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <input type="date" id="filter-date" class="input-date-filter" onchange="renderHistory()" style="background: #1e293b; border: 1px solid #334155; color: #f8fafc; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+                    <button type="button" class="btn-subtle" onclick="clearDateFilter()" style="padding: 4px 8px; font-size: 0.75rem;">Ver Todos</button>
+                </div>
+            </div>
             
             <div class="table-responsive">
                 <table>
@@ -184,7 +219,6 @@
                         </tr>
                     </thead>
                     <tbody id="history-body">
-                        <!-- Lançamentos via JS -->
                     </tbody>
                 </table>
             </div>
@@ -208,9 +242,9 @@
             <p>🔒 Seus dados ficam armazenados exclusivamente no seu dispositivo.</p>
             <p><strong>DESENVOLVIDO POR DIEGO SANTANA</strong></p>
         </footer>
+
     </div>
 
-    <!-- MODAIS -->
     <div id="modal-confirm" class="modal-overlay" style="display: none;">
         <div class="modal-box">
             <h3>⚠️ Confirmar Exclusão</h3>
@@ -246,6 +280,30 @@
     </div>
 
     <script>
+        let inputMode = 'odometro';
+
+        function setInputMode(mode) {
+            inputMode = mode;
+            const btnOdo = document.getElementById('btnInputOdometro');
+            const btnDist = document.getElementById('btnInputDistancia');
+            const groupOdo = document.getElementById('groupOdometroInput');
+            const groupDist = document.getElementById('groupDistanciaInput');
+
+            if (mode === 'odometro') {
+                btnOdo.classList.add('active');
+                btnDist.classList.remove('active');
+                groupOdo.style.display = 'block';
+                groupDist.style.display = 'none';
+            } else {
+                btnDist.classList.add('active');
+                btnOdo.classList.remove('active');
+                groupOdo.style.display = 'none';
+                groupDist.style.display = 'block';
+            }
+        }
+    </script>
+
+    <script>
         let deferredPrompt;
         const installContainer = document.getElementById('install-container');
         const btnInstall = document.getElementById('btn-install');
@@ -278,6 +336,6 @@
         });
     </script>
 
-    <script src="script.js?v=15"></script>
+    <script src="script.js?v=14"></script>
 </body>
 </html>
