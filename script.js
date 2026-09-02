@@ -8,17 +8,17 @@ const PARAMS_KEY = 'km_params';
 let entries = [];
 let currentMode = 'parada';
 let isEditingParams = false;
+let exibirHistoricoCompleto = false; // Estado do filtro de semana/mês
 
 // Inicialização ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
     loadParams();
     loadEntries();
-    initMonthSelector();
     renderHistory();
     updateDashboard();
 });
 
-// Chave de Acesso Compartilhada Exata (ACESSO@KM)
+// Chave de Acesso Exata
 function verificarChave() {
     const input = document.getElementById('chave-input').value.trim();
     const erroEl = document.getElementById('erro-chave');
@@ -32,7 +32,7 @@ function verificarChave() {
     }
 }
 
-// Alternar entre modo Parada e Abastecimento
+// Alternar modo Parada e Abastecimento
 function setMode(mode) {
     currentMode = mode;
     const btnParada = document.getElementById('btn-mode-parada');
@@ -53,16 +53,15 @@ function setMode(mode) {
     }
 }
 
-// Atalhos rápidos para preencher cliente
+// Atalhos rápidos
 function setShortcut(local) {
     document.getElementById('input-client').value = local;
 }
 
-// Carregar Parâmetros Financeiros e Sincronizar com o Mês Atual do Celular
+// Carregar Parâmetros Financeiros e Sincronizar com o Mês/Ano do Celular
 function loadParams() {
     let params = JSON.parse(localStorage.getItem(PARAMS_KEY));
     
-    // Pega data atual do celular (Setembro de 2026)
     const agora = new Date();
     const anoAtual = agora.getFullYear();
     const mesIndex = agora.getMonth(); // 0 a 11
@@ -78,7 +77,8 @@ function loadParams() {
             caju: 250
         };
         localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
-    } else if (!params.period || params.period === "AGOSTO/2026") {
+    } else {
+        // Sempre atualiza o mês/ano com o relógio do celular
         params.period = mesAnoAtualStr;
         localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
     }
@@ -89,7 +89,6 @@ function loadParams() {
     document.getElementById('param-km-rate').value = params.kmRate || 1.30;
     document.getElementById('param-caju').value = params.caju || 0;
 
-    // Atualiza os campos do relatório PDF no topo
     document.getElementById('pdf-tech-name').innerText = params.tech || "Diego Santana";
     document.getElementById('pdf-period').innerText = params.period;
     document.getElementById('pdf-base-pay').innerText = Number(params.basePay).toFixed(2);
@@ -100,11 +99,11 @@ function loadParams() {
     document.getElementById('pdf-summary-base').innerText = Number(params.basePay).toFixed(2);
 }
 
-// Alternar edição dos parâmetros
+// Alternar edição dos parâmetros (apenas técnico, ajuda, taxa e caju - mês travado)
 function toggleEditParams() {
     isEditingParams = !isEditingParams;
     const btn = document.getElementById('btn-edit-params');
-    const inputs = ['param-tech', 'param-period', 'param-base-pay', 'param-km-rate', 'param-caju'];
+    const inputs = ['param-tech', 'param-base-pay', 'param-km-rate', 'param-caju'];
 
     inputs.forEach(id => {
         document.getElementById(id).disabled = !isEditingParams;
@@ -135,7 +134,7 @@ function salvarParametrosNovos() {
     renderHistory();
 }
 
-// Carregar Registros da Chave Segura (Preservando Agosto e anteriores)
+// Carregar Registros
 function loadEntries() {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) {
@@ -149,61 +148,29 @@ function loadEntries() {
     }
 }
 
-// Salvar Registros na Chave Segura
+// Salvar Registros
 function saveEntries() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
-// Inicializar Seletor de Meses Dinâmico
-function initMonthSelector() {
-    const select = document.getElementById('select-mes-referencia');
-    if (!select) return;
+// Alternar Filtro Semana Atual / Mês Completo
+function toggleHistoricoCompleto() {
+    exibirHistoricoCompleto = !exibirHistoricoCompleto;
+    const label = document.getElementById('label-semana-atual');
+    const btn = document.getElementById('btn-toggle-semanas');
 
-    const mesesDisponiveis = new Set();
-    
-    entries.forEach(entry => {
-        if (entry.date) {
-            const partes = entry.date.split('-'); // YYYY-MM-DD
-            if (partes.length >= 2) {
-                mesesDisponiveis.add(`${partes[0]}-${partes[1]}`);
-            }
-        }
-    });
+    if (exibirHistoricoCompleto) {
+        if (label) label.innerText = "Exibindo: Histórico Completo do Mês";
+        if (btn) btn.innerText = "Ver Semana Atual";
+    } else {
+        if (label) label.innerText = "Exibindo: Semana Atual";
+        if (btn) btn.innerText = "Ver Histórico Completo do Mês";
+    }
 
-    const agora = new Date();
-    const anoAtual = agora.getFullYear();
-    const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
-    mesesDisponiveis.add(`${anoAtual}-${mesAtualStr}`);
-
-    const ordenados = Array.from(mesesDisponiveis).sort().reverse();
-
-    const nomesMeses = {
-        "01": "JANEIRO", "02": "FEVEREIRO", "03": "MARÇO", "04": "ABRIL",
-        "05": "MAIO", "06": "JUNHO", "07": "JULHO", "08": "AGOSTO",
-        "09": "SETEMBRO", "10": "OUTUBRO", "11": "NOVEMBRO", "12": "DEZEMBRO"
-    };
-
-    select.innerHTML = '';
-    ordenados.forEach(ym => {
-        const [ano, mes] = ym.split('-');
-        const nomeMes = nomesMeses[mes] || mes;
-        const option = document.createElement('option');
-        option.value = ym; 
-        option.innerText = `${nomeMes}/${ano}`;
-        
-        if (ym === `${anoAtual}-${mesAtualStr}`) {
-            option.selected = true;
-        }
-        
-        select.appendChild(option);
-    });
-}
-
-function mudarMesReferencia() {
     renderHistory();
 }
 
-// Adicionar Novo Registro
+// Adicionar Registro
 function addEntry() {
     const client = document.getElementById('input-client').value.trim();
     const os = document.getElementById('input-os').value.trim();
@@ -240,15 +207,14 @@ function addEntry() {
         id: Date.now(),
         date: dataIso,
         type: currentMode,
-        client: currentMode === 'parada' ? client : '⛽ Abastecimento no Posto',
-        os: currentMode === 'parada' ? os : '-',
+        client: currentMode === 'parada' ? client : 'Abastecimento',
+        os: currentMode === 'parada' ? os : '',
         km: currentMode === 'parada' ? kmRodado : 0,
         fuel: currentMode === 'abastecimento' ? fuelVal : 0
     };
 
     entries.push(newEntry);
     saveEntries();
-    initMonthSelector();
     renderHistory();
     updateDashboard();
 
@@ -259,67 +225,103 @@ function addEntry() {
     document.getElementById('input-fuel').value = '';
 }
 
-// Renderizar Histórico filtrado pelo Mês Selecionado
+// Renderizar Histórico
 function renderHistory() {
-    const selectMes = document.getElementById('select-mes-referencia');
-    const mesSelecionado = selectMes ? selectMes.value : ''; 
-    
     const tbody = document.getElementById('history-body');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    const registrosFiltrados = entries.filter(entry => {
-        if (!entry.date) return false;
-        if (mesSelecionado && !entry.date.startsWith(mesSelecionado)) {
-            return false;
-        }
-        return true;
+    const agora = new Date();
+    const anoAtual = agora.getFullYear();
+    const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
+
+    // Filtra pelo mês atual do celular
+    let listaFiltrada = entries.filter(entry => {
+        if (!entry.date) return true; // compatibilidade com registros antigos sem data
+        return entry.date.startsWith(`${anoAtual}-${mesAtualStr}`);
     });
 
-    registrosFiltrados.sort((a, b) => b.id - a.id);
+    // Se estiver no modo Semana Atual, filtra os últimos 7 dias
+    if (!exibirHistoricoCompleto) {
+        const seteDiasAtras = new Date();
+        seteDiasAtras.setDate(agora.getDate() - 7);
+        
+        listaFiltrada = listaFiltrada.filter(entry => {
+            if (!entry.date) return true;
+            const dataEntry = new Date(entry.date);
+            return dataEntry >= seteDiasAtras;
+        });
+    }
 
-    if (registrosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum registro encontrado para este período.</td></tr>`;
+    listaFiltrada.sort((a, b) => b.id - a.id);
+
+    if (listaFiltrada.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum registro encontrado.</td></tr>`;
     } else {
-        registrosFiltrados.forEach(entry => {
+        listaFiltrada.forEach(entry => {
             const tr = document.createElement('tr');
-            if (entry.type === 'abastecimento') {
-                tr.style.background = 'rgba(52, 211, 153, 0.05)';
-            }
             
-            tr.innerHTML = `
-                <td>${entry.client}</td>
-                <td>${entry.os || '-'}</td>
-                <td>${entry.type === 'abastecimento' ? `<span style="color: #34d399; font-weight: 600;">Abastecimento: R$ ${Number(entry.fuel).toFixed(2)}</span>` : `${entry.km} KM`}</td>
-                <td class="no-print" style="text-align: center;">
-                    <button onclick="openEditModal(${entry.id})" class="btn-subtle" style="padding: 2px 6px; font-size: 0.75rem; margin-right: 4px;" title="Editar">✏️</button>
-                    <button onclick="deleteEntry(${entry.id})" class="btn-subtle" style="padding: 2px 6px; font-size: 0.75rem; color: #f87171;" title="Excluir">🗑️</button>
-                </td>
-            `;
+            // Clicar direto na linha para editar (como você pediu)
+            tr.style.cursor = 'pointer';
+            tr.title = 'Clique para editar';
+            tr.onclick = (e) => {
+                // Se clicar no botão de apagar da linha, não abre a edição
+                if (e.target.tagName === 'BUTTON') return;
+                openEditModal(entry.id);
+            };
+
+            const isAbast = entry.type === 'abastecimento' || (!entry.km && entry.fuel > 0);
+            const valFuel = entry.fuel !== undefined ? entry.fuel : 0;
+
+            if (isAbast) {
+                tr.style.background = 'rgba(52, 211, 153, 0.05)';
+                tr.innerHTML = `
+                    <td>⛽ Abastecimento (R$ ${Number(valFuel).toFixed(2)})</td>
+                    <td>-</td>
+                    <td style="color: #34d399; font-weight: 600;">-</td>
+                    <td class="no-print" style="text-align: center;">
+                        <button onclick="deleteEntry(${entry.id})" class="btn-subtle" style="padding: 2px 6px; font-size: 0.75rem; color: #f87171; border: none; background: transparent; cursor: pointer;" title="Excluir">✕</button>
+                    </td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td>${entry.client}</td>
+                    <td>${entry.os || '-'}</td>
+                    <td>${entry.km} KM</td>
+                    <td class="no-print" style="text-align: center;">
+                        <button onclick="deleteEntry(${entry.id})" class="btn-subtle" style="padding: 2px 6px; font-size: 0.75rem; color: #f87171; border: none; background: transparent; cursor: pointer;" title="Excluir">✕</button>
+                    </td>
+                `;
+            }
             tbody.appendChild(tr);
         });
     }
 
-    updateDashboard(registrosFiltrados);
+    updateDashboard(listaFiltrada);
 }
 
-// Atualizar Totais e Dashboard
+// Atualizar Totais e Dashboard (Contagem correta de clientes ignorando abastecimento)
 function updateDashboard(filteredList = null) {
-    const selectMes = document.getElementById('select-mes-referencia');
-    const mesSelecionado = selectMes ? selectMes.value : '';
+    const agora = new Date();
+    const anoAtual = agora.getFullYear();
+    const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
 
-    const lista = filteredList || entries.filter(e => e.date && (!mesSelecionado || e.date.startsWith(mesSelecionado)));
+    const lista = filteredList || entries.filter(e => {
+        if (!e.date) return true;
+        return e.date.startsWith(`${anoAtual}-${mesAtualStr}`);
+    });
 
     let totalKm = 0;
     let totalClients = 0;
     let totalFuel = 0;
 
     lista.forEach(e => {
-        if (e.type === 'parada') {
-            totalKm += Number(e.km) || 0;
-            totalClients += 1;
-        } else if (e.type === 'abastecimento') {
+        const isAbast = e.type === 'abastecimento' || (!e.km && e.fuel > 0);
+        if (isAbast) {
             totalFuel += Number(e.fuel) || 0;
+        } else {
+            totalKm += Number(e.km) || 0;
+            totalClients += 1; // Soma apenas os clientes atendidos
         }
     });
 
@@ -349,12 +351,11 @@ function updateDashboard(filteredList = null) {
     document.getElementById('pdf-final-reimbursement').innerText = `R$ ${finalReimbursement.toFixed(2)}`;
 }
 
-// Exclusão de registro individual
+// Excluir registro individual
 function deleteEntry(id) {
     if (confirm('Deseja realmente excluir este registro?')) {
         entries = entries.filter(e => e.id !== id);
         saveEntries();
-        initMonthSelector();
         renderHistory();
         updateDashboard();
     }
@@ -368,9 +369,9 @@ function openEditModal(id) {
     if (!entry) return;
 
     editingId = id;
-    document.getElementById('edit-client').value = entry.client;
-    document.getElementById('edit-os').value = entry.os;
-    document.getElementById('edit-km').value = entry.km;
+    document.getElementById('edit-client').value = entry.client || '';
+    document.getElementById('edit-os').value = entry.os || '';
+    document.getElementById('edit-km').value = entry.km || 0;
     document.getElementById('modal-edit').style.display = 'flex';
 }
 
@@ -402,17 +403,17 @@ function closeConfirmModal() {
 }
 
 function confirmClearAll() {
-    const selectMes = document.getElementById('select-mes-referencia');
-    const mesSelecionado = selectMes ? selectMes.value : '';
+    const agora = new Date();
+    const anoAtual = agora.getFullYear();
+    const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
 
-    if (mesSelecionado) {
-        entries = entries.filter(e => e.date && !e.date.startsWith(mesSelecionado));
-    } else {
-        entries = [];
-    }
+    // Remove apenas os registros do mês atual do celular
+    entries = entries.filter(e => {
+        if (!e.date) return false;
+        return !e.date.startsWith(`${anoAtual}-${mesAtualStr}`);
+    });
 
     saveEntries();
-    initMonthSelector();
     renderHistory();
     updateDashboard();
     closeConfirmModal();
