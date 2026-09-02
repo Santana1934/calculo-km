@@ -1,5 +1,5 @@
 // ==========================================
-// CONTROLE DE KM PESSOAL - SCRIPT COMPLETO 
+// CONTROLE DE KM PESSOAL - SCRIPT COMPLETO
 // ==========================================
 
 const STORAGE_KEY = 'km_entries_v2';
@@ -18,17 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDashboard();
 });
 
-// [CHAVE DE ACESSO ORIGINAL INTOCADA - NENHUMA ALTERAÇÃO AQUI]
+// Chave de Acesso Compartilhada Exata (ACESSO@KM)
 function verificarChave() {
-    // Sua lógica original de validação de senha/chave de acesso
     const input = document.getElementById('chave-input').value.trim();
     const erroEl = document.getElementById('erro-chave');
     
-    // Mantém exatamente o comportamento que você definiu para o seu app
-    if (input) {
+    if (input === "ACESSO@KM") {
         document.getElementById('tela-bloqueio').style.display = 'none';
     } else {
-        if (erroEl) erroEl.style.display = 'block';
+        if (erroEl) {
+            erroEl.style.display = 'block';
+        }
     }
 }
 
@@ -62,7 +62,7 @@ function setShortcut(local) {
 function loadParams() {
     let params = JSON.parse(localStorage.getItem(PARAMS_KEY));
     
-    // Pega data atual do celular (Ex: Setembro de 2026)
+    // Pega data atual do celular (Setembro de 2026)
     const agora = new Date();
     const anoAtual = agora.getFullYear();
     const mesIndex = agora.getMonth(); // 0 a 11
