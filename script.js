@@ -1,5 +1,5 @@
 // ==========================================
-// CONTROLE DE KM PESSOAL - SCRIPT COMPLETO
+// CONTROLE DE KM E ATENDIMENTO - SCRIPT
 // ==========================================
 
 const STORAGE_KEY = 'km_entries_v2';
@@ -11,13 +11,14 @@ let entries = [];
 let trashBin = [];
 let currentMode = 'parada';
 let isEditingParams = false;
-let exibirHistoricoCompleto = false;
+let mesAnoSelecionado = ''; // Armazena o mês selecionado no dropdown (ex: '2026-09')
 
 document.addEventListener('DOMContentLoaded', () => {
     verificarSessaoSalva();
     loadParams();
     loadEntries();
     loadTrash();
+    popularSeletorMeses();
     renderHistory();
     updateDashboard();
 });
@@ -85,7 +86,7 @@ function loadParams() {
             tech: "Diego Santana",
             period: mesAnoAtualStr,
             basePay: 300,
-            kmRate: 1.27,
+            kmRate: 1.30,
             caju: 300
         };
         localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
@@ -97,7 +98,7 @@ function loadParams() {
     document.getElementById('param-tech').value = params.tech || "Diego Santana";
     document.getElementById('param-period').value = params.period;
     document.getElementById('param-base-pay').value = params.basePay || 300;
-    document.getElementById('param-km-rate').value = params.kmRate || 1.27;
+    document.getElementById('param-km-rate').value = params.kmRate || 1.30;
     document.getElementById('param-caju').value = params.caju || 300;
 
     document.getElementById('pdf-tech-name').innerText = params.tech || "Diego Santana";
@@ -159,6 +160,7 @@ function loadEntries() {
 
 function saveEntries() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    popularSeletorMeses();
 }
 
 function loadTrash() {
@@ -182,19 +184,48 @@ function saveTrash() {
     if (countEl) countEl.innerText = trashBin.length;
 }
 
-function toggleHistoricoCompleto() {
-    exibirHistoricoCompleto = !exibirHistoricoCompleto;
-    const label = document.getElementById('label-semana-atual');
-    const btn = document.getElementById('btn-toggle-semanas');
+// Preencher o Seletor de Meses Dinamicamente com base nas datas dos registros
+function popularSeletorMeses() {
+    const select = document.getElementById('select-filtro-mes');
+    if (!select) return;
 
-    if (exibirHistoricoCompleto) {
-        if (label) label.innerText = "Exibindo: Histórico Completo do Mês";
-        if (btn) btn.innerText = "Ver Semana Atual";
-    } else {
-        if (label) label.innerText = "Exibindo: Semana Atual";
-        if (btn) btn.innerText = "Ver Histórico Completo do Mês";
+    const mesesNomes = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
+    
+    // Coleta todos os anos/meses existentes nos registros + mês atual
+    const mesesSet = new Set();
+    const agora = new Date();
+    const anoAtual = agora.getFullYear();
+    const mesAtualNum = String(agora.getMonth() + 1).padStart(2, '0');
+    mesesSet.add(`${anoAtual}-${mesAtualNum}`);
+
+    entries.forEach(e => {
+        if (e.date && e.date.length >= 7) {
+            mesesSet.add(e.date.substring(0, 7)); // 'YYYY-MM'
+        }
+    });
+
+    const mesesArray = Array.from(mesesSet).sort().reverse(); // Mais recente primeiro
+
+    if (!mesAnoSelecionado && mesesArray.length > 0) {
+        mesAnoSelecionado = mesesArray[0]; // Padrão: mês mais recente ou atual
     }
 
+    select.innerHTML = '';
+    mesesArray.forEach(m => {
+        const [ano, mes] = m.split('-');
+        const nomeMes = mesesNomes[parseInt(mes, 10) - 1] || mes;
+        const option = document.createElement('option');
+        option.value = m;
+        option.innerText = `${nomeMes}/${ano}`;
+        if (m === mesAnoSelecionado) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+}
+
+function mudarFiltroMes(valor) {
+    mesAnoSelecionado = valor;
     renderHistory();
 }
 
@@ -227,7 +258,6 @@ function addEntry() {
         }
     }
 
-    // Formata a data atual em YYYY-MM-DD para salvar com precisão
     const agora = new Date();
     const dataIso = agora.toISOString().split('T')[0];
 
@@ -253,7 +283,6 @@ function addEntry() {
     document.getElementById('input-fuel').value = '';
 }
 
-// Formatar data de YYYY-MM-DD para DD/MM/YYYY para exibição correta abaixo do nome
 function formatarDataBR(dateStr) {
     if (!dateStr) return '';
     const partes = dateStr.split('-');
@@ -268,34 +297,19 @@ function renderHistory() {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    const agora = new Date();
-    const anoAtual = agora.getFullYear();
-    const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
-
+    // Filtra estritamente pelo mês selecionado no dropdown (ex: '2026-09')
     let listaFiltrada = entries.filter(entry => {
         if (!entry.date) return true;
-        return entry.date.startsWith(`${anoAtual}-${mesAtualStr}`) || entry.date.startsWith('2026-09') || entry.date.startsWith('2026-08');
+        if (mesAnoSelecionado) {
+            return entry.date.startsWith(mesAnoSelecionado);
+        }
+        return true;
     });
-
-    if (listaFiltrada.length === 0 && entries.length > 0) {
-        listaFiltrada = [...entries];
-    }
-
-    if (!exibirHistoricoCompleto) {
-        const seteDiasAtras = new Date();
-        seteDiasAtras.setDate(agora.getDate() - 7);
-        
-        listaFiltrada = listaFiltrada.filter(entry => {
-            if (!entry.date) return true;
-            const dataEntry = new Date(entry.date);
-            return dataEntry >= seteDiasAtras;
-        });
-    }
 
     listaFiltrada.sort((a, b) => b.id - a.id);
 
     if (listaFiltrada.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum registro encontrado.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum registro para este mês.</td></tr>`;
     } else {
         listaFiltrada.forEach(entry => {
             const tr = document.createElement('tr');
@@ -311,7 +325,7 @@ function renderHistory() {
                     if (e.target.tagName === 'BUTTON') return;
                     openFuelEditModal(entry.id);
                 };
-                tr.style.background = 'rgba(52, 211, 153, 0.05)';
+                tr.style.background = 'rgba(52, 211, 153, 0.08)';
                 tr.innerHTML = `
                     <td>
                         ⛽ Abastecimento (R$ ${Number(valFuel).toFixed(2)})
@@ -368,9 +382,9 @@ function updateDashboard(filteredList = null) {
         }
     });
 
-    const params = JSON.parse(localStorage.getItem(PARAMS_KEY)) || { basePay: 300, kmRate: 1.27, caju: 300 };
+    const params = JSON.parse(localStorage.getItem(PARAMS_KEY)) || { basePay: 300, kmRate: 1.30, caju: 300 };
     const basePay = Number(params.basePay) || 0;
-    const kmRate = Number(params.kmRate) || 1.27;
+    const kmRate = Number(params.kmRate) || 1.30;
     const cajuBudget = Number(params.caju) || 300;
 
     const reimbursementKm = totalKm * kmRate;
@@ -480,14 +494,19 @@ function closeConfirmModal() {
 }
 
 function confirmClearAll() {
-    if (entries.length > 0) {
-        trashBin.push(...entries);
+    const select = document.getElementById('select-filtro-mes');
+    const mesAlvo = select ? select.value : '';
+
+    const registrosDoMes = entries.filter(e => !e.date || e.date.startsWith(mesAlvo));
+    if (registrosDoMes.length > 0) {
+        trashBin.push(...registrosDoMes);
         saveTrash();
+        entries = entries.filter(e => e.date && !e.date.startsWith(mesAlvo));
+        saveEntries();
+        popularSeletorMeses();
+        renderHistory();
+        updateDashboard();
     }
-    entries = [];
-    saveEntries();
-    renderHistory();
-    updateDashboard();
     closeConfirmModal();
 }
 
@@ -534,6 +553,7 @@ function restoreItem(index) {
         entries.push(item);
         saveEntries();
         saveTrash();
+        popularSeletorMeses();
         renderHistory();
         updateDashboard();
         openTrashModal();
@@ -541,7 +561,7 @@ function restoreItem(index) {
 }
 
 function emptyTrashCompletely() {
-    if (confirm('Tem certeza que deseja esvaziar a lixeira permanentemente? Os itens não poderão mais ser recuperados.')) {
+    if (confirm('Tem certeza que deseja esvaziar a lixeira permanentemente?')) {
         trashBin = [];
         saveTrash();
         openTrashModal();
