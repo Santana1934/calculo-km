@@ -11,9 +11,8 @@ let entries = [];
 let trashBin = [];
 let currentMode = 'parada';
 let isEditingParams = false;
-let exibirHistoricoCompleto = false; // Estado do filtro de semana/mês
+let exibirHistoricoCompleto = false;
 
-// Inicialização ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
     verificarSessaoSalva();
     loadParams();
@@ -23,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDashboard();
 });
 
-// Autenticação com persistência para não pedir senha ao atualizar
+// Autenticação com persistência
 function verificarSessaoSalva() {
     const authStatus = sessionStorage.getItem(AUTH_KEY);
     if (authStatus === 'liberado') {
@@ -46,7 +45,7 @@ function verificarChave() {
     }
 }
 
-// Alternar modo Parada e Abastecimento
+// Modos de Registro
 function setMode(mode) {
     currentMode = mode;
     const btnParada = document.getElementById('btn-mode-parada');
@@ -67,18 +66,17 @@ function setMode(mode) {
     }
 }
 
-// Atalhos rápidos
 function setShortcut(local) {
     document.getElementById('input-client').value = local;
 }
 
-// Carregar Parâmetros Financeiros e Sincronizar com o Mês/Ano do Celular
+// Parâmetros
 function loadParams() {
     let params = JSON.parse(localStorage.getItem(PARAMS_KEY));
     
     const agora = new Date();
     const anoAtual = agora.getFullYear();
-    const mesIndex = agora.getMonth(); // 0 a 11
+    const mesIndex = agora.getMonth();
     const mesesNomes = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
     const mesAnoAtualStr = `${mesesNomes[mesIndex]}/${anoAtual}`;
 
@@ -87,8 +85,8 @@ function loadParams() {
             tech: "Diego Santana",
             period: mesAnoAtualStr,
             basePay: 300,
-            kmRate: 1.30,
-            caju: 250
+            kmRate: 1.27,
+            caju: 300
         };
         localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
     } else {
@@ -99,8 +97,8 @@ function loadParams() {
     document.getElementById('param-tech').value = params.tech || "Diego Santana";
     document.getElementById('param-period').value = params.period;
     document.getElementById('param-base-pay').value = params.basePay || 300;
-    document.getElementById('param-km-rate').value = params.kmRate || 1.30;
-    document.getElementById('param-caju').value = params.caju || 0;
+    document.getElementById('param-km-rate').value = params.kmRate || 1.27;
+    document.getElementById('param-caju').value = params.caju || 300;
 
     document.getElementById('pdf-tech-name').innerText = params.tech || "Diego Santana";
     document.getElementById('pdf-period').innerText = params.period;
@@ -112,7 +110,6 @@ function loadParams() {
     document.getElementById('pdf-summary-base').innerText = Number(params.basePay).toFixed(2);
 }
 
-// Alternar edição dos parâmetros
 function toggleEditParams() {
     isEditingParams = !isEditingParams;
     const btn = document.getElementById('btn-edit-params');
@@ -147,7 +144,6 @@ function salvarParametrosNovos() {
     renderHistory();
 }
 
-// Carregar Registros
 function loadEntries() {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) {
@@ -161,12 +157,10 @@ function loadEntries() {
     }
 }
 
-// Salvar Registros
 function saveEntries() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
-// Gerenciamento da Lixeira (Proteção contra exclusão acidental)
 function loadTrash() {
     const data = localStorage.getItem(TRASH_KEY);
     if (data) {
@@ -188,7 +182,6 @@ function saveTrash() {
     if (countEl) countEl.innerText = trashBin.length;
 }
 
-// Alternar Filtro Semana Atual / Mês Completo
 function toggleHistoricoCompleto() {
     exibirHistoricoCompleto = !exibirHistoricoCompleto;
     const label = document.getElementById('label-semana-atual');
@@ -205,7 +198,6 @@ function toggleHistoricoCompleto() {
     renderHistory();
 }
 
-// Adicionar Registro
 function addEntry() {
     const client = document.getElementById('input-client').value.trim();
     const os = document.getElementById('input-os').value.trim();
@@ -235,6 +227,7 @@ function addEntry() {
         }
     }
 
+    // Formata a data atual em YYYY-MM-DD para salvar com precisão
     const agora = new Date();
     const dataIso = agora.toISOString().split('T')[0];
 
@@ -260,7 +253,16 @@ function addEntry() {
     document.getElementById('input-fuel').value = '';
 }
 
-// Renderizar Histórico (Garantindo que puxa todos os registros do mês corretamente sem sumir dados)
+// Formatar data de YYYY-MM-DD para DD/MM/YYYY para exibição correta abaixo do nome
+function formatarDataBR(dateStr) {
+    if (!dateStr) return '';
+    const partes = dateStr.split('-');
+    if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+    return dateStr;
+}
+
 function renderHistory() {
     const tbody = document.getElementById('history-body');
     if (!tbody) return;
@@ -270,14 +272,13 @@ function renderHistory() {
     const anoAtual = agora.getFullYear();
     const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
 
-    // Filtra pelo mês atual garantindo robustez para todos os registros salvos
     let listaFiltrada = entries.filter(entry => {
-        if (!entry.date) return true; // compatibilidade com registros antigos sem data
+        if (!entry.date) return true;
         return entry.date.startsWith(`${anoAtual}-${mesAtualStr}`) || entry.date.startsWith('2026-09') || entry.date.startsWith('2026-08');
     });
 
     if (listaFiltrada.length === 0 && entries.length > 0) {
-        listaFiltrada = [...entries]; // Fallback para exibir tudo se o filtro estrito não encontrar match de data
+        listaFiltrada = [...entries];
     }
 
     if (!exibirHistoricoCompleto) {
@@ -298,21 +299,24 @@ function renderHistory() {
     } else {
         listaFiltrada.forEach(entry => {
             const tr = document.createElement('tr');
-            
             tr.style.cursor = 'pointer';
             tr.title = 'Clique para editar';
-            tr.onclick = (e) => {
-                if (e.target.tagName === 'BUTTON') return;
-                openEditModal(entry.id);
-            };
-
+            
             const isAbast = entry.type === 'abastecimento' || (!entry.km && entry.fuel > 0);
             const valFuel = entry.fuel !== undefined ? entry.fuel : 0;
+            const dataFormatada = formatarDataBR(entry.date);
 
             if (isAbast) {
+                tr.onclick = (e) => {
+                    if (e.target.tagName === 'BUTTON') return;
+                    openFuelEditModal(entry.id);
+                };
                 tr.style.background = 'rgba(52, 211, 153, 0.05)';
                 tr.innerHTML = `
-                    <td>⛽ Abastecimento (R$ ${Number(valFuel).toFixed(2)})</td>
+                    <td>
+                        ⛽ Abastecimento (R$ ${Number(valFuel).toFixed(2)})
+                        ${dataFormatada ? `<br><span style="font-size: 0.75rem; color: #94a3b8;">${dataFormatada}</span>` : ''}
+                    </td>
                     <td>-</td>
                     <td style="color: #34d399; font-weight: 600;">-</td>
                     <td class="no-print" style="text-align: center;">
@@ -320,8 +324,15 @@ function renderHistory() {
                     </td>
                 `;
             } else {
+                tr.onclick = (e) => {
+                    if (e.target.tagName === 'BUTTON') return;
+                    openEditModal(entry.id);
+                };
                 tr.innerHTML = `
-                    <td>${entry.client}</td>
+                    <td>
+                        ${entry.client}
+                        ${dataFormatada ? `<br><span style="font-size: 0.75rem; color: #94a3b8;">${dataFormatada}</span>` : ''}
+                    </td>
                     <td>${entry.os || '-'}</td>
                     <td>${entry.km} KM</td>
                     <td class="no-print" style="text-align: center;">
@@ -336,7 +347,6 @@ function renderHistory() {
     updateDashboard(listaFiltrada);
 }
 
-// Atualizar Totais e Dashboard
 function updateDashboard(filteredList = null) {
     const lista = filteredList || entries;
 
@@ -350,14 +360,18 @@ function updateDashboard(filteredList = null) {
             totalFuel += Number(e.fuel) || 0;
         } else {
             totalKm += Number(e.km) || 0;
-            totalClients += 1;
+            // Exclui Casa e Empresa da contagem de clientes atendidos
+            const nomeLocal = (e.client || '').trim().toLowerCase();
+            if (nomeLocal !== 'casa' && nomeLocal !== 'empresa') {
+                totalClients += 1;
+            }
         }
     });
 
-    const params = JSON.parse(localStorage.getItem(PARAMS_KEY)) || { basePay: 300, kmRate: 1.30, caju: 250 };
+    const params = JSON.parse(localStorage.getItem(PARAMS_KEY)) || { basePay: 300, kmRate: 1.27, caju: 300 };
     const basePay = Number(params.basePay) || 0;
-    const kmRate = Number(params.kmRate) || 1.30;
-    const cajuBudget = Number(params.caju) || 0;
+    const kmRate = Number(params.kmRate) || 1.27;
+    const cajuBudget = Number(params.caju) || 300;
 
     const reimbursementKm = totalKm * kmRate;
     const netProfit = basePay + reimbursementKm - totalFuel;
@@ -380,7 +394,6 @@ function updateDashboard(filteredList = null) {
     document.getElementById('pdf-final-reimbursement').innerText = `R$ ${finalReimbursement.toFixed(2)}`;
 }
 
-// Excluir registro individual com envio para a lixeira
 function deleteEntry(id) {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
@@ -395,7 +408,7 @@ function deleteEntry(id) {
     }
 }
 
-// Modais de Edição e Limpeza com Proteção
+// Edição de Parada / Cliente
 let editingId = null;
 
 function openEditModal(id) {
@@ -428,6 +441,36 @@ function saveEditEntry() {
     closeEditModal();
 }
 
+// Edição Exclusiva de Abastecimento
+let editingFuelId = null;
+
+function openFuelEditModal(id) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+
+    editingFuelId = id;
+    document.getElementById('edit-fuel-val').value = entry.fuel || 0;
+    document.getElementById('modal-edit-fuel').style.display = 'flex';
+}
+
+function closeFuelEditModal() {
+    document.getElementById('modal-edit-fuel').style.display = 'none';
+    editingFuelId = null;
+}
+
+function saveEditFuelEntry() {
+    if (!editingFuelId) return;
+    const entry = entries.find(e => e.id === editingFuelId);
+    if (entry) {
+        entry.fuel = parseFloat(document.getElementById('edit-fuel-val').value) || 0;
+        saveEntries();
+        renderHistory();
+        updateDashboard();
+    }
+    closeFuelEditModal();
+}
+
+// Modal de Confirmação de Limpeza
 function openConfirmModal() {
     document.getElementById('modal-confirm').style.display = 'flex';
 }
@@ -437,7 +480,6 @@ function closeConfirmModal() {
 }
 
 function confirmClearAll() {
-    // Envia todos os registros atuais para a lixeira antes de limpar, evitando perda acidental
     if (entries.length > 0) {
         trashBin.push(...entries);
         saveTrash();
@@ -449,7 +491,7 @@ function confirmClearAll() {
     closeConfirmModal();
 }
 
-// Funções da Lixeira
+// Lixeira
 function openTrashModal() {
     closeConfirmModal();
     const listEl = document.getElementById('trash-list');
@@ -494,7 +536,7 @@ function restoreItem(index) {
         saveTrash();
         renderHistory();
         updateDashboard();
-        openTrashModal(); // Atualiza a visualização da lixeira
+        openTrashModal();
     }
 }
 
