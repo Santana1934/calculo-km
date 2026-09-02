@@ -6,7 +6,7 @@
     <title>Controle de KM Pessoal</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
-    <link rel="stylesheet" href="style.css?v=16">
+    <link rel="stylesheet" href="style.css?v=17">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
     <style>
@@ -49,17 +49,17 @@
     </div>
 
     <div id="tela-bloqueio" class="bloqueio-container">
-        <div class="bloqueio-caixa card">
-            <h2>🔒 Acesso Restrito</h2>
-            <p>App de uso exclusivo.<br>Insira a chave para liberar o aplicativo.</p>
+        <div class="bloqueio-caixa card" style="border-top: 4px solid #38bdf8;">
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; color: #f8fafc;">Autenticação Necessária</h2>
+            <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 20px;">Insira a chave de segurança para acessar o sistema.</p>
             
-            <div style="position: relative; margin-bottom: 12px;">
-                <input type="password" id="chave-input" placeholder="Digite a chave..." style="width: 100%; text-align: center; padding-right: 40px; box-sizing: border-box;">
-                <span id="toggleChaveSenha" onclick="toggleMostrarSenha()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; font-size: 16px;" title="Mostrar/Ocultar Chave">👁️</span>
+            <div style="position: relative; margin-bottom: 15px;">
+                <input type="password" id="chave-input" placeholder="Digite a chave..." style="width: 100%; text-align: center; padding-right: 40px; box-sizing: border-box; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 12px; border-radius: 8px; font-size: 1rem;">
+                <span id="toggleChaveSenha" onclick="toggleMostrarSenha()" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; font-size: 16px;" title="Mostrar/Ocultar Chave">👁️</span>
             </div>
 
-            <button class="btn-action-green" onclick="verificarChave()">Liberar Acesso</button>
-            <p id="erro-chave" style="color: var(--danger); font-size: 0.8rem; display: none; margin-top: 15px; font-weight: 600;">
+            <button class="btn-action-green" onclick="verificarChave()" style="width: 100%; padding: 12px; font-weight: 600; border-radius: 8px; cursor: pointer;">Autenticar Acesso</button>
+            <p id="erro-chave" style="color: var(--danger); font-size: 0.85rem; display: none; margin-top: 15px; font-weight: 600;">
                 ❌ Chave incorreta. Tente novamente.
             </p>
         </div>
@@ -250,17 +250,36 @@
 
     </div>
 
+    <!-- Modal de Confirmação e Lixeira de Recuperação -->
     <div id="modal-confirm" class="modal-overlay" style="display: none;">
         <div class="modal-box">
             <h3>⚠️ Confirmar Exclusão</h3>
-            <p>Deseja realmente apagar todos os registros do mês selecionado?</p>
+            <p>Deseja realmente apagar os registros do mês? Eles ficarão disponíveis temporariamente na lixeira caso precise recuperar.</p>
             <div class="modal-actions">
                 <button type="button" class="btn-modal-cancel" onclick="closeConfirmModal()">Cancelar</button>
                 <button type="button" class="btn-modal-danger" onclick="confirmClearAll()">Sim, Apagar</button>
             </div>
+            <div style="margin-top: 15px; border-top: 1px solid #334155; padding-top: 10px; text-align: left;">
+                <button type="button" onclick="openTrashModal()" style="background: transparent; border: none; color: #38bdf8; font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 0;">🗑️ Ver Lixeira / Recuperar Registros Apagados (<span id="trash-count">0</span>)</button>
+            </div>
         </div>
     </div>
 
+    <!-- Modal da Lixeira (Proteção contra exclusão acidental) -->
+    <div id="modal-trash" class="modal-overlay" style="display: none;">
+        <div class="modal-box" style="max-width: 500px;">
+            <h3>🗑️ Lixeira (Resturação)</h3>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 12px;">Itens apagados recentemente ficam salvos aqui para restauração.</p>
+            <div id="trash-list" style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 15px; background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155;">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="closeTrashModal()">Fechar</button>
+                <button type="button" onclick="emptyTrashCompletely()" style="background: #dc2626; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">Esvaziar Lixeira</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
     <div id="modal-edit" class="modal-overlay" style="display: none;">
         <div class="modal-box">
             <h3>Editar Registro</h3>
@@ -356,6 +375,6 @@
         });
     </script>
 
-    <script src="script.js?v=16"></script>
+    <script src="script.js?v=17"></script>
 </body>
 </html>
