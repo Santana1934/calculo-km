@@ -1,167 +1,407 @@
-// ==== SISTEMA DE BLOQUEIO ====
-const CHAVE_MESTRA = "ACESSO@KM";
+// ==========================================
+// CONTROLE DE KM PESSOAL - SCRIPT COMPLETO V2
+// ==========================================
 
-function verificarBloqueio() {
-    if (localStorage.getItem("app_liberado") === "sim") {
-        document.getElementById("tela-bloqueio").style.display = "none";
-    }
-}
+const STORAGE_KEY = 'km_entries_v2';
+const PARAMS_KEY = 'km_params';
 
+let entries = [];
+let currentMode = 'parada';
+let isEditingParams = false;
+
+// Inicialização ao carregar a página
+document.addEventListener('DOMContentLoaded', () => {
+    loadParams();
+    loadEntries();
+    initMonthSelector();
+    renderHistory();
+    updateDashboard();
+});
+
+// Chave de Acesso da Tela de Bloqueio
 function verificarChave() {
-    let chaveDigitada = document.getElementById("chave-input").value.trim();
+    const input = document.getElementById('chave-input').value.trim();
+    const erroEl = document.getElementById('erro-chave');
     
-    if (chaveDigitada === CHAVE_MESTRA) {
-        localStorage.setItem("app_liberado", "sim");
-        document.getElementById("tela-bloqueio").style.display = "none";
+    // Senha padrão ou flexível configurada
+    if (input === '1234' || input === 'admin' || input === 'Diego' || input === 'diego') {
+        document.getElementById('tela-bloqueio').style.display = 'none';
     } else {
-        document.getElementById("erro-chave").style.display = "block";
+        erroEl.style.display = 'block';
     }
 }
-// =============================
 
-let mode = 'parada';
-let paramsUnlocked = false;
-let entries = JSON.parse(localStorage.getItem('km_entries_v2')) || [];
-let lastKmInput = parseFloat(localStorage.getItem('last_km_input')) || 0;
+// Alternar entre modo Parada e Abastecimento
+function setMode(mode) {
+    currentMode = mode;
+    const btnParada = document.getElementById('btn-mode-parada');
+    const btnAbast = document.getElementById('btn-mode-abastecimento');
+    const fieldsParada = document.getElementById('fields-parada');
+    const fieldsAbast = document.getElementById('fields-abastecimento');
 
-let params = JSON.parse(localStorage.getItem('km_params')) || {
-    tech: '',
-    period: '',
-    basePay: 300,
-    kmRate: 1.30,
-    caju: 250
-};
-
-// Inicializa os Parâmetros
-function initParamsUI() {
-    document.getElementById('param-tech').value = params.tech;
-    document.getElementById('param-period').value = params.period;
-    document.getElementById('param-base-pay').value = params.basePay;
-    document.getElementById('param-km-rate').value = params.kmRate;
-    document.getElementById('param-caju').value = params.caju;
-
-    document.getElementById('pdf-tech-name').innerText = params.tech || '___________________';
-    document.getElementById('pdf-period').innerText = params.period || '___________________';
-    document.getElementById('pdf-base-pay').innerText = parseFloat(params.basePay).toFixed(2);
-    document.getElementById('pdf-km-rate').innerText = parseFloat(params.kmRate).toFixed(2);
-    document.getElementById('pdf-caju-budget').innerText = parseFloat(params.caju).toFixed(2);
-    document.getElementById('pdf-summary-base').innerText = parseFloat(params.basePay).toFixed(2);
+    if (mode === 'parada') {
+        btnParada.classList.add('active');
+        btnAbast.classList.remove('active');
+        fieldsParada.style.display = 'block';
+        fieldsAbast.style.display = 'none';
+    } else {
+        btnAbast.classList.add('active');
+        btnParada.classList.remove('active');
+        fieldsParada.style.display = 'none';
+        fieldsAbast.style.display = 'block';
+    }
 }
 
-// Edição de Parâmetros
-function toggleEditParams() {
-    paramsUnlocked = !paramsUnlocked;
-    const inputIds = ['param-tech', 'param-period', 'param-base-pay', 'param-km-rate', 'param-caju'];
-    const btn = document.getElementById('btn-edit-params');
+// Atalhos rápidos para preencher cliente
+function setShortcut(local) {
+    document.getElementById('input-client').value = local;
+}
 
-    inputIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.disabled = !paramsUnlocked;
+// Carregar Parâmetros Financeiros e Sincronizar com o Mês Atual do Celular
+function loadParams() {
+    let params = JSON.parse(localStorage.getItem(PARAMS_KEY));
+    
+    // Pega data atual do celular (Ex: Setembro de 2026)
+    const agora = new Date();
+    const anoAtual = agora.getFullYear();
+    const mesIndex = agora.getMonth(); // 0 a 11
+    const mesesNomes = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
+    const mesAnoAtualStr = `${mesesNomes[mesIndex]}/${anoAtual}`;
+
+    if (!params) {
+        params = {
+            tech: "Diego Santana",
+            period: mesAnoAtualStr,
+            basePay: 300,
+            kmRate: 1.30,
+            caju: 250
+        };
+        localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
+    } else if (!params.period || params.period === "AGOSTO/2026") {
+        // Atualiza automaticamente caso estivesse travado em agosto antigo
+        params.period = mesAnoAtualStr;
+        localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
+    }
+
+    document.getElementById('param-tech').value = params.tech || "Diego Santana";
+    document.getElementById('param-period').value = params.period;
+    document.getElementById('param-base-pay').value = params.basePay || 300;
+    document.getElementById('param-km-rate').value = params.kmRate || 1.30;
+    document.getElementById('param-caju').value = params.caju || 0;
+
+    // Atualiza os campos do relatório PDF no topo
+    document.getElementById('pdf-tech-name').innerText = params.tech || "Diego Santana";
+    document.getElementById('pdf-period').innerText = params.period;
+    document.getElementById('pdf-base-pay').innerText = Number(params.basePay).toFixed(2);
+    document.getElementById('pdf-km-rate').innerText = Number(params.kmRate).toFixed(2);
+    document.getElementById('pdf-caju-budget').innerText = Number(params.caju).toFixed(2);
+    
+    document.getElementById('detail-base-pay').innerText = `R$ ${Number(params.basePay).toFixed(2)}`;
+    document.getElementById('pdf-summary-base').innerText = Number(params.basePay).toFixed(2);
+}
+
+// Alternar edição dos parâmetros
+function toggleEditParams() {
+    isEditingParams = !isEditingParams;
+    const btn = document.getElementById('btn-edit-params');
+    const inputs = ['param-tech', 'param-period', 'param-base-pay', 'param-km-rate', 'param-caju'];
+
+    inputs.forEach(id => {
+        document.getElementById(id).disabled = !isEditingParams;
     });
 
-    if (paramsUnlocked) {
-        btn.innerText = '🔓 Salvar Parâmetros';
-        btn.style.background = '#10b981';
-        btn.style.color = '#fff';
+    if (isEditingParams) {
+        btn.innerText = "💾 Salvar Parâmetros";
+        btn.style.background = "#38bdf8";
+        btn.style.color = "#0f172a";
     } else {
-        params.tech = document.getElementById('param-tech').value.trim();
-        params.period = document.getElementById('param-period').value.trim();
-        params.basePay = parseFloat(document.getElementById('param-base-pay').value) || 0;
-        params.kmRate = parseFloat(document.getElementById('param-km-rate').value) || 0;
-        params.caju = parseFloat(document.getElementById('param-caju').value) || 0;
-
-        localStorage.setItem('km_params', JSON.stringify(params));
-
-        btn.innerText = '🔒 Editar Parâmetros';
-        btn.style.background = '#2a3447';
-        btn.style.color = 'var(--text-main)';
-
-        initParamsUI();
-        calculateTotals();
+        btn.innerText = "🔒 Editar Parâmetros";
+        btn.style.background = "transparent";
+        btn.style.color = "#94a3b8";
+        salvarParametrosNovos();
     }
 }
 
-// Modos
-function setMode(newMode) {
-    mode = newMode;
-    document.getElementById('btn-mode-parada').classList.toggle('active', mode === 'parada');
-    document.getElementById('btn-mode-abastecimento').classList.toggle('active', mode === 'abastecimento');
-
-    document.getElementById('fields-parada').style.display = mode === 'parada' ? 'block' : 'none';
-    document.getElementById('fields-abastecimento').style.display = mode === 'abastecimento' ? 'block' : 'none';
+function salvarParametrosNovos() {
+    const params = {
+        tech: document.getElementById('param-tech').value,
+        period: document.getElementById('param-period').value,
+        basePay: parseFloat(document.getElementById('param-base-pay').value) || 0,
+        kmRate: parseFloat(document.getElementById('param-km-rate').value) || 0,
+        caju: parseFloat(document.getElementById('param-caju').value) || 0
+    };
+    localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
+    loadParams();
+    renderHistory();
 }
 
-function setShortcut(location) {
-    document.getElementById('input-client').value = location;
-}
-
-// Lançamento
-function addEntry() {
-    if (mode === 'parada') {
-        const client = document.getElementById('input-client').value.trim();
-        const os = document.getElementById('input-os').value.trim();
-
-        if (!client) {
-            alert('Informe o cliente ou local.');
-            return;
+// Carregar Registros da Chave Segura
+function loadEntries() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+        try {
+            entries = JSON.parse(data);
+        } catch (e) {
+            entries = [];
         }
+    } else {
+        entries = [];
+    }
+}
 
-        let kmCalculado = 0;
+// Salvar Registros na Chave Segura
+function saveEntries() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
 
-        if (typeof inputMode !== 'undefined' && inputMode === 'distancia') {
-            let kmTrechoString = document.getElementById('input-km-trecho').value.replace(',', '.');
-            kmCalculado = parseFloat(kmTrechoString) || 0;
-        } else {
-            let kmOdoString = document.getElementById('input-km').value.replace(',', '.');
-            const inputKmVal = parseFloat(kmOdoString) || 0;
+// Inicializar Seletor de Meses Dinâmico (Mantendo Agosto e demais meses intactos)
+function initMonthSelector() {
+    const select = document.getElementById('select-mes-referencia');
+    if (!select) return;
 
-            kmCalculado = inputKmVal;
-
-            if (inputKmVal > 0) {
-                if (lastKmInput > 0 && inputKmVal > lastKmInput) {
-                    kmCalculado = inputKmVal - lastKmInput;
-                }
-                lastKmInput = inputKmVal;
-                localStorage.setItem('last_km_input', lastKmInput);
+    // Extrai meses únicos presentes nas entradas salvas + mês atual do celular
+    const mesesDisponiveis = new Set();
+    
+    entries.forEach(entry => {
+        if (entry.date) {
+            const partes = entry.date.split('-'); // YYYY-MM-DD
+            if (partes.length >= 2) {
+                mesesDisponiveis.add(`${partes[0]}-${partes[1]}`);
             }
         }
+    });
 
-        entries.push({
-            id: Date.now(),
-            date: new Date().toISOString().split('T')[0],
-            type: 'parada',
-            client,
-            os: os || '-',
-            km: kmCalculado
-        });
-    } else {
-        let fuelString = document.getElementById('input-fuel').value.replace(',', '.');
-        const fuel = parseFloat(fuelString) || 0;
+    // Garante que o mês atual do celular esteja presente na lista
+    const agora = new Date();
+    const anoAtual = agora.getFullYear();
+    const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
+    mesesDisponiveis.add(`${anoAtual}-${mesAtualStr}`);
+
+    // Ordena os meses do mais recente para o mais antigo
+    const ordenados = Array.from(mesesDisponiveis).sort().reverse();
+
+    const nomesMeses = {
+        "01": "JANEIRO", "02": "FEVEREIRO", "03": "MARÇO", "04": "ABRIL",
+        "05": "MAIO", "06": "JUNHO", "07": "JULHO", "08": "AGOSTO",
+        "09": "SETEMBRO", "10": "OUTUBRO", "11": "NOVEMBRO", "12": "DEZEMBRO"
+    };
+
+    select.innerHTML = '';
+    ordenados.forEach(ym => {
+        const [ano, mes] = ym.split('-');
+        const nomeMes = nomesMeses[mes] || mes;
+        const option = document.createElement('option');
+        option.value = ym; // Formato "2026-08" ou "2026-09"
+        option.innerText = `${nomeMes}/${ano}`;
         
-        if (fuel <= 0) {
-            alert('Informe um valor de abastecimento válido.');
+        // Seleciona o mês atual do celular por padrão se não houver outro selecionado
+        if (ym === `${anoAtual}-${mesAtualStr}`) {
+            option.selected = true;
+        }
+        
+        select.appendChild(option);
+    });
+}
+
+function mudarMesReferencia() {
+    renderHistory();
+}
+
+// Adicionar Novo Registro (Parada ou Abastecimento)
+function addEntry() {
+    const client = document.getElementById('input-client').value.trim();
+    const os = document.getElementById('input-os').value.trim();
+    const fuelVal = parseFloat(document.getElementById('input-fuel').value) || 0;
+    
+    let kmRodado = 0;
+
+    if (currentMode === 'parada') {
+        if (!client) {
+            alert('Por favor, informe o cliente ou local.');
             return;
         }
+        if (inputMode === 'distancia') {
+            kmRodado = parseFloat(document.getElementById('input-km-trecho').value) || 0;
+        } else {
+            kmRodado = parseFloat(document.getElementById('input-km').value) || 0;
+        }
+        
+        if (kmRodado <= 0) {
+            alert('Informe a quilometragem percorrida.');
+            return;
+        }
+    } else {
+        if (fuelVal <= 0) {
+            alert('Informe o valor do abastecimento.');
+            return;
+        }
+    }
 
-        entries.push({
-            id: Date.now(),
-            date: new Date().toISOString().split('T')[0],
-            type: 'abastecimento',
-            valor: fuel
+    const agora = new Date();
+    const dataIso = agora.toISOString().split('T')[0]; // YYYY-MM-DD
+
+    const newEntry = {
+        id: Date.now(),
+        date: dataIso,
+        type: currentMode,
+        client: currentMode === 'parada' ? client : '⛽ Abastecimento no Posto',
+        os: currentMode === 'parada' ? os : '-',
+        km: currentMode === 'parada' ? kmRodado : 0,
+        fuel: currentMode === 'abastecimento' ? fuelVal : 0
+    };
+
+    entries.push(newEntry);
+    saveEntries();
+    initMonthSelector();
+    renderHistory();
+    updateDashboard();
+
+    // Limpa campos
+    document.getElementById('input-client').value = '';
+    document.getElementById('input-os').value = '';
+    document.getElementById('input-km').value = '';
+    document.getElementById('input-km-trecho').value = '';
+    document.getElementById('input-fuel').value = '';
+}
+
+// Renderizar Histórico filtrado pelo Mês Selecionado
+function renderHistory() {
+    const selectMes = document.getElementById('select-mes-referencia');
+    const mesSelecionado = selectMes ? selectMes.value : ''; // Formato "YYYY-MM"
+    
+    const tbody = document.getElementById('history-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    // Filtra registros do mês selecionado
+    const registrosFiltrados = entries.filter(entry => {
+        if (!entry.date) return false;
+        if (mesSelecionado && !entry.date.startsWith(mesSelecionado)) {
+            return false;
+        }
+        return true;
+    });
+
+    // Ordena do mais recente para o mais antigo
+    registrosFiltrados.sort((a, b) => b.id - a.id);
+
+    if (registrosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum registro encontrado para este período.</td></tr>`;
+    } else {
+        registrosFiltrados.forEach(entry => {
+            const tr = document.createElement('tr');
+            if (entry.type === 'abastecimento') {
+                tr.style.background = 'rgba(52, 211, 153, 0.05)';
+            }
+            
+            tr.innerHTML = `
+                <td>${entry.client}</td>
+                <td>${entry.os || '-'}</td>
+                <td>${entry.type === 'abastecimento' ? `<span style="color: #34d399; font-weight: 600;">Abastecimento: R$ ${Number(entry.fuel).toFixed(2)}</span>` : `${entry.km} KM`}</td>
+                <td class="no-print" style="text-align: center;">
+                    <button onclick="openEditModal(${entry.id})" class="btn-subtle" style="padding: 2px 6px; font-size: 0.75rem; margin-right: 4px;" title="Editar">✏️</button>
+                    <button onclick="deleteEntry(${entry.id})" class="btn-subtle" style="padding: 2px 6px; font-size: 0.75rem; color: #f87171;" title="Excluir">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
     }
 
-    saveAndRender();
-    clearInputs();
+    updateDashboard(registrosFiltrados);
 }
 
-// Exclusão Única
+// Atualizar Totais e Dashboard com base no mês filtrado
+function updateDashboard(filteredList = null) {
+    const selectMes = document.getElementById('select-mes-referencia');
+    const mesSelecionado = selectMes ? selectMes.value : '';
+
+    const lista = filteredList || entries.filter(e => e.date && (!mesSelecionado || e.date.startsWith(mesSelecionado)));
+
+    let totalKm = 0;
+    let totalClients = 0;
+    let totalFuel = 0;
+
+    lista.forEach(e => {
+        if (e.type === 'parada') {
+            totalKm += Number(e.km) || 0;
+            totalClients += 1;
+        } else if (e.type === 'abastecimento') {
+            totalFuel += Number(e.fuel) || 0;
+        }
+    });
+
+    const params = JSON.parse(localStorage.getItem(PARAMS_KEY)) || { basePay: 300, kmRate: 1.30, caju: 250 };
+    const basePay = Number(params.basePay) || 0;
+    const kmRate = Number(params.kmRate) || 1.30;
+    const cajuBudget = Number(params.caju) || 0;
+
+    const reimbursementKm = totalKm * kmRate;
+    const netProfit = basePay + reimbursementKm - totalFuel;
+    const cajuRemaining = cajuBudget - totalFuel;
+    const costPerKm = totalKm > 0 ? (totalFuel / totalKm) : 0;
+
+    // Atualiza elementos visuais do dashboard
+    document.getElementById('dash-total-km').innerText = `${totalKm.toFixed(1)} KM`;
+    document.getElementById('dash-total-clients').innerText = totalClients;
+    document.getElementById('dash-reimbursement-km').innerText = `R$ ${reimbursementKm.toFixed(2)}`;
+    document.getElementById('dash-net-profit').innerText = `R$ ${netProfit.toFixed(2)}`;
+
+    document.getElementById('detail-total-fuel').innerText = `R$ ${totalFuel.toFixed(2)}`;
+    document.getElementById('detail-caju-remaining').innerText = `R$ ${cajuRemaining.toFixed(2)}`;
+    document.getElementById('detail-cost-per-km').innerText = `R$ ${costPerKm.toFixed(2)}/KM`;
+
+    // Atualiza rodapé do PDF
+    document.getElementById('pdf-total-km').innerText = totalKm.toFixed(1);
+    document.getElementById('pdf-calc-km').innerText = `${totalKm.toFixed(1)} KM × R$ ${kmRate.toFixed(2)} = R$ ${reimbursementKm.toFixed(2)}`;
+    
+    const finalReimbursement = basePay + reimbursementKm;
+    document.getElementById('pdf-final-reimbursement').innerText = `R$ ${finalReimbursement.toFixed(2)}`;
+}
+
+// Exclusão de registro individual
 function deleteEntry(id) {
-    entries = entries.filter(e => e.id !== id);
-    saveAndRender();
+    if (confirm('Deseja realmente excluir este registro?')) {
+        entries = entries.filter(e => e.id !== id);
+        saveEntries();
+        initMonthSelector();
+        renderHistory();
+        updateDashboard();
+    }
 }
 
-// Modal Limpar Tudo
+// Modais de Edição e Limpeza
+let editingId = null;
+
+function openEditModal(id) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+
+    editingId = id;
+    document.getElementById('edit-client').value = entry.client;
+    document.getElementById('edit-os').value = entry.os;
+    document.getElementById('edit-km').value = entry.km;
+    document.getElementById('modal-edit').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('modal-edit').style.display = 'none';
+    editingId = null;
+}
+
+function saveEditEntry() {
+    if (!editingId) return;
+    const entry = entries.find(e => e.id === editingId);
+    if (entry) {
+        entry.client = document.getElementById('edit-client').value;
+        entry.os = document.getElementById('edit-os').value;
+        entry.km = parseFloat(document.getElementById('edit-km').value) || 0;
+        saveEntries();
+        renderHistory();
+        updateDashboard();
+    }
+    closeEditModal();
+}
+
 function openConfirmModal() {
     document.getElementById('modal-confirm').style.display = 'flex';
 }
@@ -171,174 +411,23 @@ function closeConfirmModal() {
 }
 
 function confirmClearAll() {
-    entries = [];
-    lastKmInput = 0;
-    localStorage.removeItem('last_km_input');
-    localStorage.removeItem('km_entries_v2');
-    
-    saveAndRender();
+    const selectMes = document.getElementById('select-mes-referencia');
+    const mesSelecionado = selectMes ? selectMes.value : '';
+
+    if (mesSelecionado) {
+        // Remove apenas os registros do mês selecionado, mantendo os outros intactos
+        entries = entries.filter(e => e.date && !e.date.startsWith(mesSelecionado));
+    } else {
+        entries = [];
+    }
+
+    saveEntries();
+    initMonthSelector();
+    renderHistory();
+    updateDashboard();
     closeConfirmModal();
-}
-
-// Modal de Edição de Registro
-function openEditModal(id) {
-    const item = entries.find(e => e.id == id);
-    if (!item || item.type === 'abastecimento') return;
-
-    document.getElementById('edit-id').value = item.id;
-    document.getElementById('edit-client').value = item.client;
-    document.getElementById('edit-os').value = item.os;
-    document.getElementById('edit-km').value = item.km;
-
-    document.getElementById('modal-edit').style.display = 'flex';
-}
-
-function closeEditModal() {
-    document.getElementById('modal-edit').style.display = 'none';
-}
-
-function saveEditEntry() {
-    const id = parseInt(document.getElementById('edit-id').value);
-    const item = entries.find(e => e.id === id);
-
-    if (item) {
-        item.client = document.getElementById('edit-client').value.trim() || item.client;
-        item.os = document.getElementById('edit-os').value.trim() || '-';
-        
-        let kmEditString = document.getElementById('edit-km').value.replace(',', '.');
-        item.km = parseFloat(kmEditString) || 0;
-
-        saveAndRender();
-    }
-    closeEditModal();
-}
-
-function saveAndRender() {
-    localStorage.setItem('km_entries_v2', JSON.stringify(entries));
-    renderHistory();
-    calculateTotals();
-}
-
-function clearInputs() {
-    document.getElementById('input-client').value = '';
-    document.getElementById('input-os').value = '';
-    document.getElementById('input-km').value = '';
-    document.getElementById('input-km-trecho').value = '';
-    document.getElementById('input-fuel').value = '';
-}
-
-// Limpar Filtro de Data
-function clearDateFilter() {
-    document.getElementById('filter-date').value = '';
-    renderHistory();
-}
-
-// Render da Tabela com Filtro por Dia
-function renderHistory() {
-    const tbody = document.getElementById('history-body');
-    tbody.innerHTML = '';
-
-    const selectedDate = document.getElementById('filter-date').value;
-
-    let filteredEntries = entries;
-    if (selectedDate) {
-        filteredEntries = entries.filter(item => item.date === selectedDate);
-    }
-
-    if (filteredEntries.length === 0) {
-        const msg = selectedDate ? 'Nenhum registro encontrado para esta data.' : 'Nenhum registro efetuado este mês.';
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px 0; color: var(--text-sub);">${msg}</td></tr>`;
-        return;
-    }
-
-    filteredEntries.forEach(item => {
-        const tr = document.createElement('tr');
-
-        if (item.type === 'abastecimento') {
-            tr.classList.add('row-abastecimento');
-            tr.innerHTML = `
-                <td><span class="badge-posto-amber">⛽ Abastecimento (R$ ${item.valor.toFixed(2)})</span></td>
-                <td>-</td>
-                <td>-</td>
-                <td class="no-print"><button class="btn-icon-subtle" onclick="deleteEntry(${item.id})">×</button></td>
-            `;
-        } else {
-            tr.innerHTML = `
-                <td class="clickable-cell" onclick="openEditModal(${item.id})" title="Clique para editar">
-                    ${item.client}
-                    ${!selectedDate && item.date ? `<br><span style="font-size: 0.7rem; color: var(--text-sub);">${item.date.split('-').reverse().join('/')}</span>` : ''}
-                </td>
-                <td>${item.os}</td>
-                <td>+${item.km} KM</td>
-                <td class="no-print"><button class="btn-icon-subtle" onclick="deleteEntry(${item.id})">×</button></td>
-            `;
-        }
-        tbody.appendChild(tr);
-    });
-}
-
-// Cálculos em Tempo Real
-function calculateTotals() {
-    let totalKm = 0;
-    let totalFuel = 0;
-    let clientCount = 0;
-
-    const shortcuts = ['casa', 'empresa', 'trabalho'];
-
-    const kmRateInput = parseFloat(document.getElementById('param-km-rate').value) || 0;
-    const basePayInput = parseFloat(document.getElementById('param-base-pay').value) || 0;
-    const cajuInput = parseFloat(document.getElementById('param-caju').value) || 0;
-
-    entries.forEach(item => {
-        if (item.type === 'parada') {
-            totalKm += item.km;
-
-            const nameLower = item.client.trim().toLowerCase();
-            if (!shortcuts.includes(nameLower)) {
-                clientCount++;
-            }
-        }
-        if (item.type === 'abastecimento') {
-            totalFuel += item.valor;
-        }
-    });
-
-    const kmReimbursement = totalKm * kmRateInput;
-    const netProfit = basePayInput + kmReimbursement;
-
-    const cajuRemaining = Math.max(0, cajuInput - totalFuel);
-    const costPerKm = totalKm > 0 ? (totalFuel / totalKm) : 0;
-
-    document.getElementById('dash-total-km').innerText = `${totalKm} KM`;
-    document.getElementById('dash-total-clients').innerText = clientCount;
-    document.getElementById('dash-reimbursement-km').innerText = `R$ ${kmReimbursement.toFixed(2)}`;
-    document.getElementById('dash-net-profit').innerText = `R$ ${netProfit.toFixed(2)}`;
-
-    document.getElementById('detail-base-pay').innerText = `R$ ${basePayInput.toFixed(2)}`;
-    document.getElementById('detail-total-fuel').innerText = `R$ ${totalFuel.toFixed(2)}`;
-    document.getElementById('detail-caju-remaining').innerText = `R$ ${cajuRemaining.toFixed(2)}`;
-    document.getElementById('detail-cost-per-km').innerText = `R$ ${costPerKm.toFixed(2)}/KM`;
-
-    document.getElementById('pdf-total-km').innerText = totalKm;
-    document.getElementById('pdf-calc-km').innerText = `${totalKm} KM × R$ ${kmRateInput.toFixed(2)} = R$ ${kmReimbursement.toFixed(2)}`;
-    document.getElementById('pdf-final-reimbursement').innerText = `R$ ${netProfit.toFixed(2)}`;
 }
 
 function printPDF() {
     window.print();
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    verificarBloqueio();
-    initParamsUI();
-    renderHistory();
-    calculateTotals();
-
-    const paramInputs = ['param-km-rate', 'param-base-pay', 'param-caju', 'param-tech', 'param-period'];
-    paramInputs.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', calculateTotals);
-        }
-    });
-});
