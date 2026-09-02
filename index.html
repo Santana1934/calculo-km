@@ -6,9 +6,8 @@
     <title>Controle de KM Pessoal</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
-    <link rel="stylesheet" href="style.css?v=17">
+    <link rel="stylesheet" href="style.css?v=18">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
     <style>
         .mode-selector-app {
             background: #1e293b;
@@ -250,7 +249,7 @@
 
     </div>
 
-    <!-- Modal de Confirmação e Lixeira de Recuperação -->
+    <!-- Modal de Confirmação e Lixeira -->
     <div id="modal-confirm" class="modal-overlay" style="display: none;">
         <div class="modal-box">
             <h3>⚠️ Confirmar Exclusão</h3>
@@ -265,7 +264,7 @@
         </div>
     </div>
 
-    <!-- Modal da Lixeira (Proteção contra exclusão acidental) -->
+    <!-- Modal da Lixeira -->
     <div id="modal-trash" class="modal-overlay" style="display: none;">
         <div class="modal-box" style="max-width: 500px;">
             <h3>🗑️ Lixeira (Resturação)</h3>
@@ -279,10 +278,10 @@
         </div>
     </div>
 
-    <!-- Modal de Edição -->
+    <!-- Modal de Edição de Cliente / Parada -->
     <div id="modal-edit" class="modal-overlay" style="display: none;">
         <div class="modal-box">
-            <h3>Editar Registro</h3>
+            <h3>Editar Registro de Cliente</h3>
             <input type="hidden" id="edit-id">
             <div class="form-group" style="text-align: left; margin-top: 10px;">
                 <label>CLIENTE / LOCAL</label>
@@ -294,11 +293,27 @@
             </div>
             <div class="form-group" style="text-align: left;">
                 <label>KM RODADO</label>
-                <input type="number" id="edit-km">
+                <input type="number" id="edit-km" step="0.1">
             </div>
             <div class="modal-actions" style="margin-top: 15px;">
                 <button type="button" class="btn-modal-cancel" onclick="closeEditModal()">Cancelar</button>
                 <button type="button" class="btn-action-green" onclick="saveEditEntry()">Salvar Alteração</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição Exclusiva de Abastecimento -->
+    <div id="modal-edit-fuel" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3>Editar Abastecimento</h3>
+            <input type="hidden" id="edit-fuel-id">
+            <div class="form-group" style="text-align: left; margin-top: 10px;">
+                <label>VALOR DO ABASTECIMENTO (R$)</label>
+                <input type="number" id="edit-fuel-val" step="0.01">
+            </div>
+            <div class="modal-actions" style="margin-top: 15px;">
+                <button type="button" class="btn-modal-cancel" onclick="closeFuelEditModal()">Cancelar</button>
+                <button type="button" class="btn-action-green" onclick="saveEditFuelEntry()">Salvar Alteração</button>
             </div>
         </div>
     </div>
@@ -342,39 +357,6 @@
         }
     </script>
 
-    <script>
-        let deferredPrompt;
-        const installContainer = document.getElementById('install-container');
-        const btnInstall = document.getElementById('btn-install');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if (installContainer) {
-                installContainer.style.display = 'block';
-            }
-        });
-
-        if (btnInstall) {
-            btnInstall.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    deferredPrompt = null;
-                    if (installContainer) {
-                        installContainer.style.display = 'none';
-                    }
-                }
-            });
-        }
-
-        window.addEventListener('appinstalled', () => {
-            if (installContainer) {
-                installContainer.style.display = 'none';
-            }
-        });
-    </script>
-
-    <script src="script.js?v=17"></script>
+    <script src="script.js?v=18"></script>
 </body>
 </html>
