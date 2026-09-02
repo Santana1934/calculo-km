@@ -45,6 +45,12 @@ function obterMesAnoAtual() {
 }
 
 function inicializarApp() {
+    // DIAGNÓSTICO DIRETO NA TELA PARA VOCÊ VER O QUE ESTÁ SALVO
+    console.log("Total de registros no localStorage:", registros.length);
+    if (registros.length === 0) {
+        alert("ALERTA: O armazenamento do app está VAZIO (0 registros encontrados). O PWA pode ter resetado o cache.");
+    }
+
     carregarParametros();
     popularSeletorMeses();
     renderHistory();
@@ -53,7 +59,7 @@ function inicializarApp() {
 
 // --- PARÂMETROS FINANCEIROS E MESES ---
 function carregarParametros() {
-    const mesAtualAutomatico = obterMesAnoAtual(); // Mantém o topo em Setembro/2026
+    const mesAtualAutomatico = obterMesAnoAtual();
     
     document.getElementById('param-tech').value = parametros.tecnico || "Diego Santana";
     document.getElementById('param-period').value = mesAtualAutomatico;
@@ -240,11 +246,9 @@ function filtrarRegistrosAtuais() {
     const mesAlvo = (mesSelecionadoHistorico || "AGOSTO/2026").toUpperCase();
     
     let filtrados = registros.filter(r => {
-        // Pega a data salva (ex: '2026-08-04...') ou o campo mesAno
         let dataStr = r.data || "";
         let mesInformado = r.mesAno ? r.mesAno.toUpperCase() : "";
 
-        // Se o registro for de agosto (seja pela string do mês ou porque a data contém '-08-' ou '/08/')
         if (mesAlvo.includes("AGOSTO")) {
             if (mesInformado.includes("AGO") || dataStr.includes("-08-") || dataStr.includes("/08/")) {
                 return true;
@@ -284,7 +288,7 @@ function renderHistory() {
     const dadosFiltrados = filtrarRegistrosAtuais();
 
     if (dadosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum registro encontrado para este período.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum registro encontrado para este período. (Total gravado geral: ${registros.length})</td></tr>`;
         atualizarTotaisPDF(0, 0);
         return;
     }
@@ -355,7 +359,7 @@ function reimbursementFormat(val) {
 }
 
 function atualizarTotaisPDF(totalKm, dados) {
-    const taxaKm = parametros.taxaKm !== undefined ? parametros.taxaKm : 1.27;
+    const taxaKm = parametros.taxaKm !== undefined ? parametros.taxxKm : 1.27;
     const ajudaCusto = parametros.ajudaCusto !== undefined ? parametros.ajudaCusto : 300;
     const reembolsoKm = totalKm * taxaKm;
     const totalGeral = reembolsoKm + ajudaCusto;
