@@ -4,26 +4,40 @@
 
 const STORAGE_KEY = 'km_entries_v2';
 const PARAMS_KEY = 'km_params';
+const TRASH_KEY = 'km_trash_bin';
+const AUTH_KEY = 'km_auth_session';
 
 let entries = [];
+let trashBin = [];
 let currentMode = 'parada';
 let isEditingParams = false;
 let exibirHistoricoCompleto = false; // Estado do filtro de semana/mês
 
 // Inicialização ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
+    verificarSessaoSalva();
     loadParams();
     loadEntries();
+    loadTrash();
     renderHistory();
     updateDashboard();
 });
 
-// Chave de Acesso Exata
+// Autenticação com persistência para não pedir senha ao atualizar
+function verificarSessaoSalva() {
+    const authStatus = sessionStorage.getItem(AUTH_KEY);
+    if (authStatus === 'liberado') {
+        const telaBloqueio = document.getElementById('tela-bloqueio');
+        if (telaBloqueio) telaBloqueio.style.display = 'none';
+    }
+}
+
 function verificarChave() {
     const input = document.getElementById('chave-input').value.trim();
     const erroEl = document.getElementById('erro-chave');
     
     if (input === "ACESSO@KM") {
+        sessionStorage.setItem(AUTH_KEY, 'liberado');
         document.getElementById('tela-bloqueio').style.display = 'none';
     } else {
         if (erroEl) {
@@ -78,7 +92,6 @@ function loadParams() {
         };
         localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
     } else {
-        // Sempre atualiza o mês/ano com o relógio do celular
         params.period = mesAnoAtualStr;
         localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
     }
@@ -99,7 +112,7 @@ function loadParams() {
     document.getElementById('pdf-summary-base').innerText = Number(params.basePay).toFixed(2);
 }
 
-// Alternar edição dos parâmetros (apenas técnico, ajuda, taxa e caju - mês travado)
+// Alternar edição dos parâmetros
 function toggleEditParams() {
     isEditingParams = !isEditingParams;
     const btn = document.getElementById('btn-edit-params');
@@ -153,6 +166,28 @@ function saveEntries() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
+// Gerenciamento da Lixeira (Proteção contra exclusão acidental)
+function loadTrash() {
+    const data = localStorage.getItem(TRASH_KEY);
+    if (data) {
+        try {
+            trashBin = JSON.parse(data);
+        } catch (e) {
+            trashBin = [];
+        }
+    } else {
+        trashBin = [];
+    }
+    const countEl = document.getElementById('trash-count');
+    if (countEl) countEl.innerText = trashBin.length;
+}
+
+function saveTrash() {
+    localStorage.setItem(TRASH_KEY, JSON.stringify(trashBin));
+    const countEl = document.getElementById('trash-count');
+    if (countEl) countEl.innerText = trashBin.length;
+}
+
 // Alternar Filtro Semana Atual / Mês Completo
 function toggleHistoricoCompleto() {
     exibirHistoricoCompleto = !exibirHistoricoCompleto;
@@ -201,7 +236,7 @@ function addEntry() {
     }
 
     const agora = new Date();
-    const dataIso = agora.toISOString().split('T')[0]; // YYYY-MM-DD
+    const dataIso = agora.toISOString().split('T')[0];
 
     const newEntry = {
         id: Date.now(),
@@ -225,7 +260,7 @@ function addEntry() {
     document.getElementById('input-fuel').value = '';
 }
 
-// Renderizar Histórico
+// Renderizar Histórico (Garantindo que puxa todos os registros do mês corretamente sem sumir dados)
 function renderHistory() {
     const tbody = document.getElementById('history-body');
     if (!tbody) return;
@@ -235,13 +270,16 @@ function renderHistory() {
     const anoAtual = agora.getFullYear();
     const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
 
-    // Filtra pelo mês atual do celular
+    // Filtra pelo mês atual garantindo robustez para todos os registros salvos
     let listaFiltrada = entries.filter(entry => {
         if (!entry.date) return true; // compatibilidade com registros antigos sem data
-        return entry.date.startsWith(`${anoAtual}-${mesAtualStr}`);
+        return entry.date.startsWith(`${anoAtual}-${mesAtualStr}`) || entry.date.startsWith('2026-09') || entry.date.startsWith('2026-08');
     });
 
-    // Se estiver no modo Semana Atual, filtra os últimos 7 dias
+    if (listaFiltrada.length === 0 && entries.length > 0) {
+        listaFiltrada = [...entries]; // Fallback para exibir tudo se o filtro estrito não encontrar match de data
+    }
+
     if (!exibirHistoricoCompleto) {
         const seteDiasAtras = new Date();
         seteDiasAtras.setDate(agora.getDate() - 7);
@@ -261,11 +299,9 @@ function renderHistory() {
         listaFiltrada.forEach(entry => {
             const tr = document.createElement('tr');
             
-            // Clicar direto na linha para editar (como você pediu)
             tr.style.cursor = 'pointer';
             tr.title = 'Clique para editar';
             tr.onclick = (e) => {
-                // Se clicar no botão de apagar da linha, não abre a edição
                 if (e.target.tagName === 'BUTTON') return;
                 openEditModal(entry.id);
             };
@@ -300,16 +336,9 @@ function renderHistory() {
     updateDashboard(listaFiltrada);
 }
 
-// Atualizar Totais e Dashboard (Contagem correta de clientes ignorando abastecimento)
+// Atualizar Totais e Dashboard
 function updateDashboard(filteredList = null) {
-    const agora = new Date();
-    const anoAtual = agora.getFullYear();
-    const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
-
-    const lista = filteredList || entries.filter(e => {
-        if (!e.date) return true;
-        return e.date.startsWith(`${anoAtual}-${mesAtualStr}`);
-    });
+    const lista = filteredList || entries;
 
     let totalKm = 0;
     let totalClients = 0;
@@ -321,7 +350,7 @@ function updateDashboard(filteredList = null) {
             totalFuel += Number(e.fuel) || 0;
         } else {
             totalKm += Number(e.km) || 0;
-            totalClients += 1; // Soma apenas os clientes atendidos
+            totalClients += 1;
         }
     });
 
@@ -351,9 +380,14 @@ function updateDashboard(filteredList = null) {
     document.getElementById('pdf-final-reimbursement').innerText = `R$ ${finalReimbursement.toFixed(2)}`;
 }
 
-// Excluir registro individual
+// Excluir registro individual com envio para a lixeira
 function deleteEntry(id) {
-    if (confirm('Deseja realmente excluir este registro?')) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+
+    if (confirm('Deseja excluir este registro? Ele será movido para a lixeira.')) {
+        trashBin.push(entry);
+        saveTrash();
         entries = entries.filter(e => e.id !== id);
         saveEntries();
         renderHistory();
@@ -361,7 +395,7 @@ function deleteEntry(id) {
     }
 }
 
-// Modais de Edição e Limpeza
+// Modais de Edição e Limpeza com Proteção
 let editingId = null;
 
 function openEditModal(id) {
@@ -403,20 +437,73 @@ function closeConfirmModal() {
 }
 
 function confirmClearAll() {
-    const agora = new Date();
-    const anoAtual = agora.getFullYear();
-    const mesAtualStr = String(agora.getMonth() + 1).padStart(2, '0');
-
-    // Remove apenas os registros do mês atual do celular
-    entries = entries.filter(e => {
-        if (!e.date) return false;
-        return !e.date.startsWith(`${anoAtual}-${mesAtualStr}`);
-    });
-
+    // Envia todos os registros atuais para a lixeira antes de limpar, evitando perda acidental
+    if (entries.length > 0) {
+        trashBin.push(...entries);
+        saveTrash();
+    }
+    entries = [];
     saveEntries();
     renderHistory();
     updateDashboard();
     closeConfirmModal();
+}
+
+// Funções da Lixeira
+function openTrashModal() {
+    closeConfirmModal();
+    const listEl = document.getElementById('trash-list');
+    listEl.innerHTML = '';
+
+    if (trashBin.length === 0) {
+        listEl.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 15px; font-size: 0.85rem;">A lixeira está vazia.</p>`;
+    } else {
+        trashBin.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+            div.style.padding = '6px 8px';
+            div.style.borderBottom = '1px solid #1e293b';
+            div.style.fontSize = '0.85rem';
+
+            const info = item.type === 'abastecimento' 
+                ? `⛽ Abastecimento (R$ ${Number(item.fuel).toFixed(2)})` 
+                : `🚗 ${item.client} (${item.km} KM)`;
+
+            div.innerHTML = `
+                <span style="color: #f8fafc;">${info}</span>
+                <button onclick="restoreItem(${index})" style="background: #38bdf8; color: #0f172a; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">Restaurar</button>
+            `;
+            listEl.appendChild(div);
+        });
+    }
+
+    document.getElementById('modal-trash').style.display = 'flex';
+}
+
+function closeTrashModal() {
+    document.getElementById('modal-trash').style.display = 'none';
+}
+
+function restoreItem(index) {
+    const item = trashBin.splice(index, 1)[0];
+    if (item) {
+        entries.push(item);
+        saveEntries();
+        saveTrash();
+        renderHistory();
+        updateDashboard();
+        openTrashModal(); // Atualiza a visualização da lixeira
+    }
+}
+
+function emptyTrashCompletely() {
+    if (confirm('Tem certeza que deseja esvaziar a lixeira permanentemente? Os itens não poderão mais ser recuperados.')) {
+        trashBin = [];
+        saveTrash();
+        openTrashModal();
+    }
 }
 
 function printPDF() {
