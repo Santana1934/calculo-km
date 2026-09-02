@@ -6,7 +6,7 @@
     <title>Controle de KM Pessoal</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
-    <link rel="stylesheet" href="style.css?v=15">
+    <link rel="stylesheet" href="style.css?v=16">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%230f172a'/%3E%3Cpath d='M85 350V162h42v76l72-76h54l-68 74 72 114h-52l-48-76-30 32v44H85z' fill='%2338bdf8'/%3E%3Cpath d='M295 350V162h40l48 84 48-84h40v188h-40V232l-38 68h-20l-38-68v118h-40z' fill='%2334d399'/%3E%3C/svg%3E">
     <style>
@@ -96,7 +96,7 @@
                 </div>
                 <div class="form-group">
                     <label>MÊS/ANO ATUAL</label>
-                    <input type="text" id="param-period" placeholder="Ex: SETEMBRO/2026" disabled>
+                    <input type="text" id="param-period" disabled>
                 </div>
                 <div class="form-group">
                     <label>AJUDA DE CUSTO FIXA (R$)</label>
@@ -205,11 +205,11 @@
         </div>
 
         <div class="card">
-            <div class="card-header-flex no-print" style="margin-bottom: 12px; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div class="card-header-flex" style="margin-bottom: 12px; align-items: center; flex-wrap: wrap; gap: 8px;">
                 <h3 style="margin: 0;">📅 Histórico e Períodos</h3>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <select id="select-mes-referencia" class="input-date-filter" onchange="mudarMesReferencia()" style="background: #1e293b; border: 1px solid #334155; color: #f8fafc; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
-                    </select>
+                <div id="semana-filtro-container" class="no-print" style="display: flex; align-items: center; gap: 8px;">
+                    <span id="label-semana-atual" style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">Exibindo: Semana Atual</span>
+                    <button type="button" id="btn-toggle-semanas" onclick="toggleHistoricoCompleto()" style="background: #1e293b; border: 1px solid #334155; color: #38bdf8; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">Ver Histórico Completo do Mês</button>
                 </div>
             </div>
             
@@ -220,7 +220,7 @@
                             <th>Cliente / Local</th>
                             <th>Protocolo / OS</th>
                             <th>KM Rodado</th>
-                            <th class="no-print">Ação</th>
+                            <th class="no-print" style="width: 40px; text-align: center;">✕</th>
                         </tr>
                     </thead>
                     <tbody id="history-body">
@@ -356,6 +356,6 @@
         });
     </script>
 
-    <script src="script.js?v=15"></script>
+    <script src="script.js?v=16"></script>
 </body>
 </html>
