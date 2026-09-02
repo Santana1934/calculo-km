@@ -31,8 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
 let registros = JSON.parse(localStorage.getItem('controle_km_registros')) || [];
 let parametros = JSON.parse(localStorage.getItem('controle_km_params')) || {};
 
-// Variáveis separadas para não embolar o mês atual de cadastro com o mês que você está consultando no histórico
-let mesSelecionadoHistorico = ""; 
+let mesSelecionadoHistorico = "AGOSTO/2026"; 
 let exibirHistoricoCompletoMes = true; 
 
 const nomesMeses = [
@@ -47,12 +46,6 @@ function obterMesAnoAtual() {
 
 function inicializarApp() {
     carregarParametros();
-    
-    // Se o histórico ainda não foi escolhido, define o padrão inicial como Agosto para você ver os dados passados
-    if (!mesSelecionadoHistorico) {
-        mesSelecionadoHistorico = "AGOSTO/2026";
-    }
-
     popularSeletorMeses();
     renderHistory();
     atualizarDashboard();
@@ -60,10 +53,7 @@ function inicializarApp() {
 
 // --- PARÂMETROS FINANCEIROS E MESES ---
 function carregarParametros() {
-    const mesAtualAutomatico = obterMesAnoAtual(); // Pega Setembro/2026 do relógio do celular
-    
-    // O topo sempre assume o mês atual do sistema para novos lançamentos
-    parametros.mesAno = mesAtualAutomatico;
+    const mesAtualAutomatico = obterMesAnoAtual(); // Mantém o topo em Setembro/2026
     
     document.getElementById('param-tech').value = parametros.tecnico || "Diego Santana";
     document.getElementById('param-period').value = mesAtualAutomatico;
@@ -96,7 +86,7 @@ function toggleEditParams() {
 function salvarParametros() {
     parametros = {
         tecnico: document.getElementById('param-tech').value || "Diego Santana",
-        mesAno: obterMesAnoAtual(), // Mantém travado no mês atual do sistema para novos registros
+        mesAno: obterMesAnoAtual(),
         ajudaCusto: parseFloat(document.getElementById('param-base-pay').value) || 0,
         taxaKm: parseFloat(document.getElementById('param-km-rate').value) || 1.30,
         caju: parseFloat(document.getElementById('param-caju').value) || 0
@@ -133,10 +123,10 @@ function setShortcut(local) {
     document.getElementById('input-client').value = local;
 }
 
-// --- ADICIONAR REGISTROS (Sempre salvos no mês atual do relógio) ---
+// --- ADICIONAR REGISTROS ---
 function addEntry() {
     const dataAtual = new Date();
-    const mesAnoRegistro = obterMesAnoAtual(); // Salva no mês corrente do celular
+    const mesAnoRegistro = obterMesAnoAtual();
     
     let novoRegistro = {
         id: Date.now(),
@@ -250,26 +240,24 @@ function filtrarRegistrosAtuais() {
     const mesAlvo = (mesSelecionadoHistorico || "AGOSTO/2026").toUpperCase();
     
     let filtrados = registros.filter(r => {
-        let mesDoRegistro = "";
+        // Pega a data salva (ex: '2026-08-04...') ou o campo mesAno
+        let dataStr = r.data || "";
+        let mesInformado = r.mesAno ? r.mesAno.toUpperCase() : "";
+
+        // Se o registro for de agosto (seja pela string do mês ou porque a data contém '-08-' ou '/08/')
+        if (mesAlvo.includes("AGOSTO")) {
+            if (mesInformado.includes("AGO") || dataStr.includes("-08-") || dataStr.includes("/08/")) {
+                return true;
+            }
+        }
         
-        if (r.mesAno) {
-            mesDoRegistro = r.mesAno.toUpperCase();
-        } else if (r.data) {
-            const d = new Date(r.data);
-            if (!isNaN(d)) {
-                mesDoRegistro = `${nomesMeses[d.getMonth()]}/${d.getFullYear()}`;
+        if (mesAlvo.includes("SETEMBRO")) {
+            if (mesInformado.includes("SET") || dataStr.includes("-09-") || dataStr.includes("/09/")) {
+                return true;
             }
         }
 
-        // Compatibilidade flexível para encontrar os dados de Agosto ou Setembro
-        if (mesAlvo.includes("AGOSTO") && (mesDoRegistro.includes("AGOSTO") || mesDoRegistro.includes("AGO"))) {
-            return true;
-        }
-        if (mesAlvo.includes("SETEMBRO") && (mesDoRegistro.includes("SETEMBRO") || mesDoRegistro.includes("SET"))) {
-            return true;
-        }
-
-        return mesDoRegistro === mesAlvo;
+        return mesInformado === mesAlvo;
     });
 
     if (!exibirHistoricoCompletoMes) {
