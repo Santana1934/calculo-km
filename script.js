@@ -11,19 +11,27 @@ let entries = [];
 let trashBin = [];
 let currentMode = 'parada';
 let isEditingParams = false;
-let mesAnoSelecionado = ''; // Armazena o mês selecionado no dropdown (ex: '2026-09')
+let mesAnoSelecionado = ''; 
 
 document.addEventListener('DOMContentLoaded', () => {
     verificarSessaoSalva();
     loadParams();
     loadEntries();
     loadTrash();
+    inicializarDataAtual();
     popularSeletorMeses();
     renderHistory();
     updateDashboard();
 });
 
-// Autenticação com persistência
+function inicializarDataAtual() {
+    const dataInput = document.getElementById('input-entry-date');
+    if (dataInput && !dataInput.value) {
+        const hoje = new Date().toISOString().split('T')[0];
+        dataInput.value = hoje;
+    }
+}
+
 function verificarSessaoSalva() {
     const authStatus = sessionStorage.getItem(AUTH_KEY);
     if (authStatus === 'liberado') {
@@ -46,7 +54,6 @@ function verificarChave() {
     }
 }
 
-// Modos de Registro
 function setMode(mode) {
     currentMode = mode;
     const btnParada = document.getElementById('btn-mode-parada');
@@ -71,7 +78,6 @@ function setShortcut(local) {
     document.getElementById('input-client').value = local;
 }
 
-// Parâmetros
 function loadParams() {
     let params = JSON.parse(localStorage.getItem(PARAMS_KEY));
     
@@ -150,6 +156,12 @@ function loadEntries() {
     if (data) {
         try {
             entries = JSON.parse(data);
+            // Corrige possíveis registros de abastecimento antigos salvos sem a propriedade 'fuel' explícita
+            entries.forEach(e => {
+                if (e.type === 'abastecimento' && (e.fuel === undefined || isNaN(e.fuel))) {
+                    e.fuel = 0;
+                }
+            });
         } catch (e) {
             entries = [];
         }
@@ -184,14 +196,12 @@ function saveTrash() {
     if (countEl) countEl.innerText = trashBin.length;
 }
 
-// Preencher o Seletor de Meses Dinamicamente com base nas datas dos registros
 function popularSeletorMeses() {
     const select = document.getElementById('select-filtro-mes');
     if (!select) return;
 
     const mesesNomes = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
     
-    // Coleta todos os anos/meses existentes nos registros + mês atual
     const mesesSet = new Set();
     const agora = new Date();
     const anoAtual = agora.getFullYear();
@@ -200,14 +210,14 @@ function popularSeletorMeses() {
 
     entries.forEach(e => {
         if (e.date && e.date.length >= 7) {
-            mesesSet.add(e.date.substring(0, 7)); // 'YYYY-MM'
+            mesesSet.add(e.date.substring(0, 7));
         }
     });
 
-    const mesesArray = Array.from(mesesSet).sort().reverse(); // Mais recente primeiro
+    const mesesArray = Array.from(mesesSet).sort().reverse();
 
     if (!mesAnoSelecionado && mesesArray.length > 0) {
-        mesAnoSelecionado = mesesArray[0]; // Padrão: mês mais recente ou atual
+        mesAnoSelecionado = mesesArray[0];
     }
 
     select.innerHTML = '';
@@ -233,6 +243,7 @@ function addEntry() {
     const client = document.getElementById('input-client').value.trim();
     const os = document.getElementById('input-os').value.trim();
     const fuelVal = parseFloat(document.getElementById('input-fuel').value) || 0;
+    const dataInputVal = document.getElementById('input-entry-date').value;
     
     let kmRodado = 0;
 
@@ -258,12 +269,11 @@ function addEntry() {
         }
     }
 
-    const agora = new Date();
-    const dataIso = agora.toISOString().split('T')[0];
+    const dataFinalRegistro = dataInputVal || new Date().toISOString().split('T')[0];
 
     const newEntry = {
         id: Date.now(),
-        date: dataIso,
+        date: dataFinalRegistro,
         type: currentMode,
         client: currentMode === 'parada' ? client : 'Abastecimento',
         os: currentMode === 'parada' ? os : '',
@@ -297,7 +307,6 @@ function renderHistory() {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // Filtra estritamente pelo mês selecionado no dropdown (ex: '2026-09')
     let listaFiltrada = entries.filter(entry => {
         if (!entry.date) return true;
         if (mesAnoSelecionado) {
@@ -374,7 +383,6 @@ function updateDashboard(filteredList = null) {
             totalFuel += Number(e.fuel) || 0;
         } else {
             totalKm += Number(e.km) || 0;
-            // Exclui Casa e Empresa da contagem de clientes atendidos
             const nomeLocal = (e.client || '').trim().toLowerCase();
             if (nomeLocal !== 'casa' && nomeLocal !== 'empresa') {
                 totalClients += 1;
@@ -422,7 +430,6 @@ function deleteEntry(id) {
     }
 }
 
-// Edição de Parada / Cliente
 let editingId = null;
 
 function openEditModal(id) {
@@ -455,7 +462,6 @@ function saveEditEntry() {
     closeEditModal();
 }
 
-// Edição Exclusiva de Abastecimento
 let editingFuelId = null;
 
 function openFuelEditModal(id) {
@@ -484,7 +490,6 @@ function saveEditFuelEntry() {
     closeFuelEditModal();
 }
 
-// Modal de Confirmação de Limpeza
 function openConfirmModal() {
     document.getElementById('modal-confirm').style.display = 'flex';
 }
@@ -510,7 +515,6 @@ function confirmClearAll() {
     closeConfirmModal();
 }
 
-// Lixeira
 function openTrashModal() {
     closeConfirmModal();
     const listEl = document.getElementById('trash-list');
